@@ -44,6 +44,9 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\lib\TLSTypes.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\main.ts" />
     <Content Include="package.json" />
     <Content Include="README.md" />
@@ -51,8 +54,31 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
+    <Folder Include="src\lib\" />
+    <Folder Include="src\record-layer\" />
+    <Folder Include="tests\" />
     <Folder Include="typings\" />
     <Folder Include="typings\node\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="src\lib\BitConverter.ts" />
+    <Compile Include="src\lib\TLSStruct.ts" />
+    <Compile Include="src\lib\object-polyfill.ts" />
+    <Compile Include="src\lib\util.ts" />
+    <Compile Include="src\record-layer\Alert.js" />
+    <Compile Include="src\record-layer\ChangeCipherSpec.js" />
+    <Compile Include="src\record-layer\Cipher.js" />
+    <Compile Include="src\record-layer\ContentType.js" />
+    <Compile Include="src\record-layer\GenericAEADCipher.js" />
+    <Compile Include="src\record-layer\GenericBlockCipher.js" />
+    <Compile Include="src\record-layer\GenericStreamCipher.js" />
+    <Compile Include="src\record-layer\ProtocolVersion.js" />
+    <Compile Include="src\record-layer\TLSCiphertext.js" />
+    <Compile Include="src\record-layer\TLSCompressed.js" />
+    <Compile Include="src\record-layer\TLSPlaintext.js" />
+    <Compile Include="tests\BitConverter.js" />
+    <Compile Include="tests\Message.js" />
+    <Compile Include="tests\util.js" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
