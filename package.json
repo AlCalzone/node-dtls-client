@@ -2,7 +2,7 @@
   "name": "node-dtls-client",
   "version": "0.0.0",
   "description": "node-dtls-client",
-  "main": "app.js",
+  "main": "build/main.js",
   "author": {
     "name": "Dominic"
   }
