@@ -50,11 +50,23 @@
     <TypeScriptCompile Include="src\main.ts" />
     <Content Include="package.json" />
     <Content Include="README.md" />
+    <TypeScriptCompile Include="src\protocol-layer\Handshake.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\record-layer\CipherSuite.ts" />
+    <TypeScriptCompile Include="src\protocol-layer\SessionID.ts" />
+    <TypeScriptCompile Include="src\protocol-layer\Random.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\record-layer\CompressionMethod.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="typings\node\node.d.ts" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="src\lib\" />
+    <Folder Include="src\protocol-layer\" />
     <Folder Include="src\record-layer\" />
     <Folder Include="tests\" />
     <Folder Include="typings\" />
@@ -65,17 +77,17 @@
     <Compile Include="src\lib\TLSStruct.ts" />
     <Compile Include="src\lib\object-polyfill.ts" />
     <Compile Include="src\lib\util.ts" />
-    <Compile Include="src\record-layer\Alert.js" />
-    <Compile Include="src\record-layer\ChangeCipherSpec.js" />
+    <Compile Include="src\protocol-layer\Alert.ts" />
+    <Compile Include="src\protocol-layer\ChangeCipherSpec.ts" />
     <Compile Include="src\record-layer\Cipher.js" />
-    <Compile Include="src\record-layer\ContentType.js" />
+    <Compile Include="src\record-layer\ContentType.ts" />
     <Compile Include="src\record-layer\GenericAEADCipher.js" />
     <Compile Include="src\record-layer\GenericBlockCipher.js" />
     <Compile Include="src\record-layer\GenericStreamCipher.js" />
-    <Compile Include="src\record-layer\ProtocolVersion.js" />
-    <Compile Include="src\record-layer\TLSCiphertext.js" />
-    <Compile Include="src\record-layer\TLSCompressed.js" />
-    <Compile Include="src\record-layer\TLSPlaintext.js" />
+    <Compile Include="src\record-layer\ProtocolVersion.ts" />
+    <Compile Include="src\record-layer\TLSCiphertext.ts" />
+    <Compile Include="src\record-layer\TLSCompressed.ts" />
+    <Compile Include="src\record-layer\TLSPlaintext.ts" />
     <Compile Include="tests\BitConverter.js" />
     <Compile Include="tests\Message.js" />
     <Compile Include="tests\util.js" />

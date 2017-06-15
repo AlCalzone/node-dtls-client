@@ -5,16 +5,23 @@ export declare class Enum {
     constructor(underlyingType: Numbers, enumType: any);
 }
 export declare class Vector {
+    constructor(underlyingType: any, minLength: any, maxLength?: any);
     underlyingType: Numbers;
     minLength: number;
     maxLength: number;
-    constructor(underlyingType: Numbers, minLength: number, maxLength: number);
 }
 export declare type StructSpec = {
-    [propName: string]: All;
+    [propName: string]: any;
 };
 export declare class Struct {
     spec: StructSpec;
     constructor(spec: StructSpec);
 }
-export declare type All = Numbers | Enum | Vector | Struct;
+export declare type CalculationTypes = "serializedLength";
+export declare class Calculated {
+    underlyingType: Numbers;
+    calculationType: CalculationTypes;
+    propertyName: string;
+    constructor(underlyingType: Numbers, calculationType: CalculationTypes, propertyName: string);
+}
+export declare type All = Numbers | Enum | Vector | Struct | Calculated;

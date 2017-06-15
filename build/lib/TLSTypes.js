@@ -11,7 +11,7 @@ var Vector = (function () {
     function Vector(underlyingType, minLength, maxLength) {
         this.underlyingType = underlyingType;
         this.minLength = minLength;
-        this.maxLength = maxLength;
+        this.maxLength = maxLength || minLength;
     }
     return Vector;
 }());
@@ -23,4 +23,13 @@ var Struct = (function () {
     return Struct;
 }());
 exports.Struct = Struct;
+var Calculated = (function () {
+    function Calculated(underlyingType, calculationType, propertyName) {
+        this.underlyingType = underlyingType;
+        this.calculationType = calculationType;
+        this.propertyName = propertyName;
+    }
+    return Calculated;
+}());
+exports.Calculated = Calculated;
 //# sourceMappingURL=TLSTypes.js.map

@@ -1,0 +1,1 @@
+{"version":3,"file":"CompressionMethod.js","sourceRoot":"src/","sources":["record-layer/CompressionMethod.ts"],"names":[],"mappings":"AAAA,YAAY,CAAC;AAEb,IAAY,iBAEX;AAFD,WAAY,iBAAiB;IAC5B,yDAAQ,CAAA;AACT,CAAC,EAFW,iBAAiB,GAAjB,yBAAiB,KAAjB,yBAAiB,QAE5B;AACD,WAAiB,iBAAiB;IACpB,wBAAM,GAAG,OAAO,CAAC;AAC/B,CAAC,EAFgB,iBAAiB,GAAjB,yBAAiB,KAAjB,yBAAiB,QAEjC"}

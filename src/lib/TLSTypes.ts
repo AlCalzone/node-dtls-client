@@ -15,14 +15,22 @@ export class Enum {
 
 export class Vector {
 	constructor(
-		public underlyingType: Numbers,
-		public minLength: number,
-		public maxLength: number
-	) { }
+		underlyingType,
+		minLength,
+		maxLength?
+	) { 
+		this.underlyingType = underlyingType;
+		this.minLength = minLength;
+		this.maxLength = maxLength || minLength;
+	}
+
+	underlyingType: Numbers
+	minLength: number
+	maxLength: number
 }
 
 export type StructSpec = {
-	[propName: string]: All
+	[propName: string]: any
 };
 export class Struct {
 	constructor(
@@ -30,4 +38,13 @@ export class Struct {
 	) { }
 }
 
-export type All = Numbers | Enum | Vector | Struct
+export type CalculationTypes = "serializedLength";
+export class Calculated {
+	constructor(
+		public underlyingType: Numbers,
+		public calculationType: CalculationTypes,
+		public propertyName: string
+	) { }
+}
+
+export type All = Numbers | Enum | Vector | Struct | Calculated
