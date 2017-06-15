@@ -1,5 +1,5 @@
-﻿import * as TLSTypes from "../lib/TLSTypes";
-import { TLSStruct } from "../lib/TLSStruct";
+﻿import * as TLSTypes from "./TLSTypes";
+import { TLSStruct } from "./TLSStruct";
 
 export class CipherSuite extends TLSStruct {
 

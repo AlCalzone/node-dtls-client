@@ -1,9 +1,9 @@
-import * as TLSTypes from "../lib/TLSTypes";
-import { TLSStruct } from "../lib/TLSStruct";
+import * as TLSTypes from "./TLSTypes";
+import { TLSStruct } from "./TLSStruct";
 import { SessionID } from "./SessionID";
-import { CipherSuite } from "../record-layer/CipherSuite";
-import { CompressionMethod } from "../record-layer/CompressionMethod";
-import { ProtocolVersion } from "../record-layer/ProtocolVersion";
+import { CipherSuite } from "./CipherSuite";
+import { CompressionMethod } from "./CompressionMethod";
+import { ProtocolVersion } from "./ProtocolVersion";
 export declare abstract class Handshake extends TLSStruct {
     msg_type: HandshakeType;
     static readonly __spec: {

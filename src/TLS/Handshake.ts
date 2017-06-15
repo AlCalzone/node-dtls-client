@@ -1,11 +1,11 @@
-﻿import * as TLSTypes from "../lib/TLSTypes";
-import { TLSStruct } from "../lib/TLSStruct";
+﻿import * as TLSTypes from "./TLSTypes";
+import { TLSStruct } from "./TLSStruct";
 import { extend } from "../lib/object-polyfill";
 import { Random } from "./Random";
 import { SessionID } from "./SessionID";
-import { CipherSuite } from "../record-layer/CipherSuite";
-import { CompressionMethod } from "../record-layer/CompressionMethod";
-import { ProtocolVersion } from "../record-layer/ProtocolVersion";
+import { CipherSuite } from "./CipherSuite";
+import { CompressionMethod } from "./CompressionMethod";
+import { ProtocolVersion } from "./ProtocolVersion";
 
 export abstract class Handshake extends TLSStruct {
 
@@ -64,7 +64,7 @@ export class ClientHello extends Handshake {
 		client_version: ProtocolVersion.__spec,
 		random: Random.__spec,
 		session_id: SessionID.__spec,
-		// TODO: Typed Vector CipherSuite cipher_suites< 2..2^ 16 - 2 >
+		// TODO: Typed Vector CipherSuite cipher_suites< 1..2^ 15 - 1 >
 		// TODO: Typed Vector CompressionMethod compression_methods< 1..2^ 8 - 1 >
 	}
 
@@ -113,3 +113,27 @@ export class ServerHello extends Handshake {
 	}
 
 }
+
+export class ServerHelloDone extends Handshake {
+
+	static readonly __bodySpec = {}
+
+	constructor() {
+		super(HandshakeType.server_hello_done, ServerHelloDone.__bodySpec);
+	}
+
+}
+
+
+export class Finished extends Handshake {
+
+	static readonly __bodySpec = {
+		verify_data: new TLSTypes.Vector("uint8", 0, 2**16) // TODO: wirkliche Länge "verify_data_length" herausfinden
+	}
+
+	constructor(public verify_data: number[]) {
+		super(HandshakeType.finished, Finished.__bodySpec);
+	}
+
+}
+

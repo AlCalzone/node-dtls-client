@@ -1,8 +1,8 @@
 ﻿"use strict";
-import { entries } from "./object-polyfill";
-import * as BitConverter from "./BitConverter";
+import { entries } from "./lib/object-polyfill";
+import * as BitConverter from "./lib/BitConverter";
 import * as TLSTypes from "./TLSTypes";
-import * as util from "./util";
+import * as util from "./lib/util";
 
 export type PropertyDefinition = { name: string, type: TLSTypes.All };
 

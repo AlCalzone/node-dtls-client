@@ -44,21 +44,30 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="src\lib\TLSTypes.ts">
+    <TypeScriptCompile Include="src\TLS\SecurityParameters.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\TLS\TLSTypes.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\main.ts" />
     <Content Include="package.json" />
     <Content Include="README.md" />
-    <TypeScriptCompile Include="src\protocol-layer\Handshake.ts">
+    <TypeScriptCompile Include="src\TLS\Extension.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\record-layer\CipherSuite.ts" />
-    <TypeScriptCompile Include="src\protocol-layer\SessionID.ts" />
-    <TypeScriptCompile Include="src\protocol-layer\Random.ts">
+    <TypeScriptCompile Include="src\TLS\Handshake.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\record-layer\CompressionMethod.ts">
+    <TypeScriptCompile Include="src\TLS\SignatureAndHashAlgorithm.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\TLS\CipherSuite.ts" />
+    <TypeScriptCompile Include="src\TLS\SessionID.ts" />
+    <TypeScriptCompile Include="src\TLS\Random.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\TLS\CompressionMethod.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="typings\node\node.d.ts" />
@@ -66,28 +75,27 @@
   <ItemGroup>
     <Folder Include="src\" />
     <Folder Include="src\lib\" />
-    <Folder Include="src\protocol-layer\" />
-    <Folder Include="src\record-layer\" />
+    <Folder Include="src\TLS\" />
     <Folder Include="tests\" />
     <Folder Include="typings\" />
     <Folder Include="typings\node\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\lib\BitConverter.ts" />
-    <Compile Include="src\lib\TLSStruct.ts" />
+    <Compile Include="src\TLS\TLSStruct.ts" />
     <Compile Include="src\lib\object-polyfill.ts" />
     <Compile Include="src\lib\util.ts" />
-    <Compile Include="src\protocol-layer\Alert.ts" />
-    <Compile Include="src\protocol-layer\ChangeCipherSpec.ts" />
-    <Compile Include="src\record-layer\Cipher.js" />
-    <Compile Include="src\record-layer\ContentType.ts" />
-    <Compile Include="src\record-layer\GenericAEADCipher.js" />
-    <Compile Include="src\record-layer\GenericBlockCipher.js" />
-    <Compile Include="src\record-layer\GenericStreamCipher.js" />
-    <Compile Include="src\record-layer\ProtocolVersion.ts" />
-    <Compile Include="src\record-layer\TLSCiphertext.ts" />
-    <Compile Include="src\record-layer\TLSCompressed.ts" />
-    <Compile Include="src\record-layer\TLSPlaintext.ts" />
+    <Compile Include="src\TLS\Alert.ts" />
+    <Compile Include="src\TLS\ChangeCipherSpec.ts" />
+    <Compile Include="src\TLS\Cipher.js" />
+    <Compile Include="src\TLS\ContentType.ts" />
+    <Compile Include="src\TLS\GenericAEADCipher.js" />
+    <Compile Include="src\TLS\GenericBlockCipher.js" />
+    <Compile Include="src\TLS\GenericStreamCipher.js" />
+    <Compile Include="src\TLS\ProtocolVersion.ts" />
+    <Compile Include="src\TLS\TLSCiphertext.ts" />
+    <Compile Include="src\TLS\TLSCompressed.ts" />
+    <Compile Include="src\TLS\TLSPlaintext.ts" />
     <Compile Include="tests\BitConverter.js" />
     <Compile Include="tests\Message.js" />
     <Compile Include="tests\util.js" />

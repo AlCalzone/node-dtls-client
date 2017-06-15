@@ -1,5 +1,5 @@
-﻿import * as TLSTypes from "../lib/TLSTypes";
-import { TLSStruct } from "../lib/TLSStruct";
+﻿import * as TLSTypes from "./TLSTypes";
+import { TLSStruct } from "./TLSStruct";
 
 export default class ChangeCipherSpec extends TLSStruct {
 
@@ -16,3 +16,6 @@ export default class ChangeCipherSpec extends TLSStruct {
 export enum ChangeCipherSpecTypes {
 	change_cipher_spec = 1
 };
+export namespace ChangeCipherSpecTypes {
+	export const __spec = new TLSTypes.Enum("uint8", ChangeCipherSpecTypes);
+}

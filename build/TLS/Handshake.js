@@ -4,14 +4,14 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var TLSTypes = require("../lib/TLSTypes");
-var TLSStruct_1 = require("../lib/TLSStruct");
+var TLSTypes = require("./TLSTypes");
+var TLSStruct_1 = require("./TLSStruct");
 var object_polyfill_1 = require("../lib/object-polyfill");
 var Random_1 = require("./Random");
 var SessionID_1 = require("./SessionID");
-var CipherSuite_1 = require("../record-layer/CipherSuite");
-var CompressionMethod_1 = require("../record-layer/CompressionMethod");
-var ProtocolVersion_1 = require("../record-layer/ProtocolVersion");
+var CipherSuite_1 = require("./CipherSuite");
+var CompressionMethod_1 = require("./CompressionMethod");
+var ProtocolVersion_1 = require("./ProtocolVersion");
 var Handshake = (function (_super) {
     __extends(Handshake, _super);
     function Handshake(msg_type, bodySpec, initial) {
