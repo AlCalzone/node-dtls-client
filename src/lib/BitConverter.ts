@@ -1,7 +1,7 @@
 ﻿import { fitToWholeBytes } from "./util";
 import * as TLSTypes from "./TLSTypes";
 
-export type BitSizes = 8 | 16 | 24 | 32 | 64;
+export type BitSizes = 8 | 16 | 24 | 32 | 48 | 64;
 export type Vector = number[];
 export type BitConverterResult<T> = {
 	/** Das Ergebnis der BitConverter-Funktion */
@@ -221,7 +221,7 @@ export const writeVectorVariable: {
 } = {};
 
 // und in das OBjekt übernehmen
-for (let bits of [8, 16, 24, 32, 64]) {
+for (let bits of [8, 16, 24, 32, 48, 64]) {
 	readNumber[`uint${bits}`] = (arr?, offset?) => _readNumber(bits as BitSizes, arr, offset);;
 	writeNumber[`uint${bits}`] = (value, arr?, offset?) => _writeNumber(value, bits as BitSizes, arr, offset);
 	readVectorFixed[`uint${bits}`] = (length, arr?, offset?) => _readVectorFixed(bits as BitSizes, length, arr, offset);
