@@ -21,7 +21,10 @@ export class TLSStruct {
 			});
 			if (value instanceof TLSTypes.Calculated) {
 				// getter für berechnete Eigenschaft erstellen
-				// TODO!!!!
+				Object.defineProperty(value.prototype, key, {
+					get: () => this.getCalculatedPropertyValue(key);
+				})
+				// TODO: Testen!!!!
 			} else if (initial != undefined && initial.hasOwnProperty(key)) {
 				// sonst evtl. die Eigenschaft initialisieren
 				this[key] = initial[key];

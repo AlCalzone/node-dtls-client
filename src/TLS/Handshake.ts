@@ -25,12 +25,7 @@ export abstract class Handshake extends TLSStruct {
 		);
 	}
 
-	body: TLSStruct;
-
-	get length() {
-		// TODO: In TLSStruct einmalig definieren
-		return this.getCalculatedPropertyValue("length");
-	}
+	public body: TLSStruct;
 
 }
 
