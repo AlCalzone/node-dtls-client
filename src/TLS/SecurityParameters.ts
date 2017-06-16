@@ -14,36 +14,24 @@ export enum ConnectionEnd {
 	client
 }
 
-export enum PRFAlgorithm {
-	null,
-	tls_prf_md5,
-	tls_prf_sha1,
-	tls_prf_sha256,
-	tls_prf_sha384,
-	tls_prf_sha512
-}
+export type PRFAlgorithm =
+	"md5" |
+	"sha1" | "sha256" | "sha384" | "sha512"
+	;
 
-export enum BulkCipherAlgorithm {
-	null,
-	// forbidden: rc4,
-	des3,
-	aes
-}
+export type BulkCipherAlgorithm = 
+	"aes-128-cbc" | "aes-256-cbc" |
+	"des-ede3-cbc"
+	;
 
-export enum CipherType {
-	stream,
-	block,
-	aead
-}
+export type CipherType = 
+	"stream" | "block" | "aead"
+	;
 
-export enum MACAlgorithm {
-	null,
-	hmac_md5,
-	hmac_sha1,
-	hmac_sha256,
-	hmac_sha384,
-	hmac_sha512
-}
+export type MACAlgorithm = 
+	"md5" |
+	"sha1" | "sha256" | "sha384" | "sha512"
+	;
 
 export enum KeyExchangeAlgorithm {
 	dhe_dss, 
@@ -55,6 +43,18 @@ export enum KeyExchangeAlgorithm {
 	psk, // Server/Client|KeyExchange: see https://tools.ietf.org/html/rfc4279#page-4
 	dhe_psk,
 	rsa_psk
+}
+
+
+export enum AEADAlgorithm {
+	// ...
+	// from https://tools.ietf.org/html/rfc5116#section-6
+	AES_128_CCM_8     = 3,
+	AES_256_CCM_8     = 4,	
+	// ...
+	// from https://tools.ietf.org/html/rfc6655#section-6
+	AES_128_CCM_8     = 18,
+	AES_256_CCM_8     = 19,
 }
 
 export class SecurityParameters {

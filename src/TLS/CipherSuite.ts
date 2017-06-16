@@ -14,7 +14,7 @@ export class CipherSuite extends TLSStruct {
 		public mac: MACAlgorithm,
 		public prf: PRFAlgorithm,
 		public cipherType: CipherType,
-		public bulkCipher?: BulkCipherAlgorithm = BulkCipherAlgorithm.null
+		public algorithm?: (BulkCipherAlgorithm | AEADAlgorithm)
 	) {
 		super(CipherSuite.__spec);
 	}
