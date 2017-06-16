@@ -63,4 +63,14 @@ export class SecurityParameters {
 	master_secret: number[/*48*/];
 	client_random: number[/*32*/];
 	server_random: number[/*32*/];
+	
+	
+	// Implementation details:
+	
+	// master_secret = PRF(
+	// 	pre_master_secret, 
+	// 	"master secret",
+	// 	ClientHello.random + ServerHello.random
+	// )[0..47];
+	
 }

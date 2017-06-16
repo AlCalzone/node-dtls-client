@@ -8,7 +8,6 @@ import { CipherSuite } from "../TLS/CipherSuite";
 import { CompressionMethod } from "../TLS/CompressionMethod";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 
-// TODO: Remove TLS/Handshake
 export abstract class Handshake extends TLSStruct {
 
 	static readonly __spec = {
@@ -35,6 +34,10 @@ export abstract class Handshake extends TLSStruct {
 	}
 
 	public body: TLSStruct;
+	
+	// Implementation details:
+	// message_seq starts at 0 for both client and server during the handshake. 
+	// Each new (not retransmitted) message increases the value by 1.
 
 }
 
