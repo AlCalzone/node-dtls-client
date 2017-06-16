@@ -1,9 +1,14 @@
-import * as TLSTypes from "./TLSTypes";
 import { TLSStruct } from "./TLSStruct";
+import { PRFAlgorithm, BulkCipherAlgorithm, AEADAlgorithm, CipherType, MACAlgorithm, KeyExchangeAlgorithm } from "./SecurityParameters";
 export declare class CipherSuite extends TLSStruct {
-    value: number[];
+    id: number;
+    keyExchange: KeyExchangeAlgorithm;
+    mac: MACAlgorithm;
+    prf: PRFAlgorithm;
+    cipherType: CipherType;
+    algorithm: (BulkCipherAlgorithm | AEADAlgorithm);
     static readonly __spec: {
-        value: TLSTypes.Vector;
+        id: string;
     };
-    constructor(value?: number[]);
+    constructor(id: number, keyExchange: KeyExchangeAlgorithm, mac: MACAlgorithm, prf: PRFAlgorithm, cipherType: CipherType, algorithm?: (BulkCipherAlgorithm | AEADAlgorithm));
 }

@@ -1,8 +1,8 @@
 ﻿"use strict";
-import { entries } from "./lib/object-polyfill";
-import * as BitConverter from "./lib/BitConverter";
+import { entries } from "../lib/object-polyfill";
+import * as BitConverter from "../lib/BitConverter";
 import * as TLSTypes from "./TLSTypes";
-import * as util from "./lib/util";
+import * as util from "../lib/util";
 
 export type PropertyDefinition = { name: string, type: TLSTypes.All };
 
@@ -22,7 +22,7 @@ export class TLSStruct {
 			if (value instanceof TLSTypes.Calculated) {
 				// getter für berechnete Eigenschaft erstellen
 				Object.defineProperty(value.prototype, key, {
-					get: () => this.getCalculatedPropertyValue(key);
+					get: () => this.getCalculatedPropertyValue(key)
 				})
 				// TODO: Testen!!!!
 			} else if (initial != undefined && initial.hasOwnProperty(key)) {

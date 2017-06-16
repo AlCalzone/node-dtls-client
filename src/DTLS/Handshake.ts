@@ -10,6 +10,7 @@ import { ProtocolVersion } from "../TLS/ProtocolVersion";
 
 export abstract class Handshake extends TLSStruct {
 
+	// TODO: zusätzliche Parameter automatisch oder manuell ausfüllen
 	static readonly __spec = {
 		msg_type: new TLSTypes.Enum("uint8", HandshakeType),
 		length: "uint24", // can be calculated somehow?

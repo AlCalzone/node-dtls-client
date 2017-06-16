@@ -1,6 +1,6 @@
 ﻿import * as TLSTypes from "./TLSTypes";
 import { TLSStruct } from "./TLSStruct";
-import { KeyExchangeAlgorithm, PRFAlgorithm, BulkCipherAlgorithm, CipherType, MACAlgorithm, KeyExchangeAlgorithm } from "./SecurityParameters";
+import { PRFAlgorithm, BulkCipherAlgorithm, AEADAlgorithm, CipherType, MACAlgorithm, KeyExchangeAlgorithm } from "./SecurityParameters";
 
 export class CipherSuite extends TLSStruct {
 

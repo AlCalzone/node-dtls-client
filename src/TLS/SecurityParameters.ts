@@ -9,10 +9,9 @@ export namespace CompressionMethod {
 	export const __spec = new TLSTypes.Enum("uint8", CompressionMethod);
 }
 
-export enum ConnectionEnd {
-	server,
-	client
-}
+export type ConnectionEnd =
+	"server" | "client"
+	;
 
 export type PRFAlgorithm =
 	"md5" |
@@ -33,24 +32,19 @@ export type MACAlgorithm =
 	"sha1" | "sha256" | "sha384" | "sha512"
 	;
 
-export enum KeyExchangeAlgorithm {
-	dhe_dss, 
-	dhe_rsa, 
+export type KeyExchangeAlgorithm =
+	"dhe_dss" | "dhe_rsa" |
 	// forbidden: dh_anon, 
-	rsa, 
-	dh_dss, 
-	dh_rsa,
-	psk, // Server/Client|KeyExchange: see https://tools.ietf.org/html/rfc4279#page-4
-	dhe_psk,
-	rsa_psk
-}
+	"rsa" | "dh_dss" | "dh_rsa" |
+	"psk" | "dhe_psk" | "rsa_psk"// Server/Client|KeyExchange: see https://tools.ietf.org/html/rfc4279#page-4
+	;
 
 
 export enum AEADAlgorithm {
 	// ...
 	// from https://tools.ietf.org/html/rfc5116#section-6
-	AES_128_CCM_8     = 3,
-	AES_256_CCM_8     = 4,	
+	AES_128_CCM     = 3,
+	AES_256_CCM     = 4,	
 	// ...
 	// from https://tools.ietf.org/html/rfc6655#section-6
 	AES_128_CCM_8     = 18,

@@ -10,7 +10,7 @@ export class DTLSPlaintext extends TLSStruct {
 		version: ProtocolVersion.__spec,
 		epoch: "uint16",
 		sequence_number: "uint48",
-		length: new TLSTypes.Calculated("uint16", "serializedLength", "fragment")
+		length: new TLSTypes.Calculated("uint16", "serializedLength", "fragment"),
 		fragment: new TLSTypes.Vector("uint8", 0, 2**14)
 	};
 

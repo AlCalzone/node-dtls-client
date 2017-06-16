@@ -4,20 +4,23 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var TLSTypes = require("./TLSTypes");
 var TLSStruct_1 = require("./TLSStruct");
 var CipherSuite = (function (_super) {
     __extends(CipherSuite, _super);
-    function CipherSuite(value) {
-        if (value === void 0) { value = [0, 0]; }
+    function CipherSuite(id, keyExchange, mac, prf, cipherType, algorithm) {
         var _this = _super.call(this, CipherSuite.__spec) || this;
-        _this.value = value;
+        _this.id = id;
+        _this.keyExchange = keyExchange;
+        _this.mac = mac;
+        _this.prf = prf;
+        _this.cipherType = cipherType;
+        _this.algorithm = algorithm;
         return _this;
     }
     return CipherSuite;
 }(TLSStruct_1.TLSStruct));
 CipherSuite.__spec = {
-    value: new TLSTypes.Vector("uint8", 2)
+    id: "uint16"
 };
 exports.CipherSuite = CipherSuite;
 //# sourceMappingURL=CipherSuite.js.map

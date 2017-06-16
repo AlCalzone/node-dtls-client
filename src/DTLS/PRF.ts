@@ -1,32 +1,33 @@
-﻿import crypto from "crypto";
-import { MACAlgorithm } from "../TLS/SecurityParameter";
+﻿const crypto = require("crypto");
+import { PRFAlgorithm, MACAlgorithm } from "../TLS/SecurityParameters";
 
 type cryptoAlgorithms = 
 	"md5" |
 	"sha1" | "sha256" | "sha384" | "sha512"
 ;
 
-export type HMACDelegate = (secret: number[], data: number[]) => number[];
+export type HMACDelegate = (secret: Buffer, data: Buffer) => Buffer;
 
 function HMAC_factory(algorithm: cryptoAlgorithms): HMACDelegate {
 	/**
 	 * Generates a HMAC hash from the given secret and data.
 	 */
-	return (secret: number[], data: number[]) => {
+	return (secret: Buffer, data: Buffer) => {
 		const hmac = crypto.createHmac(algorithm, secret);
 		hmac.update(data);
 		return hmac.digest();
 	}
 }
 
-export const HMAC : {
-	[algorithm: MACAlgorithm]: HMACDelegate
-} = {};
-HMAC[MACAlgorithm.hmac_md5   ] = HMAC_factory("md5");
-HMAC[MACAlgorithm.hmac_sha1  ] = HMAC_factory("sha1");
-HMAC[MACAlgorithm.hmac_sha256] = HMAC_factory("sha256");
-HMAC[MACAlgorithm.hmac_sha384] = HMAC_factory("sha384");
-HMAC[MACAlgorithm.hmac_sha512] = HMAC_factory("sha512");
+export const HMAC: {
+	[algorithm in MACAlgorithm]: HMACDelegate
+} = {
+	"md5": HMAC_factory("md5"),
+	"sha1": HMAC_factory("sha1"),
+	"sha256": HMAC_factory("sha256"),
+	"sha384": HMAC_factory("sha384"),
+	"sha512": HMAC_factory("sha512"),
+};
 
 
 /**
@@ -37,9 +38,9 @@ HMAC[MACAlgorithm.hmac_sha512] = HMAC_factory("sha512");
  * @param length - The desired amount of data.
  * @see https://tools.ietf.org/html/rfc5246#section-5
  */
-function P(algorithm: MACAlgorithm, secret: number[], seed: number[], length: number = 32) => {
+function P(algorithm: MACAlgorithm, secret: Buffer, seed: Buffer, length: number = 32) {
 	
-	const _HMAC = HMAC(algorithm);
+	const _HMAC = HMAC[algorithm];
 	
 	const _A = [seed];
 	function A(i) {
@@ -55,7 +56,7 @@ function P(algorithm: MACAlgorithm, secret: number[], seed: number[], length: nu
 	
 	// iterate through the hash function
 	for (let i = 1; hashesLength < length; i++) {
-		let newHash = _HMAC(secret, A(i).concat(seed))
+		let newHash = _HMAC(secret, Buffer.concat([A(i), seed]));
 		hashes.push(newHash);
 		hashesLength += newHash.length;
 	}
@@ -67,18 +68,19 @@ function P(algorithm: MACAlgorithm, secret: number[], seed: number[], length: nu
 
 
 
-export type PRFDelegate = (secret: number[], label: string, seed: number[], length?: number) => number[];
+export type PRFDelegate = (secret: Buffer, label: string, seed: Buffer, length?: number) => Buffer;
 
-export const PRF : {
-	[algorithm: MACAlgorithm]: PRFDelegate
-} = {};
-PRF[MACAlgorithm.hmac_md5   ] = HMAC_factory(MACAlgorithm.hmac_md5);
-PRF[MACAlgorithm.hmac_sha1  ] = HMAC_factory(MACAlgorithm.hmac_sha1);
-PRF[MACAlgorithm.hmac_sha256] = HMAC_factory(MACAlgorithm.hmac_sha256);
-PRF[MACAlgorithm.hmac_sha384] = HMAC_factory(MACAlgorithm.hmac_sha384);
-PRF[MACAlgorithm.hmac_sha512] = HMAC_factory(MACAlgorithm.hmac_sha512);
+export const PRF: {
+	[algorithm in PRFAlgorithm]: PRFDelegate
+} = {
+	"md5": PRF_factory("md5"),
+	"sha1": PRF_factory("sha1"),
+	"sha256": PRF_factory("sha256"),
+	"sha384": PRF_factory("sha384"),
+	"sha512": PRF_factory("sha512"),
+};
 
-function PRF_factory(algorithm: MACAlgorithm): PRFDelegate {
+function PRF_factory(algorithm: PRFAlgorithm): PRFDelegate {
 	/**
 	 * (D)TLS v1.2 pseudorandom function. Earlier versions are not supported.
 	 * @param secret - The secret to be hashed
@@ -86,7 +88,7 @@ function PRF_factory(algorithm: MACAlgorithm): PRFDelegate {
 	 * @param seed - used together with label to generate a hash from secret
 	 * @param length - the desired length of the output
 	 */
-	return (secret: number[], label: string, seed: number[], length: number = 32) => {
+	return (secret: Buffer, label: string, seed: Buffer, length: number = 32) => {
 		return P(
 			algorithm,
 			secret,

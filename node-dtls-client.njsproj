@@ -44,6 +44,13 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\DTLS\CipherSuites.ts" />
+    <TypeScriptCompile Include="src\DTLS\Cookie.ts" />
+    <TypeScriptCompile Include="src\DTLS\DTLSCiphertext.ts" />
+    <TypeScriptCompile Include="src\DTLS\DTLSCompressed.ts" />
+    <TypeScriptCompile Include="src\DTLS\DTLSPlaintext.ts" />
+    <TypeScriptCompile Include="src\DTLS\Handshake.ts" />
+    <TypeScriptCompile Include="src\DTLS\PRF.ts" />
     <TypeScriptCompile Include="src\TLS\SecurityParameters.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
@@ -54,9 +61,6 @@
     <Content Include="package.json" />
     <Content Include="README.md" />
     <TypeScriptCompile Include="src\TLS\Extension.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="src\TLS\Handshake.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\TLS\SignatureAndHashAlgorithm.ts">
@@ -74,6 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="src\" />
+    <Folder Include="src\DTLS\" />
     <Folder Include="src\lib\" />
     <Folder Include="src\TLS\" />
     <Folder Include="tests\" />

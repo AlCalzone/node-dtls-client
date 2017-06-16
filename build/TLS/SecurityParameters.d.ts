@@ -5,31 +5,17 @@ export declare enum CompressionMethod {
 export declare namespace CompressionMethod {
     const __spec: TLSTypes.Enum;
 }
-export declare enum ConnectionEnd {
-    server = 0,
-    client = 1,
-}
-export declare enum PRFAlgorithm {
-    tls_prf_sha256 = 0,
-}
-export declare enum BulkCipherAlgorithm {
-    null = 0,
-    rc4 = 1,
-    _3des = 2,
-    aes = 3,
-}
-export declare enum CipherType {
-    stream = 0,
-    block = 1,
-    aead = 2,
-}
-export declare enum MACAlgorithm {
-    null = 0,
-    hmac_md5 = 1,
-    hmac_sha1 = 2,
-    hmac_sha256 = 3,
-    hmac_sha384 = 4,
-    hmac_sha512 = 5,
+export declare type ConnectionEnd = "server" | "client";
+export declare type PRFAlgorithm = "md5" | "sha1" | "sha256" | "sha384" | "sha512";
+export declare type BulkCipherAlgorithm = "aes-128-cbc" | "aes-256-cbc" | "des-ede3-cbc";
+export declare type CipherType = "stream" | "block" | "aead";
+export declare type MACAlgorithm = "md5" | "sha1" | "sha256" | "sha384" | "sha512";
+export declare type KeyExchangeAlgorithm = "dhe_dss" | "dhe_rsa" | "rsa" | "dh_dss" | "dh_rsa" | "psk" | "dhe_psk" | "rsa_psk";
+export declare enum AEADAlgorithm {
+    AES_128_CCM = 3,
+    AES_256_CCM = 4,
+    AES_128_CCM_8 = 18,
+    AES_256_CCM_8 = 19,
 }
 export declare class SecurityParameters {
     constructor(values: any);

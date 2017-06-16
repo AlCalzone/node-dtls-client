@@ -8,37 +8,17 @@ var CompressionMethod;
 (function (CompressionMethod) {
     CompressionMethod.__spec = new TLSTypes.Enum("uint8", CompressionMethod);
 })(CompressionMethod = exports.CompressionMethod || (exports.CompressionMethod = {}));
-var ConnectionEnd;
-(function (ConnectionEnd) {
-    ConnectionEnd[ConnectionEnd["server"] = 0] = "server";
-    ConnectionEnd[ConnectionEnd["client"] = 1] = "client";
-})(ConnectionEnd = exports.ConnectionEnd || (exports.ConnectionEnd = {}));
-var PRFAlgorithm;
-(function (PRFAlgorithm) {
-    PRFAlgorithm[PRFAlgorithm["tls_prf_sha256"] = 0] = "tls_prf_sha256";
-})(PRFAlgorithm = exports.PRFAlgorithm || (exports.PRFAlgorithm = {}));
-var BulkCipherAlgorithm;
-(function (BulkCipherAlgorithm) {
-    BulkCipherAlgorithm[BulkCipherAlgorithm["null"] = 0] = "null";
-    BulkCipherAlgorithm[BulkCipherAlgorithm["rc4"] = 1] = "rc4";
-    BulkCipherAlgorithm[BulkCipherAlgorithm["_3des"] = 2] = "_3des";
-    BulkCipherAlgorithm[BulkCipherAlgorithm["aes"] = 3] = "aes";
-})(BulkCipherAlgorithm = exports.BulkCipherAlgorithm || (exports.BulkCipherAlgorithm = {}));
-var CipherType;
-(function (CipherType) {
-    CipherType[CipherType["stream"] = 0] = "stream";
-    CipherType[CipherType["block"] = 1] = "block";
-    CipherType[CipherType["aead"] = 2] = "aead";
-})(CipherType = exports.CipherType || (exports.CipherType = {}));
-var MACAlgorithm;
-(function (MACAlgorithm) {
-    MACAlgorithm[MACAlgorithm["null"] = 0] = "null";
-    MACAlgorithm[MACAlgorithm["hmac_md5"] = 1] = "hmac_md5";
-    MACAlgorithm[MACAlgorithm["hmac_sha1"] = 2] = "hmac_sha1";
-    MACAlgorithm[MACAlgorithm["hmac_sha256"] = 3] = "hmac_sha256";
-    MACAlgorithm[MACAlgorithm["hmac_sha384"] = 4] = "hmac_sha384";
-    MACAlgorithm[MACAlgorithm["hmac_sha512"] = 5] = "hmac_sha512";
-})(MACAlgorithm = exports.MACAlgorithm || (exports.MACAlgorithm = {}));
+var AEADAlgorithm;
+(function (AEADAlgorithm) {
+    // ...
+    // from https://tools.ietf.org/html/rfc5116#section-6
+    AEADAlgorithm[AEADAlgorithm["AES_128_CCM"] = 3] = "AES_128_CCM";
+    AEADAlgorithm[AEADAlgorithm["AES_256_CCM"] = 4] = "AES_256_CCM";
+    // ...
+    // from https://tools.ietf.org/html/rfc6655#section-6
+    AEADAlgorithm[AEADAlgorithm["AES_128_CCM_8"] = 18] = "AES_128_CCM_8";
+    AEADAlgorithm[AEADAlgorithm["AES_256_CCM_8"] = 19] = "AES_256_CCM_8";
+})(AEADAlgorithm = exports.AEADAlgorithm || (exports.AEADAlgorithm = {}));
 var SecurityParameters = (function () {
     function SecurityParameters(values) {
         for (var _i = 0, _a = object_polyfill_1.entries(values); _i < _a.length; _i++) {
