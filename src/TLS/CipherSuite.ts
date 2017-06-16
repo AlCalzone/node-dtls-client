@@ -1,15 +1,21 @@
 ﻿import * as TLSTypes from "./TLSTypes";
 import { TLSStruct } from "./TLSStruct";
-
-export type CipherSuiteID = [number, number];
+import { KeyExchangeAlgorithm, PRFAlgorithm, BulkCipherAlgorithm, CipherType, MACAlgorithm, KeyExchangeAlgorithm } from "./SecurityParameters";
 
 export class CipherSuite extends TLSStruct {
 
 	static readonly __spec = {
-		value: new TLSTypes.Vector("uint8", 2)
+		id: "uint16"
 	}
 
-	constructor(public value: CipherSuiteID = [0,0]) {
+	constructor(
+		public id: number,
+		public keyExchange: KeyExchangeAlgorithm,
+		public mac: MACAlgorithm,
+		public prf: PRFAlgorithm,
+		public cipherType: CipherType,
+		public bulkCipher?: BulkCipherAlgorithm = BulkCipherAlgorithm.null
+	) {
 		super(CipherSuite.__spec);
 	}
 

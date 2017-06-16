@@ -15,13 +15,18 @@ export enum ConnectionEnd {
 }
 
 export enum PRFAlgorithm {
-	tls_prf_sha256
+	null,
+	tls_prf_md5,
+	tls_prf_sha1,
+	tls_prf_sha256,
+	tls_prf_sha384,
+	tls_prf_sha512
 }
 
 export enum BulkCipherAlgorithm {
 	null,
-	rc4,
-	_3des,
+	// forbidden: rc4,
+	des3,
 	aes
 }
 
@@ -38,6 +43,18 @@ export enum MACAlgorithm {
 	hmac_sha256,
 	hmac_sha384,
 	hmac_sha512
+}
+
+export enum KeyExchangeAlgorithm {
+	dhe_dss, 
+	dhe_rsa, 
+	// forbidden: dh_anon, 
+	rsa, 
+	dh_dss, 
+	dh_rsa,
+	psk, // Server/Client|KeyExchange: see https://tools.ietf.org/html/rfc4279#page-4
+	dhe_psk,
+	rsa_psk
 }
 
 export class SecurityParameters {
