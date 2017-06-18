@@ -9,8 +9,8 @@ export class PreMasterSecret extends TLSStruct {
 	}
 
 	constructor(
-		public other_secret: number[],
-		public psk: number[]
+		public other_secret: Buffer,
+		public psk: Buffer
 	) {
 		super(PreMasterSecret.__spec);
 	}

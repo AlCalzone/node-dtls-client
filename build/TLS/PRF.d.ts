@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { PRFAlgorithm, MACAlgorithm } from "../TLS/SecurityParameters";
 export declare type HMACDelegate = (secret: Buffer, data: Buffer) => Buffer;
 export declare const HMAC: {

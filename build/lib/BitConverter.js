@@ -1,5 +1,6 @@
 "use strict";
 var util_1 = require("./util");
+//export type ByteArray = Uint8Array | number[];
 /**
  * Liest eine Zahl der angegebenen Länge (bits) aus dem Byte-Array (arr) ab Position (offset)
  * @param bits - Die Anzahl an Bits, die verwendet werden, um die Zahl zu repräsentieren
@@ -29,8 +30,8 @@ function _writeNumber(value, bits, arr, offset) {
     if (offset === void 0) { offset = 0; }
     var delta = 0;
     if (arr == undefined) {
-        // Leeres Array auf die richtige Größe initialisieren
-        arr = new Array(bits / 8);
+        // Leeren Buffer auf die richtige Größe initialisieren
+        arr = Buffer.alloc(bits / 8);
         offset = 0;
     }
     while (bits > 0) {
@@ -71,8 +72,8 @@ function _writeVectorFixed(vector, bits, arr, offset) {
     if (offset === void 0) { offset = 0; }
     var length = vector.length;
     if (arr == undefined) {
-        // Leeres Array auf die richtige Größe initialisieren
-        arr = new Array(length * bits / 8);
+        // Leeren Buffer auf die richtige Größe initialisieren
+        arr = Buffer.alloc(length * bits / 8);
         offset = 0;
     }
     var bytesPerNumber = bits / 8;
@@ -125,8 +126,8 @@ function _writeVectorVariable(vector, bits, maxLength, arr, offset) {
     // bestimmen wie viele Bytes für die Längenangabe nötig sind
     var lengthBytes = util_1.fitToWholeBytes(maxLength * bits / 8);
     if (arr == undefined) {
-        // Leeres Array auf die richtige Größe initialisieren
-        arr = new Array(lengthBytes + numBytes);
+        // Leeren Buffer auf die richtige Größe initialisieren
+        arr = Buffer.alloc(lengthBytes + numBytes);
         offset = 0;
     }
     // Längenangabe schreiben
@@ -188,15 +189,14 @@ exports.readVectorVariable = {};
 exports.writeVectorVariable = {};
 var _loop_1 = function (bits) {
     exports.readNumber["uint" + bits] = function (arr, offset) { return _readNumber(bits, arr, offset); };
-    ;
     exports.writeNumber["uint" + bits] = function (value, arr, offset) { return _writeNumber(value, bits, arr, offset); };
     exports.readVectorFixed["uint" + bits] = function (length, arr, offset) { return _readVectorFixed(bits, length, arr, offset); };
     exports.writeVectorFixed["uint" + bits] = function (vector, arr, offset) { return _writeVectorFixed(vector, bits, arr, offset); };
     exports.readVectorVariable["uint" + bits] = function (maxLength, arr, offset) { return _readVectorVariable(bits, maxLength, arr, offset); };
     exports.writeVectorVariable["uint" + bits] = function (vector, maxLength, arr, offset) { return _writeVectorVariable(vector, bits, maxLength, arr, offset); };
 };
-// und in das OBjekt übernehmen
-for (var _i = 0, _a = [8, 16, 24, 32, 64]; _i < _a.length; _i++) {
+// und in das Objekt übernehmen
+for (var _i = 0, _a = [8, 16, 24, 32, 48, 64]; _i < _a.length; _i++) {
     var bits = _a[_i];
     _loop_1(bits);
 }

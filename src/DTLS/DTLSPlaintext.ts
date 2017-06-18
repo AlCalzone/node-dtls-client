@@ -19,7 +19,7 @@ export class DTLSPlaintext extends TLSStruct {
 		public version = new ProtocolVersion(),
 		public epoch: number,
 		public sequence_number: number,
-		public fragment: number[]
+		public fragment: Buffer
 	) {
 		super(DTLSPlaintext.__spec);
 	}

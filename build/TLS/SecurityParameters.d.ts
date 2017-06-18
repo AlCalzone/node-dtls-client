@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import * as TLSTypes from "./TLSTypes";
 import { PreMasterSecret } from "./PreMasterSecret";
 export declare enum CompressionMethod {
@@ -48,5 +49,8 @@ export declare class SecurityParameters {
      * @param serverHelloRandom - The random data from the server hello message
      */
     computeMasterSecret(preMasterSecret: PreMasterSecret, clientHelloRandom: Buffer, serverHelloRandom: Buffer): void;
+    /**
+     * Berechnet die Schlüsselkomponenten
+     */
     computeKeyMaterial(): void;
 }

@@ -8,14 +8,14 @@ export class TLSCompressed extends TLSStruct {
 	static readonly __spec = {
 		type: ContentType.__spec,
 		version: ProtocolVersion.__spec,
-		length: new TLSTypes.Calculated("uint16", "serializedLength", "fragment")
+		length: new TLSTypes.Calculated("uint16", "serializedLength", "fragment"),
 		fragment: new TLSTypes.Vector("uint8", 0, 1024 + 2 ** 14)
 	};
 
 	constructor(
 		public type: ContentType,
 		public version = new ProtocolVersion(),
-		public fragment: number[]
+		public fragment: Buffer
 	) {
 		super(TLSCompressed.__spec);
 	}

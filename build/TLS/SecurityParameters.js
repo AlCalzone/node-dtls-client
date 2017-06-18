@@ -9,6 +9,9 @@ var CompressionMethod;
 (function (CompressionMethod) {
     CompressionMethod.__spec = new TLSTypes.Enum("uint8", CompressionMethod);
 })(CompressionMethod = exports.CompressionMethod || (exports.CompressionMethod = {}));
+var master_secret_length = 48;
+var client_random_length = 32;
+var server_random_length = 32;
 var AEADAlgorithm;
 (function (AEADAlgorithm) {
     // ...
@@ -36,10 +39,13 @@ var SecurityParameters = (function () {
      * @param serverHelloRandom - The random data from the server hello message
      */
     SecurityParameters.prototype.computeMasterSecret = function (preMasterSecret, clientHelloRandom, serverHelloRandom) {
-        this.master_secret = PRF_1.PRF[this.prf_algorithm](preMasterSecret.serialize(), "master secret", Buffer.concat([clientHelloRandom, serverHelloRandom]), 48);
+        this.master_secret = PRF_1.PRF[this.prf_algorithm](preMasterSecret.serialize(), "master secret", Buffer.concat([clientHelloRandom, serverHelloRandom]), master_secret_length);
     };
+    /**
+     * Berechnet die Schlüsselkomponenten
+     */
     SecurityParameters.prototype.computeKeyMaterial = function () {
-        var keyBlock = PRF_1.PRF[this.prf_algorithm](this.master_secret, "key expansion", Buffer.concat([this.server_random, this.client_random]), 2 * this.mac_key_length + 2 * this.enc_key_length + 2 * this.fixed_iv_length);
+        var keyBlock = PRF_1.PRF[this.prf_algorithm](this.master_secret, "key expansion", Buffer.concat([this.server_random, this.client_random]), 2 * (this.mac_key_length + this.enc_key_length + this.fixed_iv_length));
         var offset = 0;
         function read(length) {
             var ret = keyBlock.slice(offset, offset + length);

@@ -1,4 +1,4 @@
-﻿const crypto = require("crypto");
+﻿import * as crypto from "crypto";
 import { PRFAlgorithm, MACAlgorithm } from "../TLS/SecurityParameters";
 
 type cryptoAlgorithms = 

@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import * as TLSTypes from "../TLS/TLSTypes";
 import { TLSStruct } from "../TLS/TLSStruct";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
@@ -7,7 +8,7 @@ export declare class DTLSPlaintext extends TLSStruct {
     version: ProtocolVersion;
     epoch: number;
     sequence_number: number;
-    fragment: number[];
+    fragment: Buffer;
     static readonly __spec: {
         type: TLSTypes.Enum;
         version: {
@@ -19,5 +20,5 @@ export declare class DTLSPlaintext extends TLSStruct {
         length: TLSTypes.Calculated;
         fragment: TLSTypes.Vector;
     };
-    constructor(type: ContentType, version: ProtocolVersion, epoch: number, sequence_number: number, fragment: number[]);
+    constructor(type: ContentType, version: ProtocolVersion, epoch: number, sequence_number: number, fragment: Buffer);
 }

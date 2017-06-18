@@ -35,7 +35,7 @@
     <TypeScriptOutFile />
     <TypeScriptOutDir>build</TypeScriptOutDir>
     <TypeScriptGeneratesDeclarations>True</TypeScriptGeneratesDeclarations>
-    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+    <TypeScriptNoEmitOnError>False</TypeScriptNoEmitOnError>
     <TypeScriptSourceMap>True</TypeScriptSourceMap>
     <TypeScriptMapRoot />
     <TypeScriptSourceRoot>src</TypeScriptSourceRoot>
@@ -44,6 +44,21 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="rfc\RFC 2104 - HMAC  Keyed-Hashing for Message Authentication.html" />
+    <Content Include="rfc\RFC 4279 - Pre-Shared Key Ciphersuites for Transport Layer Security %28TLS%29.html" />
+    <Content Include="rfc\RFC 5246 - The Transport Layer Security %28TLS%29 Protocol Version 1.2.html" />
+    <Content Include="rfc\RFC 5746 - Transport Layer Security %28TLS%29 Renegotiation Indication Extension.html" />
+    <Content Include="rfc\RFC 5878 - Transport Layer Security %28TLS%29 Authorization Extensions.html" />
+    <Content Include="rfc\RFC 6151 - Updated Security Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms.html" />
+    <Content Include="rfc\RFC 6176 - Prohibiting Secure Sockets Layer %28SSL%29 Version 2.0.html" />
+    <Content Include="rfc\RFC 6347 - Datagram Transport Layer Security Version 1.2.html" />
+    <Content Include="rfc\RFC 6655 - AES-CCM Cipher Suites for Transport Layer Security %28TLS%29.html" />
+    <Content Include="rfc\RFC 7627 - Transport Layer Security %28TLS%29 Session Hash and Extended Master Secret Extension.html" />
+    <Content Include="rfc\RFC 7685 - A Transport Layer Security %28TLS%29 ClientHello Padding Extension.html" />
+    <Content Include="rfc\RFC 7919 - Negotiated Finite Field Diffie-Hellman Ephemeral Parameters for Transport Layer Security %28TLS%29.html" />
+    <Content Include="tsconfig.json">
+      <SubType>Code</SubType>
+    </Content>
     <TypeScriptCompile Include="src\DTLS\CipherSuites.ts" />
     <TypeScriptCompile Include="src\DTLS\Cookie.ts" />
     <TypeScriptCompile Include="src\DTLS\DTLSCiphertext.ts" />
@@ -80,16 +95,14 @@
     <TypeScriptCompile Include="src\TLS\CompressionMethod.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="typings\node\node.d.ts" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="rfc\" />
     <Folder Include="src\" />
     <Folder Include="src\DTLS\" />
     <Folder Include="src\lib\" />
     <Folder Include="src\TLS\" />
     <Folder Include="tests\" />
-    <Folder Include="typings\" />
-    <Folder Include="typings\node\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\lib\BitConverter.ts" />

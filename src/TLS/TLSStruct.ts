@@ -21,7 +21,7 @@ export class TLSStruct {
 			});
 			if (value instanceof TLSTypes.Calculated) {
 				// getter für berechnete Eigenschaft erstellen
-				Object.defineProperty(value.prototype, key, {
+				Object.defineProperty(value, key, {
 					get: () => this.getCalculatedPropertyValue(key)
 				})
 				// TODO: Testen!!!!
@@ -40,7 +40,7 @@ export class TLSStruct {
 	 * @param arr - Das Array, aus dem gelesen werden soll
 	 * @param offset - Der Index, ab dem gelesen werden soll
 	 */
-	deserialize(arr: number[], offset = 0): { value: TLSStruct, delta: number } {
+	deserialize(arr: Buffer, offset = 0): { value: TLSStruct, delta: number } {
 		let delta = 0;
 		for (let def of this.propertyDefinitions) {
 			// Welche Eigenschaft wird ausgelesen?
@@ -86,10 +86,10 @@ export class TLSStruct {
 	 * @param arr - Das Array, aus dem gelesen werden soll
 	 * @param offset - Der Index, ab dem gelesen werden soll
 	 */
-	static from(spec: TLSTypes.StructSpec, arr: number[], offset = 0) {
+	static from(spec: TLSTypes.StructSpec, arr: Buffer, offset = 0) {
 		return TLSStruct._from(spec, arr, offset).value;
 	}
-	private static _from(spec: TLSTypes.StructSpec, arr: number[], offset = 0) {
+	private static _from(spec: TLSTypes.StructSpec, arr: Buffer, offset = 0) {
 		const ret = new TLSStruct(spec);
 		return ret.deserialize(arr, offset);
 	}
@@ -97,8 +97,8 @@ export class TLSStruct {
 	/**
 	 * Serialisiert das Objekt in ein ein Byte-Array
 	 */
-	serialize() {
-		return this.propertyDefinitions
+	serialize(): Buffer {
+		const ret = this.propertyDefinitions
 			.map(def => {
 				// Welche Eigenschaft wird ausgelesen?
 				const
@@ -106,7 +106,7 @@ export class TLSStruct {
 					type = def.type,
 					propValue = this[propName]
 					;
-				let result: BitConverter.BitConverterResult<number[]>;
+				let result: BitConverter.BitConverterResult<Buffer>;
 				// Typ ermitteln
 				if (typeof type === "string") {
 					// Basistyp (Zahl)
@@ -128,9 +128,10 @@ export class TLSStruct {
 					throw new TypeError("unknown message type specified");
 				}
 				return result.value;
-			})
-			.reduce((prev, cur) => prev.concat(cur), [])
-			;
+			});
+		return Buffer.concat(ret);
+			//.reduce((prev, cur) => prev.concat(cur), [])
+			//;
 	}
 
 	protected getCalculatedPropertyValue(propName: string) {

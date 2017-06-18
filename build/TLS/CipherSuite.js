@@ -5,7 +5,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var TLSStruct_1 = require("./TLSStruct");
-var crypto = require("crypto");
+//const crypto = require("crypto");
 var CipherSuite = (function (_super) {
     __extends(CipherSuite, _super);
     function CipherSuite(id, keyExchange, mac, prf, cipherType, algorithm) {

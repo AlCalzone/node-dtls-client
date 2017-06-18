@@ -1,5 +1,5 @@
 ﻿import { fitToWholeBytes } from "./util";
-import * as TLSTypes from "./TLSTypes";
+import * as TLSTypes from "../TLS/TLSTypes";
 
 export type BitSizes = 8 | 16 | 24 | 32 | 48 | 64;
 export type Vector = number[];
@@ -10,7 +10,7 @@ export type BitConverterResult<T> = {
 	delta: number
 };
 
-export type ByteArray = Uint8Array | number[];
+//export type ByteArray = Uint8Array | number[];
 
 /**
  * Liest eine Zahl der angegebenen Länge (bits) aus dem Byte-Array (arr) ab Position (offset)
@@ -18,7 +18,7 @@ export type ByteArray = Uint8Array | number[];
  * @param arr - Das Byte-Array, aus dem gelesen werden soll
  * @param offset - Der Index im Array, an dem mit dem Lesen begonnen werden soll
  */
-function _readNumber(bits: BitSizes, arr: ByteArray, offset = 0): BitConverterResult<number> {
+function _readNumber(bits: BitSizes, arr: Buffer, offset = 0): BitConverterResult<number> {
 	let ret = 0;
 	const delta = bits / 8;
 	while (bits > 0) {
@@ -37,11 +37,11 @@ function _readNumber(bits: BitSizes, arr: ByteArray, offset = 0): BitConverterRe
  * @param arr - Das Byte-Array, in das geschrieben werden soll
  * @param offset - Der Index im Array, an dem mit dem Schreiben begonnen werden soll
  */
-function _writeNumber(value: number, bits: BitSizes, arr?: number[], offset = 0): BitConverterResult<number[]> {
+function _writeNumber(value: number, bits: BitSizes, arr?: Buffer, offset = 0): BitConverterResult<Buffer> {
 	let delta = 0;
 	if (arr == undefined) {
-		// Leeres Array auf die richtige Größe initialisieren
-		arr = new Array(bits / 8);
+		// Leeren Buffer auf die richtige Größe initialisieren
+		arr = Buffer.alloc(bits / 8);
 		offset = 0;
 	}
 	while (bits > 0) {
@@ -59,7 +59,7 @@ function _writeNumber(value: number, bits: BitSizes, arr?: number[], offset = 0)
  * @param arr - Das Byte-Array, aus dem gelesen werden soll
  * @param offset - Der Index im Array, an dem mit dem Lesen begonnen werden soll
  */
-function  _readVectorFixed(bits: BitSizes, length: number, arr?: ByteArray, offset = 0) : BitConverterResult<Vector> {
+function  _readVectorFixed(bits: BitSizes, length: number, arr?: Buffer, offset = 0) : BitConverterResult<Vector> {
 	let ret = new Array(length);
 	let delta = 0;
 	const bytesPerNumber = bits / 8;
@@ -79,11 +79,11 @@ function  _readVectorFixed(bits: BitSizes, length: number, arr?: ByteArray, offs
  * @param arr - Das Byte-Array, in das geschrieben werden soll
  * @param offset - Der Index im Array, an dem mit dem Schreiben begonnen werden soll
  */
-function _writeVectorFixed(vector: Vector, bits: BitSizes, arr?: number[], offset = 0): BitConverterResult<number[]> {
+function _writeVectorFixed(vector: Vector, bits: BitSizes, arr?: Buffer, offset = 0): BitConverterResult<Buffer> {
 	const length = vector.length;
 	if (arr == undefined) {
-		// Leeres Array auf die richtige Größe initialisieren
-		arr = new Array(length * bits / 8);
+		// Leeren Buffer auf die richtige Größe initialisieren
+		arr = Buffer.alloc(length * bits / 8);
 		offset = 0;
 	}
 	const bytesPerNumber = bits / 8;
@@ -103,7 +103,7 @@ function _writeVectorFixed(vector: Vector, bits: BitSizes, arr?: number[], offse
  * @param arr - Das Byte-Array, aus dem gelesen werden soll
  * @param offset - Der Index im Array, an dem mit dem Lesen begonnen werden soll
  */
-function _readVectorVariable(bits: BitSizes, maxLength: number, arr?: ByteArray, offset = 0): BitConverterResult<Vector> {
+function _readVectorVariable(bits: BitSizes, maxLength: number, arr?: Buffer, offset = 0): BitConverterResult<Vector> {
 	// Länge auslesen, dazu bestimmen wie viele Bytes für die Längenangabe nötig sind
 	const lengthBits = fitToWholeBytes(maxLength * bits / 8) * 8 as BitSizes;
 	let output = _readNumber(lengthBits, arr, offset);
@@ -133,14 +133,14 @@ function _readVectorVariable(bits: BitSizes, maxLength: number, arr?: ByteArray,
  * @param arr - Das Byte-Array, in das geschrieben werden soll
  * @param offset - Der Index im Array, an dem mit dem Schreiben begonnen werden soll
  */
-function _writeVectorVariable(vector: Vector, bits: BitSizes, maxLength: number, arr?: number[], offset = 0): BitConverterResult<number[]> {
+function _writeVectorVariable(vector: Vector, bits: BitSizes, maxLength: number, arr?: Buffer, offset = 0): BitConverterResult<Buffer> {
 	const numEntries = vector.length;
 	const numBytes = numEntries * bits / 8;
 	// bestimmen wie viele Bytes für die Längenangabe nötig sind
 	const lengthBytes = fitToWholeBytes(maxLength * bits / 8);
 	if (arr == undefined) {
-		// Leeres Array auf die richtige Größe initialisieren
-		arr = new Array(lengthBytes + numBytes);
+		// Leeren Buffer auf die richtige Größe initialisieren
+		arr = Buffer.alloc(lengthBytes + numBytes);
 		offset = 0;
 	}
 	// Längenangabe schreiben
@@ -163,7 +163,7 @@ function _writeVectorVariable(vector: Vector, bits: BitSizes, maxLength: number,
  * @param offset - Der Index ab dem mit dem Lesen begonnen werden soll
  */
 export const readNumber: {
-	[type in TLSTypes.Numbers]?: (arr?: ByteArray, offset?: number) => BitConverterResult<number>
+	[type in TLSTypes.Numbers]?: (arr?: Buffer, offset?: number) => BitConverterResult<number>
 } = {};
 
 /**
@@ -174,7 +174,7 @@ export const readNumber: {
  * @param offset - Der Index im Array, an dem mit dem Schreiben begonnen werden soll
  */
 export const writeNumber: {
-	[type in TLSTypes.Numbers]?: (value: number[], arr?: ByteArray, offset?: number) => BitConverterResult<number[]>
+	[type in TLSTypes.Numbers]?: (value: number, arr?: Buffer, offset?: number) => BitConverterResult<Buffer>
 } = {};
 
 /**
@@ -184,7 +184,7 @@ export const writeNumber: {
  * @param offset - Der Index im Array, an dem mit dem Lesen begonnen werden soll
  */
 export const readVectorFixed: {
-	[type in TLSTypes.Numbers]?: (length: number, arr?: ByteArray, offset?: number) => BitConverterResult<Vector>
+	[type in TLSTypes.Numbers]?: (length: number, arr?: Buffer, offset?: number) => BitConverterResult<Vector>
 } = {};
 
 /**
@@ -195,7 +195,7 @@ export const readVectorFixed: {
  * @param offset - Der Index im Array, an dem mit dem Schreiben begonnen werden soll
  */
 export const writeVectorFixed: {
-	[type in TLSTypes.Numbers]?: (vector: Vector, arr?: ByteArray, offset?: number) => BitConverterResult<Vector>
+	[type in TLSTypes.Numbers]?: (vector: Vector, arr?: Buffer, offset?: number) => BitConverterResult<Buffer>
 } = {};
 
 /**
@@ -205,7 +205,7 @@ export const writeVectorFixed: {
  * @param offset - Der Index im Array, an dem mit dem Lesen begonnen werden soll
  */
 export const readVectorVariable: {
-	[type in TLSTypes.Numbers]?: (maxLength: number, arr?: ByteArray, offset?: number) => BitConverterResult<Vector>
+	[type in TLSTypes.Numbers]?: (maxLength: number, arr?: Buffer, offset?: number) => BitConverterResult<Vector>
 } = {};
 
 /**
@@ -217,12 +217,12 @@ export const readVectorVariable: {
  * @param offset - Der Index im Array, an dem mit dem Schreiben begonnen werden soll
  */
 export const writeVectorVariable: {
-	[type in TLSTypes.Numbers]?: (vector: Vector, maxLength: number, arr?: ByteArray, offset?: number) => BitConverterResult<Vector>
+	[type in TLSTypes.Numbers]?: (vector: Vector, maxLength: number, arr?: Buffer, offset?: number) => BitConverterResult<Buffer>
 } = {};
 
-// und in das OBjekt übernehmen
+// und in das Objekt übernehmen
 for (let bits of [8, 16, 24, 32, 48, 64]) {
-	readNumber[`uint${bits}`] = (arr?, offset?) => _readNumber(bits as BitSizes, arr, offset);;
+	readNumber[`uint${bits}`] = (arr?, offset?) => _readNumber(bits as BitSizes, arr, offset);
 	writeNumber[`uint${bits}`] = (value, arr?, offset?) => _writeNumber(value, bits as BitSizes, arr, offset);
 	readVectorFixed[`uint${bits}`] = (length, arr?, offset?) => _readVectorFixed(bits as BitSizes, length, arr, offset);
 	writeVectorFixed[`uint${bits}`] = (vector, arr?, offset?) => _writeVectorFixed(vector, bits as BitSizes, arr, offset);

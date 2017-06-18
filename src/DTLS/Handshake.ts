@@ -137,9 +137,7 @@ export class HelloVerifyRequest extends Handshake {
 		public server_version: ProtocolVersion,
 		public cookie: Cookie
 	) {
-		super(
-			super(HandshakeType.hello_verify_request, HelloVerifyRequest.__bodySpec);
-		);
+		super(HandshakeType.hello_verify_request, HelloVerifyRequest.__bodySpec);
 	}
 
 }
@@ -161,7 +159,7 @@ export class Finished extends Handshake {
 		verify_data: new TLSTypes.Vector("uint8", 0, 2**16) // TODO: wirkliche Länge "verify_data_length" herausfinden
 	}
 
-	constructor(public verify_data: number[]) {
+	constructor(public verify_data: Buffer) {
 		super(HandshakeType.finished, Finished.__bodySpec);
 	}
 

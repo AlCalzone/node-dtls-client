@@ -41,6 +41,9 @@ export type KeyExchangeAlgorithm =
 	"psk" | "dhe_psk" | "rsa_psk"// Server/Client|KeyExchange: see https://tools.ietf.org/html/rfc4279#page-4
 	;
 
+const master_secret_length = 48;
+const client_random_length = 32;
+const server_random_length = 32;
 
 export enum AEADAlgorithm {
 	// ...
@@ -96,16 +99,19 @@ export class SecurityParameters {
 			preMasterSecret.serialize(),
 			"master secret",
 			Buffer.concat([clientHelloRandom, serverHelloRandom]),
-			48
+			master_secret_length
 		);
 	}
 
+	/**
+	 * Berechnet die Schlüsselkomponenten
+	 */
 	computeKeyMaterial(): void {
 		const keyBlock = PRF[this.prf_algorithm](
 			this.master_secret,
 			"key expansion",
 			Buffer.concat([this.server_random, this.client_random]),
-			2 * this.mac_key_length + 2 * this.enc_key_length + 2 * this.fixed_iv_length
+			2 * (this.mac_key_length + this.enc_key_length + this.fixed_iv_length)
 		);
 
 		let offset = 0;
@@ -122,14 +128,5 @@ export class SecurityParameters {
 		this.server_write_IV = read(this.fixed_iv_length);
 
 	}
-	
-	
-	// Implementation details:
-	
-	// master_secret = PRF(
-	// 	pre_master_secret, 
-	// 	"master secret",
-	// 	ClientHello.random + ServerHello.random
-	// )[0..47];
 	
 }

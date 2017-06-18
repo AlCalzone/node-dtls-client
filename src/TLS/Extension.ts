@@ -8,7 +8,7 @@ export default class Extension extends TLSStruct {
 		extension_data: new TLSTypes.Vector("uint8", 0, 2**16 - 1)
 	}
 
-	constructor(public extension_type: ExtensionType, public extension_data: number[]) {
+	constructor(public extension_type: ExtensionType, public extension_data: Buffer) {
 		super(Extension.__spec);
 	}
 }

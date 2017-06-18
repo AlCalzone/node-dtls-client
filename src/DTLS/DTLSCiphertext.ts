@@ -19,7 +19,7 @@ export class DTLSCiphertext extends TLSStruct {
 		public version = new ProtocolVersion(),
 		public epoch: number,
 		public sequence_number: number,
-		public fragment: number[] // <XXX>Ciphertext
+		public fragment: Buffer // <XXX>Ciphertext
 	) {
 		super(DTLSCiphertext.__spec);
 	}
