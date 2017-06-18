@@ -1,4 +1,5 @@
 import * as TLSTypes from "./TLSTypes";
+import { PreMasterSecret } from "./PreMasterSecret";
 export declare enum CompressionMethod {
     null = 0,
 }
@@ -31,7 +32,21 @@ export declare class SecurityParameters {
     mac_length: number;
     mac_key_length: number;
     compression_algorithm: CompressionMethod;
-    master_secret: number[];
-    client_random: number[];
-    server_random: number[];
+    master_secret: Buffer;
+    client_random: Buffer;
+    server_random: Buffer;
+    client_write_MAC_key: Buffer;
+    server_write_MAC_key: Buffer;
+    client_write_key: Buffer;
+    server_write_key: Buffer;
+    client_write_IV: Buffer;
+    server_write_IV: Buffer;
+    /**
+     * Compute the master secret from a given premaster secret
+     * @param preMasterSecret - The secret used to calculate the master secret
+     * @param clientHelloRandom - The random data from the client hello message
+     * @param serverHelloRandom - The random data from the server hello message
+     */
+    computeMasterSecret(preMasterSecret: PreMasterSecret, clientHelloRandom: Buffer, serverHelloRandom: Buffer): void;
+    computeKeyMaterial(): void;
 }

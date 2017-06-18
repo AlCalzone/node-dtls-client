@@ -1,6 +1,7 @@
 ﻿import * as TLSTypes from "./TLSTypes";
 import { TLSStruct } from "./TLSStruct";
 import { PRFAlgorithm, BulkCipherAlgorithm, AEADAlgorithm, CipherType, MACAlgorithm, KeyExchangeAlgorithm } from "./SecurityParameters";
+const crypto = require("crypto");
 
 export class CipherSuite extends TLSStruct {
 

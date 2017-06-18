@@ -50,7 +50,13 @@
     <TypeScriptCompile Include="src\DTLS\DTLSCompressed.ts" />
     <TypeScriptCompile Include="src\DTLS\DTLSPlaintext.ts" />
     <TypeScriptCompile Include="src\DTLS\Handshake.ts" />
-    <TypeScriptCompile Include="src\DTLS\PRF.ts" />
+    <TypeScriptCompile Include="src\TLS\PRF.ts" />
+    <TypeScriptCompile Include="src\TLS\KeyExchange.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\TLS\PreMasterSecret.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\TLS\SecurityParameters.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

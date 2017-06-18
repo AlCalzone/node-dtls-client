@@ -1,7 +1,7 @@
 ﻿import * as TLSTypes from "./TLSTypes";
 import { TLSStruct } from "./TLSStruct";
 
-export default class ChangeCipherSpec extends TLSStruct {
+export class ChangeCipherSpec extends TLSStruct {
 
 	static readonly __spec = {
 		type: new TLSTypes.Enum("uint8", ChangeCipherSpec)

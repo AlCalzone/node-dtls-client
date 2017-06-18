@@ -1,6 +1,7 @@
 "use strict";
 var TLSTypes = require("./TLSTypes");
 var object_polyfill_1 = require("../lib/object-polyfill");
+var PRF_1 = require("./PRF");
 var CompressionMethod;
 (function (CompressionMethod) {
     CompressionMethod[CompressionMethod["null"] = 0] = "null";
@@ -27,6 +28,31 @@ var SecurityParameters = (function () {
                 this[key] = value;
         }
     }
+    // TODO: Gehört das wirklich hier hin?
+    /**
+     * Compute the master secret from a given premaster secret
+     * @param preMasterSecret - The secret used to calculate the master secret
+     * @param clientHelloRandom - The random data from the client hello message
+     * @param serverHelloRandom - The random data from the server hello message
+     */
+    SecurityParameters.prototype.computeMasterSecret = function (preMasterSecret, clientHelloRandom, serverHelloRandom) {
+        this.master_secret = PRF_1.PRF[this.prf_algorithm](preMasterSecret.serialize(), "master secret", Buffer.concat([clientHelloRandom, serverHelloRandom]), 48);
+    };
+    SecurityParameters.prototype.computeKeyMaterial = function () {
+        var keyBlock = PRF_1.PRF[this.prf_algorithm](this.master_secret, "key expansion", Buffer.concat([this.server_random, this.client_random]), 2 * this.mac_key_length + 2 * this.enc_key_length + 2 * this.fixed_iv_length);
+        var offset = 0;
+        function read(length) {
+            var ret = keyBlock.slice(offset, offset + length);
+            offset += length;
+            return ret;
+        }
+        this.client_write_MAC_key = read(this.mac_key_length);
+        this.server_write_MAC_key = read(this.mac_key_length);
+        this.client_write_key = read(this.enc_key_length);
+        this.server_write_key = read(this.enc_key_length);
+        this.client_write_IV = read(this.fixed_iv_length);
+        this.server_write_IV = read(this.fixed_iv_length);
+    };
     return SecurityParameters;
 }());
 exports.SecurityParameters = SecurityParameters;

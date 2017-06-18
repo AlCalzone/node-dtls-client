@@ -1,6 +1,8 @@
 ﻿import * as TLSTypes from "./TLSTypes";
 import { TLSStruct } from "./TLSStruct";
 import { entries } from "../lib/object-polyfill";
+import { PreMasterSecret } from "./PreMasterSecret";
+import { PRF } from "./PRF";
 
 export enum CompressionMethod {
 	null = 0
@@ -71,9 +73,55 @@ export class SecurityParameters {
 	mac_length: number;
 	mac_key_length: number;
 	compression_algorithm: CompressionMethod;
-	master_secret: number[/*48*/];
-	client_random: number[/*32*/];
-	server_random: number[/*32*/];
+	master_secret: Buffer /*48*/;
+	client_random: Buffer /*32*/;
+	server_random: Buffer /*32*/;
+
+	client_write_MAC_key: Buffer /*SecurityParameters.mac_key_length*/;
+	server_write_MAC_key: Buffer /*SecurityParameters.mac_key_length*/;
+	client_write_key: Buffer /*SecurityParameters.enc_key_length*/;
+	server_write_key: Buffer /*SecurityParameters.enc_key_length*/;
+	client_write_IV: Buffer /*SecurityParameters.fixed_iv_length*/;
+	server_write_IV: Buffer /*SecurityParameters.fixed_iv_length*/;
+
+	// TODO: Gehört das wirklich hier hin?
+	/**
+	 * Compute the master secret from a given premaster secret
+	 * @param preMasterSecret - The secret used to calculate the master secret
+	 * @param clientHelloRandom - The random data from the client hello message
+	 * @param serverHelloRandom - The random data from the server hello message
+	 */
+	computeMasterSecret(preMasterSecret: PreMasterSecret, clientHelloRandom: Buffer, serverHelloRandom: Buffer): void {
+		this.master_secret = PRF[this.prf_algorithm](
+			preMasterSecret.serialize(),
+			"master secret",
+			Buffer.concat([clientHelloRandom, serverHelloRandom]),
+			48
+		);
+	}
+
+	computeKeyMaterial(): void {
+		const keyBlock = PRF[this.prf_algorithm](
+			this.master_secret,
+			"key expansion",
+			Buffer.concat([this.server_random, this.client_random]),
+			2 * this.mac_key_length + 2 * this.enc_key_length + 2 * this.fixed_iv_length
+		);
+
+		let offset = 0;
+		function read(length: number) {
+			const ret = keyBlock.slice(offset, offset + length);
+			offset += length;
+			return ret;
+		}
+		this.client_write_MAC_key = read(this.mac_key_length);
+		this.server_write_MAC_key = read(this.mac_key_length);
+		this.client_write_key = read(this.enc_key_length);
+		this.server_write_key = read(this.enc_key_length);
+		this.client_write_IV = read(this.fixed_iv_length);
+		this.server_write_IV = read(this.fixed_iv_length);
+
+	}
 	
 	
 	// Implementation details:
