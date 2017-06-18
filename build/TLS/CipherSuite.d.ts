@@ -11,4 +11,9 @@ export declare class CipherSuite extends TLSStruct {
         id: string;
     };
     constructor(id: number, keyExchange: KeyExchangeAlgorithm, mac: MACAlgorithm, prf: PRFAlgorithm, cipherType: CipherType, algorithm?: (BulkCipherAlgorithm | AEADAlgorithm));
+    readonly keyLengths: {
+        keyLength: number;
+        blockSize: number;
+        macLength: number;
+    };
 }
