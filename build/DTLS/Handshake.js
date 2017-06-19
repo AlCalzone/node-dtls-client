@@ -11,7 +11,7 @@ var Random_1 = require("../TLS/Random");
 var SessionID_1 = require("../TLS/SessionID");
 var Cookie_1 = require("./Cookie");
 var CipherSuite_1 = require("../TLS/CipherSuite");
-var CompressionMethod_1 = require("../TLS/CompressionMethod");
+var ConnectionState_1 = require("../TLS/ConnectionState");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var Handshake = (function (_super) {
     __extends(Handshake, _super);
@@ -96,7 +96,7 @@ ServerHello.__bodySpec = {
     random: Random_1.Random.__spec,
     session_id: SessionID_1.SessionID.__spec,
     cipher_suite: CipherSuite_1.CipherSuite.__spec,
-    compression_method: CompressionMethod_1.CompressionMethod.__spec
+    compression_method: ConnectionState_1.CompressionMethod.__spec
 };
 ServerHello.__bodySpecWithExtensions = object_polyfill_1.extend(ServerHello.__bodySpec, {});
 exports.ServerHello = ServerHello;

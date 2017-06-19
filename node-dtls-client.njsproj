@@ -65,14 +65,12 @@
     <TypeScriptCompile Include="src\DTLS\DTLSCompressed.ts" />
     <TypeScriptCompile Include="src\DTLS\DTLSPlaintext.ts" />
     <TypeScriptCompile Include="src\DTLS\Handshake.ts" />
+    <TypeScriptCompile Include="src\TLS\ConnectionState.ts" />
     <TypeScriptCompile Include="src\TLS\PRF.ts" />
     <TypeScriptCompile Include="src\TLS\KeyExchange.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\TLS\PreMasterSecret.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="src\TLS\SecurityParameters.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\TLS\TLSTypes.ts">
@@ -90,9 +88,6 @@
     <TypeScriptCompile Include="src\TLS\CipherSuite.ts" />
     <TypeScriptCompile Include="src\TLS\SessionID.ts" />
     <TypeScriptCompile Include="src\TLS\Random.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="src\TLS\CompressionMethod.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
   </ItemGroup>
@@ -114,12 +109,9 @@
     <Compile Include="src\TLS\Cipher.js" />
     <Compile Include="src\TLS\ContentType.ts" />
     <Compile Include="src\TLS\GenericAEADCipher.js" />
-    <Compile Include="src\TLS\GenericBlockCipher.js" />
+    <Compile Include="src\TLS\BlockCipher.ts" />
     <Compile Include="src\TLS\GenericStreamCipher.js" />
     <Compile Include="src\TLS\ProtocolVersion.ts" />
-    <Compile Include="src\TLS\TLSCiphertext.ts" />
-    <Compile Include="src\TLS\TLSCompressed.ts" />
-    <Compile Include="src\TLS\TLSPlaintext.ts" />
     <Compile Include="tests\BitConverter.js" />
     <Compile Include="tests\Message.js" />
     <Compile Include="tests\util.js" />

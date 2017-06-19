@@ -4,7 +4,7 @@ import { TLSStruct } from "../TLS/TLSStruct";
 import { SessionID } from "../TLS/SessionID";
 import { Cookie } from "./Cookie";
 import { CipherSuite } from "../TLS/CipherSuite";
-import { CompressionMethod } from "../TLS/CompressionMethod";
+import { CompressionMethod } from "../TLS/ConnectionState";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 export declare abstract class Handshake extends TLSStruct {
     msg_type: HandshakeType;

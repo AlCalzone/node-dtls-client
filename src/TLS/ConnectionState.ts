@@ -4,13 +4,13 @@ import { entries } from "../lib/object-polyfill";
 import { PreMasterSecret } from "./PreMasterSecret";
 import { PRF } from "./PRF";
 import {
-	PRFAlgorithm,
-	BulkCipherAlgorithm,
+	HashAlgorithm,
+	//BulkCipherAlgorithm,
 	AEADAlgorithm,
 	CipherType,
-	MACAlgorithm,
-	KeyExchangeAlgorithm
+	KeyMaterial
 } from "./CipherSuite";
+import { KeyExchangeAlgorithm } from "./KeyExchange";
 
 export enum CompressionMethod {
 	null = 0
@@ -27,15 +27,6 @@ const master_secret_length = 48;
 const client_random_length = 32;
 const server_random_length = 32;
 
-export interface KeyMaterial {
-	client_write_MAC_key: Buffer /*ConnectionState.mac_key_length*/;
-	server_write_MAC_key: Buffer /*ConnectionState.mac_key_length*/;
-	client_write_key: Buffer /*ConnectionState.enc_key_length*/;
-	server_write_key: Buffer /*ConnectionState.enc_key_length*/;
-	client_write_IV: Buffer /*ConnectionState.fixed_iv_length*/;
-	server_write_IV: Buffer /*ConnectionState.fixed_iv_length*/;
-}
-
 export class ConnectionState {
 
 	constructor(values) {
@@ -45,14 +36,14 @@ export class ConnectionState {
 	}
 
 	entity: ConnectionEnd;
-	prf_algorithm: PRFAlgorithm;
-	bulk_cipher_algorithm: BulkCipherAlgorithm;
+	prf_algorithm: HashAlgorithm;
+	//bulk_cipher_algorithm: BulkCipherAlgorithm;
 	cipher_type: CipherType;
 	enc_key_length: number;
 	block_length: number;
 	fixed_iv_length: number;
 	record_iv_length: number;
-	mac_algorithm: MACAlgorithm;
+	mac_algorithm: HashAlgorithm;
 	mac_length: number;
 	mac_key_length: number;
 	compression_algorithm: CompressionMethod;

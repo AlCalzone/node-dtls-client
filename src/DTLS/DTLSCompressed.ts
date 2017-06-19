@@ -64,7 +64,7 @@ export class DTLSCompressed extends TLSStruct {
 			this.sequence_number,
 			this.type,
 			this.version,
-			this.length
+			this["length"]
 		)).serialize();
 	}
 

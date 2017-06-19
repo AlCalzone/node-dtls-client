@@ -1,21 +1,22 @@
 "use strict";
 var crypto = require("crypto");
-function HMAC_factory(algorithm) {
-    /**
-     * Generates a HMAC hash from the given secret and data.
-     */
-    return function (secret, data) {
+;
+function HMAC_factory(algorithm, length) {
+    var ret = (function (secret, data) {
         var hmac = crypto.createHmac(algorithm, secret);
         hmac.update(data);
         return hmac.digest();
-    };
+    });
+    // add length information
+    ret.length = length;
+    return ret;
 }
 exports.HMAC = {
-    "md5": HMAC_factory("md5"),
-    "sha1": HMAC_factory("sha1"),
-    "sha256": HMAC_factory("sha256"),
-    "sha384": HMAC_factory("sha384"),
-    "sha512": HMAC_factory("sha512"),
+    "md5": HMAC_factory("md5", 16),
+    "sha1": HMAC_factory("sha1", 20),
+    "sha256": HMAC_factory("sha256", 32),
+    "sha384": HMAC_factory("sha384", 48),
+    "sha512": HMAC_factory("sha512", 64),
 };
 /**
  * Data expansion function: Turns a secret into an arbitrary quantity of output using a hash function and a seed.
