@@ -2,7 +2,7 @@
 import { TLSStruct } from "../TLS/TLSStruct";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
-import { CompressionMethod } from "../TLS/ConnectionState"
+import { DTLSPlaintext } from "./DTLSPlaintext";
 
 export class DTLSCompressed extends TLSStruct {
 
