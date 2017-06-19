@@ -4,6 +4,7 @@ import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
 import { DTLSPlaintext } from "./DTLSPlaintext";
 
+
 export class DTLSCompressed extends TLSStruct {
 
 	static readonly __spec = {
@@ -53,8 +54,44 @@ export class DTLSCompressed extends TLSStruct {
 			decompressor(this.fragment) // TODO: handle decompression errors (like too large fragments)
 		);
 	}
+	
+	/**
+	 * Computes the MAC header representing this packet. The MAC header is the input buffer of the MAC calculation minus the actual fragment buffer.
+	 */
+	computeMACHeader(): Buffer {
+		return (new MACHeader(
+			this.epoch,
+			this.sequence_number,
+			this.type,
+			this.version,
+			this.length
+		)).serialize();
+	}
 
 }
 
 export type CompressorDelegate = (plaintext: Buffer) => Buffer;
 export type DecompressorDelegate = (compressed: Buffer) => Buffer;
+
+
+export class MACHeader extends TLSStruct {
+
+	static readonly __spec = {
+		epoch: "uint16",
+		sequence_number: "uint48",
+		type: ContentType.__spec,
+		version: ProtocolVersion.__spec,
+		fragment_length: "uint16"
+	};
+
+	constructor(
+		public epoch: number,
+		public sequence_number: number,
+		public type: ContentType,
+		public version: ProtocolVersion,
+		public fragment_length: number
+	) {
+		super(MACHeader.__spec);
+	}
+
+}

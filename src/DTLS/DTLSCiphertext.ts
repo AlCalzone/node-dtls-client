@@ -3,6 +3,7 @@ import { TLSStruct } from "../TLS/TLSStruct";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
 import { DTLSCompressed } from "./DTLSCompressed";
+import { CipherDelegate, DecipherDelegate } from "../TLS/CipherSuite";
 
 export class DTLSCiphertext extends TLSStruct {
 
@@ -57,5 +58,3 @@ export class DTLSCiphertext extends TLSStruct {
 }
 
 
-export type CipherDelegate = (plaintext: Buffer) => Buffer;
-export type DecipherDelegate = (ciphertext: Buffer) => Buffer;

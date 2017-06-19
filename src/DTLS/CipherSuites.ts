@@ -1,5 +1,4 @@
-﻿import { CipherSuite } from "../TLS/CipherSuite";
-import { PRFAlgorithm, BulkCipherAlgorithm, CipherType, MACAlgorithm, KeyExchangeAlgorithm, AEADAlgorithm } from "../TLS/ConnectionState";
+﻿import { CipherSuite, PRFAlgorithm, BulkCipherAlgorithm, CipherType, MACAlgorithm, KeyExchangeAlgorithm, AEADAlgorithm } from "../TLS/CipherSuite";
 
 export interface ICipherSuites {
 	[name: string] : CipherSuite
