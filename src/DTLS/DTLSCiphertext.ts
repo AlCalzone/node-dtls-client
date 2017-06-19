@@ -2,6 +2,7 @@
 import { TLSStruct } from "../TLS/TLSStruct";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
+import { DTLSCompressed } from "./DTLSCompressed";
 
 export class DTLSCiphertext extends TLSStruct {
 
@@ -24,6 +25,37 @@ export class DTLSCiphertext extends TLSStruct {
 		super(DTLSCiphertext.__spec);
 	}
 
-	//get length() { return this.fragment.length; }
 
+	/**
+	 * Encrypts the given compressed packet
+	 * @param packet - The packet to be encrypted
+	 * @param cipher - The cipher used to encrypt the given packet
+	 */
+	static encrypt(packet: DTLSCompressed, cipher: CipherDelegate) : DTLSCiphertext {
+		return new DTLSCiphertext(
+			packet.type,
+			packet.version,
+			packet.epoch,
+			packet.sequence_number,
+			cipher(packet.fragment)
+		);
+	}
+	
+	/**
+	 * Decrypts this packet into a compressed packet
+	 * @param decipher - The decipher used to decrypt this packet
+	 */
+	decompress(decipher: DecipherDelegate) : DTLSCompressed {
+		return new DTLSCompressed(
+			this.type,
+			this.version,
+			this.epoch,
+			this.sequence_number,
+			decipher(this.fragment) // TODO: handle decryption errors (like too large fragments)
+		);
+	}
 }
+
+
+export type CipherDelegate = (plaintext: Buffer) => Buffer;
+export type DecipherDelegate = (ciphertext: Buffer) => Buffer;
