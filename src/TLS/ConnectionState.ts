@@ -56,7 +56,7 @@ export enum AEADAlgorithm {
 	AES_256_CCM_8     = 19,
 }
 
-export class SecurityParameters {
+export class ConnectionState {
 
 	constructor(values) {
 		for (let [key, value] of entries(values)) {
@@ -80,12 +80,12 @@ export class SecurityParameters {
 	client_random: Buffer /*32*/;
 	server_random: Buffer /*32*/;
 
-	client_write_MAC_key: Buffer /*SecurityParameters.mac_key_length*/;
-	server_write_MAC_key: Buffer /*SecurityParameters.mac_key_length*/;
-	client_write_key: Buffer /*SecurityParameters.enc_key_length*/;
-	server_write_key: Buffer /*SecurityParameters.enc_key_length*/;
-	client_write_IV: Buffer /*SecurityParameters.fixed_iv_length*/;
-	server_write_IV: Buffer /*SecurityParameters.fixed_iv_length*/;
+	client_write_MAC_key: Buffer /*ConnectionState.mac_key_length*/;
+	server_write_MAC_key: Buffer /*ConnectionState.mac_key_length*/;
+	client_write_key: Buffer /*ConnectionState.enc_key_length*/;
+	server_write_key: Buffer /*ConnectionState.enc_key_length*/;
+	client_write_IV: Buffer /*ConnectionState.fixed_iv_length*/;
+	server_write_IV: Buffer /*ConnectionState.fixed_iv_length*/;
 
 	// TODO: Gehört das wirklich hier hin?
 	/**

@@ -1,6 +1,6 @@
 ﻿import * as TLSTypes from "./TLSTypes";
 import { TLSStruct } from "./TLSStruct";
-import { KeyExchangeAlgorithm } from "./SecurityParameters";
+import { KeyExchangeAlgorithm } from "./ConnectionState";
 
 export class ServerKeyExchange extends TLSStruct {
 

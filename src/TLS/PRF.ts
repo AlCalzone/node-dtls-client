@@ -1,5 +1,5 @@
 ﻿import * as crypto from "crypto";
-import { PRFAlgorithm, MACAlgorithm } from "../TLS/SecurityParameters";
+import { PRFAlgorithm, MACAlgorithm } from "../TLS/ConnectionState";
 
 type cryptoAlgorithms = 
 	"md5" |

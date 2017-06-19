@@ -7,7 +7,7 @@ import {
 	CipherType,
 	MACAlgorithm,
 	KeyExchangeAlgorithm
-} from "./SecurityParameters";
+} from "./ConnectionState";
 import { extend } from "../lib/object-polyfill";
 
 interface BulkCipherParameter {
