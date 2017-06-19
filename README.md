@@ -14,4 +14,12 @@ Although great care has been taken to properly implement the required encryption
 - [x] cipher suite definitions
 - [ ] message definitions (~70%)
 - [ ] record protocol implementation
+  - [x] compression (no actual algorithms implemented)
+  - [x] encryption and verification:
+    - [x] block ciphers
+    - [ ] stream ciphers (optional)
+    - [ ] AEAD ciphers (optional)
+  - [ ] managing connection states
+  - [ ] replay protection
 - [ ] handshake protocol implementation
+- [ ] testing... a lot!
