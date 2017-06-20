@@ -3,38 +3,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var object_polyfill_1 = require("../lib/object-polyfill");
 var BitConverter = require("../lib/BitConverter");
 var TLSTypes = require("./TLSTypes");
-var util = require("../lib/util");
 /**
  * Basisklasse für TLS-Objekte
  */
 var TLSStruct = (function () {
     function TLSStruct(spec, initial) {
-        var _this = this;
-        this.spec = spec;
         this.propertyDefinitions = [];
         // Eigenschaften aus Spec kopieren
         this.__spec__ = spec;
-        var _loop_1 = function (key, value) {
-            this_1.propertyDefinitions.push({
+        for (var _i = 0, _a = object_polyfill_1.entries(spec); _i < _a.length; _i++) {
+            var _b = _a[_i], key = _b[0], value = _b[1];
+            this.propertyDefinitions.push({
                 name: key,
                 type: value
             });
-            if (value instanceof TLSTypes.Calculated) {
+            /*if (value instanceof TLSTypes.Calculated) {
                 // getter für berechnete Eigenschaft erstellen
                 Object.defineProperty(value, key, {
-                    get: function () { return _this.getCalculatedPropertyValue(key); }
-                });
+                    get: () => this.getCalculatedPropertyValue(key)
+                })
                 // TODO: Testen!!!!
-            }
-            else if (initial != undefined && initial.hasOwnProperty(key)) {
+            } else*/ if (initial != undefined && initial.hasOwnProperty(key)) {
                 // sonst evtl. die Eigenschaft initialisieren
-                this_1[key] = initial[key];
+                this[key] = initial[key];
             }
-        };
-        var this_1 = this;
-        for (var _i = 0, _a = object_polyfill_1.entries(spec); _i < _a.length; _i++) {
-            var _b = _a[_i], key = _b[0], value = _b[1];
-            _loop_1(key, value);
         }
     }
     /**
@@ -88,11 +80,9 @@ var TLSStruct = (function () {
      * @param offset - Der Index, ab dem gelesen werden soll
      */
     TLSStruct.from = function (spec, arr, offset) {
-        if (offset === void 0) { offset = 0; }
         return TLSStruct._from(spec, arr, offset).value;
     };
     TLSStruct._from = function (spec, arr, offset) {
-        if (offset === void 0) { offset = 0; }
         var ret = new TLSStruct(spec);
         return ret.deserialize(arr, offset);
     };
@@ -136,68 +126,6 @@ var TLSStruct = (function () {
         return Buffer.concat(ret);
         //.reduce((prev, cur) => prev.concat(cur), [])
         //;
-    };
-    TLSStruct.prototype.getCalculatedPropertyValue = function (propName) {
-        var definition = this.__spec__[propName];
-        return this.calculateProperty(definition.calculationType, definition.propertyName);
-    };
-    /**
-     * Führt Berechnungen auf Basis einer bestimmten Eigenschaft durch
-     * @param type - Der Typ der durchzuführenden Rechnung
-     * @param propName - Der Name der Eigenschaft, mit der gerechnet werden soll
-     */
-    TLSStruct.prototype.calculateProperty = function (type, propName) {
-        switch (type) {
-            case "serializedLength":
-                return this.calculateLength(propName);
-            default:
-                throw Error("unknown property calculation \"" + type + "\"");
-        }
-    };
-    TLSStruct.prototype.getNumberLength = function (numberType) {
-        // uintXX
-        return +(numberType.substr("uint".length)) / 8;
-    };
-    /**
-     * Berechnet die Byte-Länge aller Eigenschaften dieser Struct
-     */
-    TLSStruct.prototype.calculateOwnLength = function () {
-        var _this = this;
-        // Länge aller Eigenschaften berechnen und aufsummieren
-        return this.propertyDefinitions
-            .map(function (pd) { return _this.calculateLength(pd.name); })
-            .reduce(function (prev, cur) { return prev + cur; }, 0);
-    };
-    /**
-     * Berechnet die Länge der angegebenen Eigenschaft
-     */
-    TLSStruct.prototype.calculateLength = function (propName) {
-        var definition = this.__spec__[propName];
-        if (typeof definition === "string") {
-            return this.getNumberLength(definition);
-        }
-        else if (definition instanceof TLSTypes.Enum) {
-            return this.getNumberLength(definition.underlyingType);
-        }
-        else if (definition instanceof TLSTypes.Vector) {
-            var vector = this[propName];
-            if (definition.minLength === definition.maxLength) {
-                // fixe Größe
-                return this.getNumberLength(definition.underlyingType) * vector.length;
-            }
-            else {
-                // variable Größe
-                return util.fitToWholeBytes(definition.maxLength) +
-                    this.getNumberLength(definition.underlyingType) * vector.length;
-            }
-        }
-        else if (definition instanceof TLSTypes.Struct) {
-            var struct = this[propName];
-            return struct.calculateOwnLength();
-        }
-        else if (definition instanceof TLSTypes.Calculated) {
-            return this.getNumberLength(definition.underlyingType);
-        }
     };
     return TLSStruct;
 }());

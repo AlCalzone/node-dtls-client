@@ -10,18 +10,11 @@ export declare class Vector {
     minLength: number;
     maxLength: number;
 }
-export declare type StructSpec = {
+export interface StructSpec {
     [propName: string]: any;
-};
+}
 export declare class Struct {
     spec: StructSpec;
     constructor(spec: StructSpec);
 }
-export declare type CalculationTypes = "serializedLength";
-export declare class Calculated {
-    underlyingType: Numbers;
-    calculationType: CalculationTypes;
-    propertyName: string;
-    constructor(underlyingType: Numbers, calculationType: CalculationTypes, propertyName: string);
-}
-export declare type All = Numbers | Enum | Vector | Struct | Calculated;
+export declare type All = Numbers | Enum | Vector | Struct;

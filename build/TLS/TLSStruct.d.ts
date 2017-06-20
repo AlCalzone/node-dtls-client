@@ -8,7 +8,6 @@ export declare type PropertyDefinition = {
  * Basisklasse für TLS-Objekte
  */
 export declare class TLSStruct {
-    spec: TLSTypes.StructSpec;
     constructor(spec: TLSTypes.StructSpec, initial?: any);
     private __spec__;
     private propertyDefinitions;
@@ -33,20 +32,4 @@ export declare class TLSStruct {
      * Serialisiert das Objekt in ein ein Byte-Array
      */
     serialize(): Buffer;
-    protected getCalculatedPropertyValue(propName: string): number;
-    /**
-     * Führt Berechnungen auf Basis einer bestimmten Eigenschaft durch
-     * @param type - Der Typ der durchzuführenden Rechnung
-     * @param propName - Der Name der Eigenschaft, mit der gerechnet werden soll
-     */
-    private calculateProperty(type, propName);
-    private getNumberLength(numberType);
-    /**
-     * Berechnet die Byte-Länge aller Eigenschaften dieser Struct
-     */
-    private calculateOwnLength();
-    /**
-     * Berechnet die Länge der angegebenen Eigenschaft
-     */
-    private calculateLength(propName);
 }

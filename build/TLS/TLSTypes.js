@@ -17,6 +17,7 @@ var Vector = (function () {
     return Vector;
 }());
 exports.Vector = Vector;
+;
 var Struct = (function () {
     function Struct(spec) {
         this.spec = spec;
@@ -24,13 +25,4 @@ var Struct = (function () {
     return Struct;
 }());
 exports.Struct = Struct;
-var Calculated = (function () {
-    function Calculated(underlyingType, calculationType, propertyName) {
-        this.underlyingType = underlyingType;
-        this.calculationType = calculationType;
-        this.propertyName = propertyName;
-    }
-    return Calculated;
-}());
-exports.Calculated = Calculated;
 //# sourceMappingURL=TLSTypes.js.map

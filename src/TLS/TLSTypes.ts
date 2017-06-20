@@ -29,7 +29,7 @@ export class Vector {
 	maxLength: number
 }
 
-export type StructSpec = {
+export interface StructSpec {
 	[propName: string]: any
 };
 export class Struct {
@@ -38,13 +38,13 @@ export class Struct {
 	) { }
 }
 
-export type CalculationTypes = "serializedLength";
-export class Calculated {
-	constructor(
-		public underlyingType: Numbers,
-		public calculationType: CalculationTypes,
-		public propertyName: string
-	) { }
-}
+//export type CalculationTypes = "serializedLength";
+//export class Calculated {
+//	constructor(
+//		public underlyingType: Numbers,
+//		public calculationType: CalculationTypes,
+//		public propertyName: string
+//	) { }
+//}
 
-export type All = Numbers | Enum | Vector | Struct | Calculated
+export type All = Numbers | Enum | Vector | Struct // | Calculated

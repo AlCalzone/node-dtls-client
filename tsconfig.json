@@ -5,9 +5,10 @@
         "module": "commonjs",
         "noEmitOnError": false,
         "noImplicitAny": false,
-        "outDir": "build",
+        "outDir": "build/",
         "removeComments": false,
         "sourceMap": true,
+        "sourceRoot": "src/",
         "target": "es5"
     }//,
     //"include": [

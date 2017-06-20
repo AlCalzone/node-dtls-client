@@ -11,7 +11,7 @@ export type PropertyDefinition = { name: string, type: TLSTypes.All };
  */
 export class TLSStruct {
 
-	constructor(public spec: TLSTypes.StructSpec, initial?) {
+	constructor(spec: TLSTypes.StructSpec, initial?) {
 		// Eigenschaften aus Spec kopieren
 		this.__spec__ = spec;
 		for (let [key, value] of entries(spec)) {
@@ -19,13 +19,13 @@ export class TLSStruct {
 				name: key,
 				type: value
 			});
-			if (value instanceof TLSTypes.Calculated) {
+			/*if (value instanceof TLSTypes.Calculated) {
 				// getter für berechnete Eigenschaft erstellen
 				Object.defineProperty(value, key, {
 					get: () => this.getCalculatedPropertyValue(key)
 				})
 				// TODO: Testen!!!!
-			} else if (initial != undefined && initial.hasOwnProperty(key)) {
+			} else*/ if (initial != undefined && initial.hasOwnProperty(key)) {
 				// sonst evtl. die Eigenschaft initialisieren
 				this[key] = initial[key];
 			}
@@ -86,10 +86,10 @@ export class TLSStruct {
 	 * @param arr - Das Array, aus dem gelesen werden soll
 	 * @param offset - Der Index, ab dem gelesen werden soll
 	 */
-	static from(spec: TLSTypes.StructSpec, arr: Buffer, offset = 0) {
+	static from(spec: TLSTypes.StructSpec, arr: Buffer, offset?: number) {
 		return TLSStruct._from(spec, arr, offset).value;
 	}
-	private static _from(spec: TLSTypes.StructSpec, arr: Buffer, offset = 0) {
+	private static _from(spec: TLSTypes.StructSpec, arr: Buffer, offset?: number) {
 		const ret = new TLSStruct(spec);
 		return ret.deserialize(arr, offset);
 	}
@@ -134,63 +134,63 @@ export class TLSStruct {
 			//;
 	}
 
-	protected getCalculatedPropertyValue(propName: string) {
-		const definition = this.__spec__[propName] as TLSTypes.Calculated;
-		return this.calculateProperty(definition.calculationType, definition.propertyName);
-	}
+	//protected getCalculatedPropertyValue(propName: string) {
+	//	const definition = this.__spec__[propName] as TLSTypes.Calculated;
+	//	return this.calculateProperty(definition.calculationType, definition.propertyName);
+	//}
 
-	/**
-	 * Führt Berechnungen auf Basis einer bestimmten Eigenschaft durch
-	 * @param type - Der Typ der durchzuführenden Rechnung
-	 * @param propName - Der Name der Eigenschaft, mit der gerechnet werden soll
-	 */
-	private calculateProperty(type: TLSTypes.CalculationTypes, propName: string) {
-		switch (type) {
-			case "serializedLength":
-				return this.calculateLength(propName);
-			default:
-				throw Error(`unknown property calculation "${type}"`)
-		}
-	}
-	private getNumberLength(numberType: TLSTypes.Numbers): number {
-		// uintXX
-		return +(numberType.substr("uint".length)) / 8;
-	}
-	/**
-	 * Berechnet die Byte-Länge aller Eigenschaften dieser Struct
-	 */
-	private calculateOwnLength(): number {
-		// Länge aller Eigenschaften berechnen und aufsummieren
-		return this.propertyDefinitions
-			.map(pd => this.calculateLength(pd.name))
-			.reduce((prev, cur) => prev + cur, 0)
-			;
-	}
-	/**
-	 * Berechnet die Länge der angegebenen Eigenschaft
-	 */
-	private calculateLength(propName: string) : number {
-		const definition = this.__spec__[propName] as TLSTypes.All;
-		if (typeof definition === "string") {
-			return this.getNumberLength(definition);
-		} else if (definition instanceof TLSTypes.Enum) {
-			return this.getNumberLength(definition.underlyingType);
-		} else if (definition instanceof TLSTypes.Vector) {
-			const vector = this[propName] as number[];
-			if (definition.minLength === definition.maxLength) {
-				// fixe Größe
-				return this.getNumberLength(definition.underlyingType) * vector.length;
-			} else {
-				// variable Größe
-				return util.fitToWholeBytes(definition.maxLength) +
-					this.getNumberLength(definition.underlyingType) * vector.length;
-			}
-		} else if (definition instanceof TLSTypes.Struct) {
-			const struct = this[propName] as TLSStruct;
-			return struct.calculateOwnLength();
-		} else if (definition instanceof TLSTypes.Calculated) {
-			return this.getNumberLength(definition.underlyingType);
-		}
-	}
+	///**
+	// * Führt Berechnungen auf Basis einer bestimmten Eigenschaft durch
+	// * @param type - Der Typ der durchzuführenden Rechnung
+	// * @param propName - Der Name der Eigenschaft, mit der gerechnet werden soll
+	// */
+	//private calculateProperty(type: TLSTypes.CalculationTypes, propName: string) {
+	//	switch (type) {
+	//		case "serializedLength":
+	//			return this.calculateLength(propName);
+	//		default:
+	//			throw Error(`unknown property calculation "${type}"`)
+	//	}
+	//}
+	//private getNumberLength(numberType: TLSTypes.Numbers): number {
+	//	// uintXX
+	//	return +(numberType.substr("uint".length)) / 8;
+	//}
+	///**
+	// * Berechnet die Byte-Länge aller Eigenschaften dieser Struct
+	// */
+	//private calculateOwnLength(): number {
+	//	// Länge aller Eigenschaften berechnen und aufsummieren
+	//	return this.propertyDefinitions
+	//		.map(pd => this.calculateLength(pd.name))
+	//		.reduce((prev, cur) => prev + cur, 0)
+	//		;
+	//}
+	///**
+	// * Berechnet die Länge der angegebenen Eigenschaft
+	// */
+	//private calculateLength(propName: string) : number {
+	//	const definition = this.__spec__[propName] as TLSTypes.All;
+	//	if (typeof definition === "string") {
+	//		return this.getNumberLength(definition);
+	//	} else if (definition instanceof TLSTypes.Enum) {
+	//		return this.getNumberLength(definition.underlyingType);
+	//	} else if (definition instanceof TLSTypes.Vector) {
+	//		const vector = this[propName] as number[];
+	//		if (definition.minLength === definition.maxLength) {
+	//			// fixe Größe
+	//			return this.getNumberLength(definition.underlyingType) * vector.length;
+	//		} else {
+	//			// variable Größe
+	//			return util.fitToWholeBytes(definition.maxLength) +
+	//				this.getNumberLength(definition.underlyingType) * vector.length;
+	//		}
+	//	} else if (definition instanceof TLSTypes.Struct) {
+	//		const struct = this[propName] as TLSStruct;
+	//		return struct.calculateOwnLength();
+	//	} else if (definition instanceof TLSTypes.Calculated) {
+	//		return this.getNumberLength(definition.underlyingType);
+	//	}
+	//}
 
 }
