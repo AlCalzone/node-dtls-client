@@ -17,8 +17,9 @@ var AntiReplayWindow = (function () {
      * Initializes the anti replay window to its default state
      */
     AntiReplayWindow.prototype.reset = function () {
+        this.window = [];
         for (var i = 0; i < width / INT_SIZE; i++) {
-            window[i] = 0;
+            this.window[i] = 0;
         }
         this.ceiling = width - 1;
     };
@@ -80,12 +81,12 @@ var AntiReplayWindow = (function () {
             var overflow = 0;
             for (var i = 0; i < this.window.length; i++) {
                 overflow = this.window[i] << (INT_SIZE - amount); // BBBBBBAA => AA000000
-                this.window[i] = this.window[i] >>>= amount; // BBBBBBAA ==> 00BBBBBB
+                this.window[i] = this.window[i] >>> amount; // BBBBBBAA ==> 00BBBBBB
                 if (i > 0)
                     this.window[i - 1] |= overflow;
             }
             // and remember the new ceiling
-            this.ceiling += amount;
+            this.ceiling = seq_num;
         }
         var lowerBound = this.ceiling - width + 1;
         // find out where the bit is located

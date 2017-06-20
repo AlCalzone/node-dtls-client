@@ -117,6 +117,10 @@
     <Compile Include="coverage\prettify.js" />
     <Compile Include="coverage\sorter.js" />
     <Compile Include="src\lib\BitConverter.ts" />
+    <TypeScriptCompile Include="src\TLS\AntiReplayWindow.test.ts">
+      <SubType>Code</SubType>
+      <TestFramework>Mocha</TestFramework>
+    </TypeScriptCompile>
     <Compile Include="src\TLS\TLSStruct.ts" />
     <Compile Include="src\lib\object-polyfill.ts" />
     <Compile Include="src\lib\util.ts" />
