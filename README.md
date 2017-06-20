@@ -22,4 +22,9 @@ Although great care has been taken to properly implement the required encryption
   - [x] replay protection
   - [ ] managing connection states
 - [ ] handshake protocol implementation
-- [ ] testing... a lot!
+- [ ] testing
+  - [x] implement testing framework with code coverage
+  - [ ] tests
+    - [x] /src/lib
+    - [ ] /src/TLS (~5% done)
+    - [ ] /src/DTLS
