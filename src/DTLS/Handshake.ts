@@ -9,37 +9,54 @@ import { CompressionMethod } from "../TLS/ConnectionState";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 
 export abstract class Handshake extends TLSStruct {
-
-	// TODO: zusätzliche Parameter automatisch oder manuell ausfüllen
-	static readonly __spec = {
-		msg_type: new TLSTypes.Enum("uint8", HandshakeType),
-		length: "uint24", // can be calculated somehow?
-		message_seq: "uint16",
-		fragment_offset: "uint24",
-		fragment_length: "uint24" //new TLSTypes.Calculated("uint24", "serializedLength", "body") // TODO: Add fragmentation support
-	}
-
+	
 	constructor(
 		public msg_type: HandshakeType,
-		public length: number,
-		public message_seq: number,
-		public fragment_offset: number,
-		public fragment_length: number,
 		bodySpec: TLSTypes.StructSpec,
-		initial?
+		public body?: TLSStruct
 	) {
-		super(
-			extend(Handshake.__spec, { body: bodySpec }),
-			initial
-		);
+		super(bodySpec, body);
 	}
 
-	public body: TLSStruct;
+	public message_seq: number;
+	
+	/**
+	 * Fragments this packet into a series of packets according to the configured MTU
+	 */
+	fragmentMessage(): FragmentedHandshake[] {
+		
+		// spec only contains the body, so serialize() will only return that
+		const wholeMessage = this.serialize();
+		// TODO: fragment the message
+	}
 	
 	// Implementation details:
 	// message_seq starts at 0 for both client and server during the handshake. 
 	// Each new (not retransmitted) message increases the value by 1.
 
+}
+
+export class FragmentedHandshake extends TLSStruct {
+
+	static readonly __spec = {
+		msg_type: new TLSTypes.Enum("uint8", HandshakeType),
+		total_length: "uint24",
+		message_seq: "uint16",
+		fragment_offset: "uint24",
+		// uint24 fragment_length is implied in the variable size vector
+		fragment: new TLSTypes.Vector("uint8", 0, 2**24-1)
+	}
+	
+	constructor(
+		public msg_type: HandshakeType,
+		public total_length: number,
+		public message_seq: number,
+		public fragment_offset: number,
+		public fragment: Buffer
+	) {
+		super(FragmentedHandshake.__spec);
+	}
+	
 }
 
 
