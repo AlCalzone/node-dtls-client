@@ -19,7 +19,7 @@ Although great care has been taken to properly implement the required encryption
     - [x] block ciphers
     - [ ] stream ciphers (optional)
     - [ ] AEAD ciphers (optional)
+  - [x] replay protection
   - [ ] managing connection states
-  - [ ] replay protection
 - [ ] handshake protocol implementation
 - [ ] testing... a lot!
