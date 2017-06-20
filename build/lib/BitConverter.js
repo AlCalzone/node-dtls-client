@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var util_1 = require("./util");
 //export type ByteArray = Uint8Array | number[];
 /**

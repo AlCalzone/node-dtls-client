@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var CipherSuite_1 = require("../TLS/CipherSuite");
 // block sizes etc. see https://tools.ietf.org/html/rfc5246 page 83
 exports.CipherSuites = {

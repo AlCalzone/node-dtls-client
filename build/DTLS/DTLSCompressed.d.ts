@@ -18,7 +18,6 @@ export declare class DTLSCompressed extends TLSStruct {
         };
         epoch: string;
         sequence_number: string;
-        length: TLSTypes.Calculated;
         fragment: TLSTypes.Vector;
     };
     constructor(type: ContentType, version: ProtocolVersion, epoch: number, sequence_number: number, fragment: Buffer);

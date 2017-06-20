@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var object_polyfill_1 = require("../lib/object-polyfill");
 var BitConverter = require("../lib/BitConverter");
 var TLSTypes = require("./TLSTypes");
@@ -23,6 +24,7 @@ var TLSStruct = (function () {
                 Object.defineProperty(value, key, {
                     get: function () { return _this.getCalculatedPropertyValue(key); }
                 });
+                // TODO: Testen!!!!
             }
             else if (initial != undefined && initial.hasOwnProperty(key)) {
                 // sonst evtl. die Eigenschaft initialisieren

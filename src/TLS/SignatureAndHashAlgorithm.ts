@@ -1,18 +1,6 @@
 ﻿import * as TLSTypes from "./TLSTypes";
 import { TLSStruct } from "./TLSStruct";
 
-export default class SignatureAndHashAlgorithm extends TLSStruct {
-
-	static readonly __spec = {
-		hash: HashAlgorithm.__spec,
-		signature: SignatureAlgorithm.__spec
-	}
-
-	constructor(public hash: HashAlgorithm, public signature: SignatureAlgorithm) {
-		super(SignatureAndHashAlgorithm.__spec);
-	}
-}
-
 export enum HashAlgorithm {
 	none = 0,
 	md5 = 1,
@@ -34,4 +22,16 @@ export enum SignatureAlgorithm {
 }
 export namespace SignatureAlgorithm {
 	export const __spec = new TLSTypes.Enum("uint8", SignatureAlgorithm);
+}
+
+export default class SignatureAndHashAlgorithm extends TLSStruct {
+
+	static readonly __spec = {
+		hash: HashAlgorithm.__spec,
+		signature: SignatureAlgorithm.__spec
+	}
+
+	constructor(public hash: HashAlgorithm, public signature: SignatureAlgorithm) {
+		super(SignatureAndHashAlgorithm.__spec);
+	}
 }

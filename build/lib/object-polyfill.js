@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * Stellt einen Polyfill für Object.entries bereit
  * @param obj - Ein Objekt über dessen Einträge iteriert werden soll

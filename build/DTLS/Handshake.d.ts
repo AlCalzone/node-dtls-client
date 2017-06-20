@@ -8,19 +8,28 @@ import { CompressionMethod } from "../TLS/ConnectionState";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 export declare abstract class Handshake extends TLSStruct {
     msg_type: HandshakeType;
-    length: number;
+    body: TLSStruct;
+    constructor(msg_type: HandshakeType, bodySpec: TLSTypes.StructSpec, body?: TLSStruct);
+    message_seq: number;
+    /**
+     * Fragments this packet into a series of packets according to the configured MTU
+     */
+    fragmentMessage(): FragmentedHandshake[];
+}
+export declare class FragmentedHandshake extends TLSStruct {
+    msg_type: HandshakeType;
+    total_length: number;
     message_seq: number;
     fragment_offset: number;
-    fragment_length: number;
+    fragment: Buffer;
     static readonly __spec: {
         msg_type: TLSTypes.Enum;
-        length: string;
+        total_length: string;
         message_seq: string;
         fragment_offset: string;
-        fragment_length: string;
+        fragment: TLSTypes.Vector;
     };
-    constructor(msg_type: HandshakeType, length: number, message_seq: number, fragment_offset: number, fragment_length: number, bodySpec: TLSTypes.StructSpec, initial?: any);
-    body: TLSStruct;
+    constructor(msg_type: HandshakeType, total_length: number, message_seq: number, fragment_offset: number, fragment: Buffer);
 }
 export declare enum HandshakeType {
     hello_request = 0,

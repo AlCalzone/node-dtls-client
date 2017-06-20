@@ -44,6 +44,13 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="coverage\base.css" />
+    <Content Include="coverage\BitConverter.test.ts.html" />
+    <Content Include="coverage\BitConverter.ts.html" />
+    <Content Include="coverage\index.html" />
+    <Content Include="coverage\prettify.css" />
+    <Content Include="coverage\sort-arrow-sprite.png" />
+    <Content Include="coverage\util.ts.html" />
     <Content Include="rfc\RFC 2104 - HMAC  Keyed-Hashing for Message Authentication.html" />
     <Content Include="rfc\RFC 4279 - Pre-Shared Key Ciphersuites for Transport Layer Security %28TLS%29.html" />
     <Content Include="rfc\RFC 5246 - The Transport Layer Security %28TLS%29 Protocol Version 1.2.html" />
@@ -65,6 +72,8 @@
     <TypeScriptCompile Include="src\DTLS\DTLSCompressed.ts" />
     <TypeScriptCompile Include="src\DTLS\DTLSPlaintext.ts" />
     <TypeScriptCompile Include="src\DTLS\Handshake.ts" />
+    <TypeScriptCompile Include="src\DTLS\RecordLayer.ts" />
+    <TypeScriptCompile Include="src\TLS\AntiReplayWindow.ts" />
     <TypeScriptCompile Include="src\TLS\ConnectionState.ts" />
     <TypeScriptCompile Include="src\TLS\PRF.ts" />
     <TypeScriptCompile Include="src\TLS\KeyExchange.ts">
@@ -92,6 +101,7 @@
     </TypeScriptCompile>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="coverage\" />
     <Folder Include="rfc\" />
     <Folder Include="src\" />
     <Folder Include="src\DTLS\" />
@@ -100,6 +110,8 @@
     <Folder Include="tests\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="coverage\prettify.js" />
+    <Compile Include="coverage\sorter.js" />
     <Compile Include="src\lib\BitConverter.ts" />
     <Compile Include="src\TLS\TLSStruct.ts" />
     <Compile Include="src\lib\object-polyfill.ts" />
@@ -112,9 +124,7 @@
     <Compile Include="src\TLS\BlockCipher.ts" />
     <Compile Include="src\TLS\GenericStreamCipher.js" />
     <Compile Include="src\TLS\ProtocolVersion.ts" />
-    <Compile Include="tests\BitConverter.js" />
-    <Compile Include="tests\Message.js" />
-    <Compile Include="tests\util.js" />
+    <Compile Include="src\lib\BitConverter.test.ts" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />

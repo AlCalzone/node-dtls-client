@@ -262,3 +262,8 @@ __pycache__/
 
 # RFC-Dokumentation
 rfc/
+
+# compiled test-files
+*.test.js
+/.nyc_output
+coverage/

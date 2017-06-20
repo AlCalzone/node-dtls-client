@@ -28,6 +28,7 @@ export abstract class Handshake extends TLSStruct {
 		// spec only contains the body, so serialize() will only return that
 		const wholeMessage = this.serialize();
 		// TODO: fragment the message
+		return []
 	}
 	
 	// Implementation details:

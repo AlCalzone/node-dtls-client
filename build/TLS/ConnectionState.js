@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var TLSTypes = require("./TLSTypes");
 var object_polyfill_1 = require("../lib/object-polyfill");
 var PRF_1 = require("./PRF");

@@ -1,13 +1,40 @@
 {
-  "name": "node-dtls-client",
-  "version": "0.0.0",
-  "description": "node-dtls-client",
-  "main": "build/main.js",
-  "author": {
-    "name": "Dominic"
-  },
-  "devDependencies": {
-    "@types/node": "^6.0.78",
-    "mocha": "^3.4.2"
-  }
+    "name": "node-dtls-client",
+    "version": "0.0.0",
+    "description": "node-dtls-client",
+    "main": "build/main.js",
+    "author": {
+        "name": "Dominic"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.0.0",
+        "@types/mocha": "^2.2.41",
+        "@types/node": "^6.0.78",
+        "chai": "^4.0.2",
+        "mocha": "^3.4.2",
+        "nyc": "^11.0.2",
+        "source-map-support": "^0.4.15",
+        "ts-node": "^3.0.6",
+        "typescript": "^2.3.4"
+    },
+    "scripts": {
+        "test": "nyc mocha --recursive --compilers ts-node/register --require source-map-support/register --full-trace src/**/*.test.ts"
+    },
+    "nyc": {
+        "include": [
+            "src/**/*.ts"
+        ],
+        "extension": [
+            ".ts"
+        ],
+        "require": [
+            "ts-node/register"
+        ],
+        "reporter": [
+            "text-summary",
+            "html"
+        ],
+        "sourceMap": true,
+        "instrument": true
+    }
 }

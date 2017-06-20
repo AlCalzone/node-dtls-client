@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
 * Calculates how many bytes are neccessary to express the given value
 * @param value {number} - the value to be measured

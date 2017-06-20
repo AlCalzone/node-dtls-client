@@ -1,17 +1,16 @@
+const width = 64; // bits / entries, must be multiple of INT_SIZE
+const INT_SIZE = 32; // in JS, bitwise operators use 32bit ints
 
 /**
  * Provides protection against replay attacks by remembering received packets in a sliding window
  */
 export class AntiReplayWindow {
 	
-	private const width = 64; // bits / entries, must be multiple of INT_SIZE
-	private const INT_SIZE = 32; // in JS, bitwise operators use 32bit ints
-	
 	// window bitmap looks as follows:
 	//  v- upper end                    lower end --v
 	// [111011 ... window_n]...[11111101 ... window_0]
-	private let window: number[] = [];
-	private let ceiling: number; // upper end of the window bitmap / highest received seq_num
+	private window: number[] = [];
+	private ceiling: number; // upper end of the window bitmap / highest received seq_num
 	
 	constructor() {
 		this.reset();
@@ -23,7 +22,7 @@ export class AntiReplayWindow {
 		for (let i = 0; i < width / INT_SIZE; i++) {
 			window[i] = 0;
 		}
-		ceiling = width-1; 
+		this.ceiling = width-1; 
 	}
 	
 	/**
@@ -31,17 +30,17 @@ export class AntiReplayWindow {
 	 * @param seq_num - The sequence number of the packet to be checked
 	 */
 	mayReceive(seq_num: number) : boolean {
-		if (seq_num > ceiling + width) {
+		if (seq_num > this.ceiling + width) {
 			// we skipped a lot of packets... I don't think we should accept
 			return false;
-		} else if (seq_num > ceiling) {
+		} else if (seq_num > this.ceiling) {
 			// always accept new packets
 			return true;
-		} else if (seq_num >= ceiling - width + 1 && seq_num <= ceiling) {
+		} else if (seq_num >= this.ceiling - width + 1 && seq_num <= this.ceiling) {
 			// packet falls within the window, check if it was received already.
 			// if so, don't accept
 			return !this.hasReceived(seq_num);
-		} else /* seq_num <= ceiling - width */ {
+		} else /* seq_num <= this.ceiling - width */ {
 			// too old, don't accept
 			return false;
 		}
@@ -53,7 +52,7 @@ export class AntiReplayWindow {
 	 */
 	hasReceived(seq_num: number) : boolean {
 		// check if the packet was received already
-		const lowerBound = ceiling - width + 1;
+		const lowerBound = this.ceiling - width + 1;
 		// find out where the bit is located
 		let bitIndex = seq_num - lowerBound;
 		let windowIndex = Math.floor(bitIndex / INT_SIZE);
@@ -68,9 +67,9 @@ export class AntiReplayWindow {
 	 * @param seq_num - The sequence number of the packet
 	 */
 	markAsReceived(seq_num: number) : void {
-		if (seq_num > ceiling) {
+		if (seq_num > this.ceiling) {
 			// shift the window
-			const amount = seq_num - ceiling;
+			let amount = seq_num - this.ceiling;
 			// first shift whole blocks
 			while (amount > INT_SIZE) {
 				for (let i = 1; i < this.window.length; i++) {
@@ -87,9 +86,9 @@ export class AntiReplayWindow {
 				if (i > 0) this.window[i-1] |= overflow;
 			}
 			// and remember the new ceiling
-			ceiling += amount;
+			this.ceiling += amount;
 		}	
-		const lowerBound = ceiling - width + 1;
+		const lowerBound = this.ceiling - width + 1;
 			
 		// find out where the bit is located
 		let bitIndex = seq_num - lowerBound;

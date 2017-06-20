@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var crypto = require("crypto");
 ;
 function HMAC_factory(algorithm, length) {

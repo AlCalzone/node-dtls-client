@@ -1,9 +1,15 @@
 "use strict";
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
 var TLSTypes = require("../TLS/TLSTypes");
 var TLSStruct_1 = require("../TLS/TLSStruct");
 var object_polyfill_1 = require("../lib/object-polyfill");
@@ -15,26 +21,46 @@ var ConnectionState_1 = require("../TLS/ConnectionState");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var Handshake = (function (_super) {
     __extends(Handshake, _super);
-    function Handshake(msg_type, length, message_seq, fragment_offset, fragment_length, bodySpec, initial) {
-        var _this = _super.call(this, object_polyfill_1.extend(Handshake.__spec, { body: bodySpec }), initial) || this;
+    function Handshake(msg_type, bodySpec, body) {
+        var _this = _super.call(this, bodySpec, body) || this;
         _this.msg_type = msg_type;
-        _this.length = length;
-        _this.message_seq = message_seq;
-        _this.fragment_offset = fragment_offset;
-        _this.fragment_length = fragment_length;
+        _this.body = body;
         return _this;
     }
+    /**
+     * Fragments this packet into a series of packets according to the configured MTU
+     */
+    Handshake.prototype.fragmentMessage = function () {
+        // spec only contains the body, so serialize() will only return that
+        var wholeMessage = this.serialize();
+        // TODO: fragment the message
+        return [];
+    };
     return Handshake;
 }(TLSStruct_1.TLSStruct));
-// TODO: zusätzliche Parameter automatisch oder manuell ausfüllen
-Handshake.__spec = {
+exports.Handshake = Handshake;
+var FragmentedHandshake = (function (_super) {
+    __extends(FragmentedHandshake, _super);
+    function FragmentedHandshake(msg_type, total_length, message_seq, fragment_offset, fragment) {
+        var _this = _super.call(this, FragmentedHandshake.__spec) || this;
+        _this.msg_type = msg_type;
+        _this.total_length = total_length;
+        _this.message_seq = message_seq;
+        _this.fragment_offset = fragment_offset;
+        _this.fragment = fragment;
+        return _this;
+    }
+    return FragmentedHandshake;
+}(TLSStruct_1.TLSStruct));
+FragmentedHandshake.__spec = {
     msg_type: new TLSTypes.Enum("uint8", HandshakeType),
-    length: "uint24",
+    total_length: "uint24",
     message_seq: "uint16",
     fragment_offset: "uint24",
-    fragment_length: "uint24" //new TLSTypes.Calculated("uint24", "serializedLength", "body") // TODO: Add fragmentation support
+    // uint24 fragment_length is implied in the variable size vector
+    fragment: new TLSTypes.Vector("uint8", 0, Math.pow(2, 24) - 1)
 };
-exports.Handshake = Handshake;
+exports.FragmentedHandshake = FragmentedHandshake;
 var HandshakeType;
 (function (HandshakeType) {
     HandshakeType[HandshakeType["hello_request"] = 0] = "hello_request";
