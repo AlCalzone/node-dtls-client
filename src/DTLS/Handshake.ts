@@ -252,7 +252,10 @@ export class ClientHello extends Handshake {
 	}
 
 	static readonly __bodySpecWithExtensions = extend(ClientHello.__bodySpec, {
+		// see http://wiki.osdev.org/TLS_Handshake
 		// TODO: TypedVector Extension extensions< 0..2^ 16 - 1 >;
+		// TODO: optional type -> may only appear last, present if bytes follow
+		// TODO: item parser function
 	})
 
 	constructor(

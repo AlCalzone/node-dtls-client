@@ -22,6 +22,11 @@ Although great care has been taken to properly implement the required encryption
   - [x] replay protection
   - [ ] managing connection states
 - [ ] handshake protocol implementation
+  - [ ] extend TLSStruct:
+    - [ ] support non-primitive vector items
+	- [ ] support optional properties 
+	- [ ] support parser function for vector items
+  - [ ] handle message flow, including retransmission
 - [ ] testing
   - [x] implement testing framework with code coverage
   - [ ] tests
