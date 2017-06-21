@@ -17,16 +17,19 @@ export class Vector {
 	constructor(
 		underlyingType,
 		minLength,
-		maxLength?
+		maxLength?,
+		optional = false
 	) { 
 		this.underlyingType = underlyingType;
 		this.minLength = minLength;
 		this.maxLength = maxLength || minLength;
+		this.optional = optional
 	}
 
 	underlyingType: Numbers
 	minLength: number
 	maxLength: number
+	optional: boolean
 }
 
 export interface StructSpec {
@@ -45,6 +48,12 @@ export class Struct {
 //		public calculationType: CalculationTypes,
 //		public propertyName: string
 //	) { }
+//}
+
+//export type NonOptional = Numbers | Enum | Vector | Struct;
+
+//export class Optional {
+//	constructor(public inner: NonOptional) { }
 //}
 
 export type All = Numbers | Enum | Vector | Struct // | Calculated

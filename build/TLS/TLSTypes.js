@@ -9,10 +9,12 @@ var Enum = (function () {
 }());
 exports.Enum = Enum;
 var Vector = (function () {
-    function Vector(underlyingType, minLength, maxLength) {
+    function Vector(underlyingType, minLength, maxLength, optional) {
+        if (optional === void 0) { optional = false; }
         this.underlyingType = underlyingType;
         this.minLength = minLength;
         this.maxLength = maxLength || minLength;
+        this.optional = optional;
     }
     return Vector;
 }());

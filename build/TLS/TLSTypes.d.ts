@@ -5,10 +5,11 @@ export declare class Enum {
     constructor(underlyingType: Numbers, enumType: any);
 }
 export declare class Vector {
-    constructor(underlyingType: any, minLength: any, maxLength?: any);
+    constructor(underlyingType: any, minLength: any, maxLength?: any, optional?: boolean);
     underlyingType: Numbers;
     minLength: number;
     maxLength: number;
+    optional: boolean;
 }
 export interface StructSpec {
     [propName: string]: any;

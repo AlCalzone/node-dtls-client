@@ -53,11 +53,18 @@ var TLSStruct = (function () {
             }
             else if (type instanceof TLSTypes.Vector) {
                 // Vektor (variable oder fixed)
-                if (type.minLength === type.maxLength) {
-                    result = BitConverter.readVectorFixed[type.underlyingType](type.maxLength, arr, offset + delta);
+                if (type.optional && offset + delta >= arr.length) {
+                    // Optionaler Vektor:
+                    // Wir sind am Ende, keine weiteren Werte lesen
+                    result = { value: [], delta: 0 };
                 }
                 else {
-                    result = BitConverter.readVectorVariable[type.underlyingType](type.maxLength, arr, offset + delta);
+                    if (type.minLength === type.maxLength) {
+                        result = BitConverter.readVectorFixed[type.underlyingType](type.maxLength, arr, offset + delta);
+                    }
+                    else {
+                        result = BitConverter.readVectorVariable[type.underlyingType](type.maxLength, arr, offset + delta);
+                    }
                 }
             }
             else if (type instanceof TLSTypes.Struct) {
@@ -106,6 +113,9 @@ var TLSStruct = (function () {
                 result = BitConverter.writeNumber[type.underlyingType](propValue);
             }
             else if (type instanceof TLSTypes.Vector) {
+                // Optionale Vektoren nur schreiben, wenn länger als 0
+                if (type.optional && propValue.length === 0)
+                    return Buffer.from([]);
                 // Vektor (variabel oder fixed)
                 if (type.minLength === type.maxLength) {
                     result = BitConverter.writeVectorFixed[type.underlyingType](propValue);

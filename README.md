@@ -15,16 +15,16 @@ Although great care has been taken to properly implement the required encryption
 - [ ] record protocol implementation
   - [x] compression (no actual algorithms implemented)
   - [x] encryption and verification:
-    - [x] block ciphers
-    - [ ] stream ciphers (optional)
-    - [ ] AEAD ciphers (optional)
+	- [x] block ciphers
+	- [ ] stream ciphers (optional)
+	- [ ] AEAD ciphers (optional)
   - [x] replay protection
   - [ ] managing connection states
 - [ ] change cipher suite protocol implementation
 - [ ] handshake protocol implementation
   - [ ] extend TLSStruct:
-    - [ ] support non-primitive vector items
-	- [ ] support optional properties 
+	- [x] support optional vectors 
+	- [ ] support non-primitive vector items
 	- [ ] support parser function for vector items
   - [ ] handle message flow, including retransmission
   - [x] fragmentation and re-assembly
@@ -33,6 +33,6 @@ Although great care has been taken to properly implement the required encryption
 - [ ] testing
   - [x] implement testing framework with code coverage
   - [ ] tests
-    - [x] /src/lib
-    - [ ] /src/TLS (~5% done)
-    - [ ] /src/DTLS
+	- [x] /src/lib
+	- [ ] /src/TLS (~5% done)
+	- [ ] /src/DTLS
