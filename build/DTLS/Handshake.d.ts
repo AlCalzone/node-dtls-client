@@ -8,13 +8,18 @@ import { CompressionMethod } from "../TLS/ConnectionState";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 export declare abstract class Handshake extends TLSStruct {
     msg_type: HandshakeType;
-    body: TLSStruct;
-    constructor(msg_type: HandshakeType, bodySpec: TLSTypes.StructSpec, body?: TLSStruct);
+    constructor(msg_type: HandshakeType, bodySpec: TLSTypes.StructSpec, initial?: any);
     message_seq: number;
     /**
      * Fragments this packet into a series of packets according to the configured MTU
+     * @returns An array of fragmented handshake messages - or a single one if it is small enough.
      */
     fragmentMessage(): FragmentedHandshake[];
+    /**
+     * Parses a re-assembled handshake message into the correct object struture
+     * @param assembled - the re-assembled (or never-fragmented) message
+     */
+    static parse(assembled: FragmentedHandshake): Handshake;
 }
 export declare class FragmentedHandshake extends TLSStruct {
     msg_type: HandshakeType;
@@ -29,7 +34,29 @@ export declare class FragmentedHandshake extends TLSStruct {
         fragment_offset: string;
         fragment: TLSTypes.Vector;
     };
+    /**
+     * The amount of data consumed by a handshake message header (without the actual fragment)
+     */
+    static readonly headerLength: number;
     constructor(msg_type: HandshakeType, total_length: number, message_seq: number, fragment_offset: number, fragment: Buffer);
+    /**
+     * Checks if this message is actually fragmented, i.e. total_length > fragment_length
+     */
+    isFragmented(): boolean;
+    /**
+     * Enforces an array of fragments to belong to a single message
+     * @throws Error
+     */
+    private static enforceSingleMessage(fragments);
+    /**
+     * Checks if the provided handshake fragments form a complete message
+     */
+    static isComplete(fragments: FragmentedHandshake[]): boolean;
+    /**
+     * Reassembles a series of fragmented handshake messages into a complete one.
+     * Warning: doesn't check for validity, do that in advance!
+     */
+    static reassemble(messages: FragmentedHandshake[]): FragmentedHandshake;
 }
 export declare enum HandshakeType {
     hello_request = 0,
@@ -44,16 +71,13 @@ export declare enum HandshakeType {
     client_key_exchange = 16,
     finished = 20,
 }
+export declare const HandshakeMessages: {};
 export declare class HelloRequest extends Handshake {
-    static readonly __bodySpec: {};
+    static readonly __spec: {};
     constructor();
 }
 export declare class ClientHello extends Handshake {
-    client_version: ProtocolVersion;
-    session_id: SessionID;
-    cookie: Cookie;
-    extensions: any;
-    static readonly __bodySpec: {
+    static readonly __spec: {
         client_version: {
             major: string;
             minor: string;
@@ -70,15 +94,14 @@ export declare class ClientHello extends Handshake {
         };
     };
     static readonly __bodySpecWithExtensions: any;
-    constructor(client_version: ProtocolVersion, session_id: SessionID, cookie: Cookie, extensions?: any);
+    client_version: ProtocolVersion;
+    session_id: SessionID;
+    cookie: Cookie;
+    extensions: any;
+    constructor(initial?: any);
 }
 export declare class ServerHello extends Handshake {
-    server_version: ProtocolVersion;
-    session_id: SessionID;
-    cipher_suite: CipherSuite;
-    compression_method: CompressionMethod;
-    extensions: any;
-    static readonly __bodySpec: {
+    static readonly __spec: {
         server_version: {
             major: string;
             minor: string;
@@ -96,12 +119,15 @@ export declare class ServerHello extends Handshake {
         compression_method: TLSTypes.Enum;
     };
     static readonly __bodySpecWithExtensions: any;
-    constructor(server_version: ProtocolVersion, session_id: SessionID, cipher_suite: CipherSuite, compression_method: CompressionMethod, extensions?: any);
+    server_version: ProtocolVersion;
+    session_id: SessionID;
+    cipher_suite: CipherSuite;
+    compression_method: CompressionMethod;
+    extensions: any;
+    constructor(initial?: any);
 }
 export declare class HelloVerifyRequest extends Handshake {
-    server_version: ProtocolVersion;
-    cookie: Cookie;
-    static readonly __bodySpec: {
+    static readonly __spec: {
         server_version: {
             major: string;
             minor: string;
@@ -110,16 +136,18 @@ export declare class HelloVerifyRequest extends Handshake {
             value: TLSTypes.Vector;
         };
     };
-    constructor(server_version: ProtocolVersion, cookie: Cookie);
+    server_version: ProtocolVersion;
+    cookie: Cookie;
+    constructor(initial?: any);
 }
 export declare class ServerHelloDone extends Handshake {
-    static readonly __bodySpec: {};
+    static readonly __spec: {};
     constructor();
 }
 export declare class Finished extends Handshake {
-    verify_data: Buffer;
-    static readonly __bodySpec: {
+    static readonly __spec: {
         verify_data: TLSTypes.Vector;
     };
-    constructor(verify_data: Buffer);
+    verify_data: Buffer;
+    constructor(initial?: any);
 }

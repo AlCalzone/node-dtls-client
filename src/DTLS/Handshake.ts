@@ -14,9 +14,11 @@ export abstract class Handshake extends TLSStruct {
 	constructor(
 		public msg_type: HandshakeType,
 		bodySpec: TLSTypes.StructSpec,
-		public body?: TLSStruct
+		initial?: any
+		/*,
+		public body?: TLSStruct*/
 	) {
-		super(bodySpec, (body ? {body: body} : null));
+		super(bodySpec, initial); //, (body ? {body: body} : null));
 	}
 
 	public message_seq: number;
@@ -61,23 +63,17 @@ export abstract class Handshake extends TLSStruct {
 		if (assembled.isFragmented())
 			throw new Error("the message to be parsed MUST NOT be fragmented");
 		
-		if (HandshakeMessages.hasOwnProperty(assembled.msg_type)) {
+		if (HandshakeMessages[assembled.msg_type] != undefined) {
 			// find the right type for the body object
-			const objConstructor = HandshakeMessages[assembled.msg_type];
+			const msgClass = HandshakeMessages[assembled.msg_type];
 			// extract the struct spec
-			const spec = (objConstructor as any).__spec; // we can expect this to exist
-			// parse the body object
-			const body = objConstructor.from(
-				spec
+			const spec = (msgClass as any).__spec; // we can expect this to exist
+			// parse the body object into a new Handshake instance
+			const ret = msgClass.from(
+				spec,
 				assembled.fragment
 				);
-			// and feed it into a new Handshake instance
-			const ret = new Handshake(
-				assembled.msg_type,
-				spec,
-				body
-			);
-			ret.msg_seq = assembled.msg_seq;
+			ret.message_seq = assembled.message_seq;
 			return ret;
 		} else {
 			throw new Error(`unsupported message type ${assembled.msg_type}`);
@@ -127,12 +123,12 @@ export class FragmentedHandshake extends TLSStruct {
 	 * @throws Error
 	 */
 	// TODO: error Documentation ^^ ?
-	private static function enforceSingleMessage(fragments: FragmentedHandshake[]): boolean {
+	private static enforceSingleMessage(fragments: FragmentedHandshake[]): void {
 		// check if we are looking at a single message, i.e. compare type, seq_num and length
 		const singleMessage = fragments.every((val, i, arr) => {
 			if (i > 0) {
 				return val.msg_type === arr[0].msg_type &&
-					val.seq_num === arr[0].seq_num &&
+					val.message_seq === arr[0].message_seq &&
 					val.total_length === arr[0].total_length
 			}
 			return true;
@@ -149,11 +145,11 @@ export class FragmentedHandshake extends TLSStruct {
 		if (!(fragments && fragments.length)) return false;
 		FragmentedHandshake.enforceSingleMessage(fragments);
 
-		const firstSeqNum = fragments[0].seq_num;
+		const firstSeqNum = fragments[0].message_seq;
 		const totalLength = fragments[0].total_length;
 		const ranges = fragments
 			// map to fragment range (start and end index)
-			.map(f => {start: f.fragment_offset, end: f.fragment_offset + f.fragment.length-1})
+			.map(f => ({start: f.fragment_offset, end: f.fragment_offset + f.fragment.length-1}))
 			// order the fragments by fragment offset
 			.sort((a,b) => a.start - b.start)
 			;
@@ -179,24 +175,24 @@ export class FragmentedHandshake extends TLSStruct {
 	 * Reassembles a series of fragmented handshake messages into a complete one.
 	 * Warning: doesn't check for validity, do that in advance!
 	 */
-	static reassemble(fragments : FragmentedHandshake[]) : FragmentedHandshake {
+	static reassemble(messages : FragmentedHandshake[]) : FragmentedHandshake {
 		// cannot reassemble empty arrays
-		if (!(fragments && fragments.length)) 
+		if (!(messages && messages.length)) 
 			throw new Error("cannot reassemble handshake from empty array"); // TODO: Better type?
 		
 		// sort by fragment start
-		fragments = fragments.sort((a,b) => a.fragment_offset - b.fragment_offset);
+		messages = messages.sort((a,b) => a.fragment_offset - b.fragment_offset);
 		// combine into a single buffer
-		const combined = Buffer.allocUnsafe(fragments[0].total_length);
-		for (let fragment of fragments) {
-			fragment.copy(combined, fragment.fragment_offset);
+		const combined = Buffer.allocUnsafe(messages[0].total_length);
+		for (let msg of messages) {
+			msg.fragment.copy(combined, msg.fragment_offset);
 		}
 		
 		// and return the complete message
 		return new FragmentedHandshake(
-			fragments[0].msg_type,
-			fragments[0].total_length,
-			fragments[0].message_seq,
+			messages[0].msg_type,
+			messages[0].total_length,
+			messages[0].message_seq,
 			0,
 			combined
 		);
@@ -219,9 +215,7 @@ export enum HandshakeType {
 	finished = 20
 }
 // define handshake messages for lookup
-export const HandshakeMessages: {
-	[type: HandshakeType]?: (any extends Handshake)
-} = {};
+export const HandshakeMessages = {};
 HandshakeMessages[HandshakeType.hello_request] = HelloRequest;
 HandshakeMessages[HandshakeType.client_hello] = ClientHello;
 HandshakeMessages[HandshakeType.server_hello] = ServerHello;
@@ -232,17 +226,17 @@ HandshakeMessages[HandshakeType.finished] = Finished;
 // Handshake message implementations
 export class HelloRequest extends Handshake {
 
-	static readonly __bodySpec = {}
+	static readonly __spec = {}
 
 	constructor() {
-		super(HandshakeType.hello_request, HelloRequest.__bodySpec);
+		super(HandshakeType.hello_request, HelloRequest.__spec);
 	}
 
 }
 
 export class ClientHello extends Handshake {
 
-	static readonly __bodySpec = {
+	static readonly __spec = {
 		client_version: ProtocolVersion.__spec,
 		random: Random.__spec,
 		session_id: SessionID.__spec,
@@ -251,30 +245,27 @@ export class ClientHello extends Handshake {
 		// TODO: Typed Vector CompressionMethod compression_methods< 1..2^ 8 - 1 >
 	}
 
-	static readonly __bodySpecWithExtensions = extend(ClientHello.__bodySpec, {
+	static readonly __bodySpecWithExtensions = extend(ClientHello.__spec, {
 		// see http://wiki.osdev.org/TLS_Handshake
 		// TODO: TypedVector Extension extensions< 0..2^ 16 - 1 >;
 		// TODO: optional type -> may only appear last, present if bytes follow
 		// TODO: item parser function
 	})
 
-	constructor(
-		public client_version: ProtocolVersion,
-		public session_id: SessionID,
-		public cookie: Cookie,
-		public extensions?: any
-	) {
-		super(
-			HandshakeType.client_hello,
-			extensions != undefined ? ClientHello.__bodySpecWithExtensions : ClientHello.__bodySpec
-		);
+	public client_version: ProtocolVersion;
+	public session_id: SessionID;
+	public cookie: Cookie;
+	public extensions: any;
+
+	constructor(initial?) {
+		super(HandshakeType.client_hello, ClientHello.__spec, initial);
 	}
 
 }
 
 export class ServerHello extends Handshake {
 
-	static readonly __bodySpec = {
+	static readonly __spec = {
 		server_version: ProtocolVersion.__spec,
 		random: Random.__spec,
 		session_id: SessionID.__spec,
@@ -282,48 +273,44 @@ export class ServerHello extends Handshake {
 		compression_method: CompressionMethod.__spec
 	}
 
-	static readonly __bodySpecWithExtensions = extend(ServerHello.__bodySpec, {
+	static readonly __bodySpecWithExtensions = extend(ServerHello.__spec, {
 		// TODO: TypedVector Extension extensions< 0..2^ 16 - 1 >;
 	})
 
-	constructor(
-		public server_version: ProtocolVersion,
-		public session_id: SessionID,
-		public cipher_suite: CipherSuite,
-		public compression_method: CompressionMethod,
-		public extensions?: any
-	) {
-		super(
-			HandshakeType.server_hello,
-			extensions != undefined ? ServerHello.__bodySpecWithExtensions : ServerHello.__bodySpec
-		);
+	public server_version: ProtocolVersion;
+	public session_id: SessionID;
+	public cipher_suite: CipherSuite;
+	public compression_method: CompressionMethod;
+	public extensions: any;
+
+	constructor(initial?) {
+		super(HandshakeType.server_hello, ServerHello.__spec, initial);
 	}
 
 }
 
 export class HelloVerifyRequest extends Handshake {
 
-	static readonly __bodySpec = {
+	static readonly __spec = {
 		server_version: ProtocolVersion.__spec,
 		cookie: Cookie.__spec
 	}
 
+	public server_version: ProtocolVersion;
+	public cookie: Cookie;
 
-	constructor(
-		public server_version: ProtocolVersion,
-		public cookie: Cookie
-	) {
-		super(HandshakeType.hello_verify_request, HelloVerifyRequest.__bodySpec);
+	constructor(initial?) {
+		super(HandshakeType.hello_verify_request, HelloVerifyRequest.__spec, initial);
 	}
 
 }
 
 export class ServerHelloDone extends Handshake {
 
-	static readonly __bodySpec = {}
+	static readonly __spec = {}
 
 	constructor() {
-		super(HandshakeType.server_hello_done, ServerHelloDone.__bodySpec);
+		super(HandshakeType.server_hello_done, ServerHelloDone.__spec);
 	}
 
 }
@@ -331,12 +318,14 @@ export class ServerHelloDone extends Handshake {
 
 export class Finished extends Handshake {
 
-	static readonly __bodySpec = {
+	static readonly __spec = {
 		verify_data: new TLSTypes.Vector("uint8", 0, 2**16) // TODO: wirkliche Länge "verify_data_length" herausfinden
 	}
 
-	constructor(public verify_data: Buffer) {
-		super(HandshakeType.finished, Finished.__bodySpec);
+	public verify_data: Buffer;
+
+	constructor(initial?) {
+		super(HandshakeType.finished, Finished.__spec, initial);
 	}
 
 }

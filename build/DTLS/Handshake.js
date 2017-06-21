@@ -19,22 +19,60 @@ var Cookie_1 = require("./Cookie");
 var CipherSuite_1 = require("../TLS/CipherSuite");
 var ConnectionState_1 = require("../TLS/ConnectionState");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
+var RecordLayer_1 = require("./RecordLayer");
 var Handshake = (function (_super) {
     __extends(Handshake, _super);
-    function Handshake(msg_type, bodySpec, body) {
-        var _this = _super.call(this, bodySpec, body) || this;
+    function Handshake(msg_type, bodySpec, initial
+        /*,
+        public body?: TLSStruct*/
+    ) {
+        var _this = _super.call(this, bodySpec, initial) || this;
         _this.msg_type = msg_type;
-        _this.body = body;
         return _this;
     }
     /**
      * Fragments this packet into a series of packets according to the configured MTU
+     * @returns An array of fragmented handshake messages - or a single one if it is small enough.
      */
     Handshake.prototype.fragmentMessage = function () {
         // spec only contains the body, so serialize() will only return that
         var wholeMessage = this.serialize();
-        // TODO: fragment the message
-        return [];
+        var start = 0;
+        var fragments = [];
+        var maxFragmentLength = RecordLayer_1.RecordLayer.MAX_PAYLOAD_SIZE - FragmentedHandshake.headerLength;
+        // loop through the message and fragment it
+        while (!fragments.length && start < wholeMessage.length) {
+            // calculate maximum length, limited by MTU - IP/UDP headers - handshake overhead
+            var fragmentLength = Math.min(maxFragmentLength, wholeMessage.length - start);
+            // slice and dice
+            var fragment = wholeMessage.slice(start, start + fragmentLength);
+            //create the message
+            fragments.push(new FragmentedHandshake(this.msg_type, wholeMessage.length, this.message_seq, start, fragment));
+            // step forward by the actual fragment length
+            start += fragment.length;
+        }
+        return fragments;
+    };
+    /**
+     * Parses a re-assembled handshake message into the correct object struture
+     * @param assembled - the re-assembled (or never-fragmented) message
+     */
+    Handshake.parse = function (assembled) {
+        if (assembled.isFragmented())
+            throw new Error("the message to be parsed MUST NOT be fragmented");
+        if (exports.HandshakeMessages[assembled.msg_type] != undefined) {
+            // find the right type for the body object
+            var msgClass = exports.HandshakeMessages[assembled.msg_type];
+            // extract the struct spec
+            var spec = msgClass.__spec; // we can expect this to exist
+            // parse the body object into a new Handshake instance
+            var ret = msgClass.from(spec, assembled.fragment);
+            ret.message_seq = assembled.message_seq;
+            return ret;
+        }
+        else {
+            throw new Error("unsupported message type " + assembled.msg_type);
+        }
     };
     return Handshake;
 }(TLSStruct_1.TLSStruct));
@@ -50,6 +88,84 @@ var FragmentedHandshake = (function (_super) {
         _this.fragment = fragment;
         return _this;
     }
+    /**
+     * Checks if this message is actually fragmented, i.e. total_length > fragment_length
+     */
+    FragmentedHandshake.prototype.isFragmented = function () {
+        return (this.fragment_offset !== 0) || (this.total_length > this.fragment.length);
+    };
+    /**
+     * Enforces an array of fragments to belong to a single message
+     * @throws Error
+     */
+    // TODO: error Documentation ^^ ?
+    FragmentedHandshake.enforceSingleMessage = function (fragments) {
+        // check if we are looking at a single message, i.e. compare type, seq_num and length
+        var singleMessage = fragments.every(function (val, i, arr) {
+            if (i > 0) {
+                return val.msg_type === arr[0].msg_type &&
+                    val.message_seq === arr[0].message_seq &&
+                    val.total_length === arr[0].total_length;
+            }
+            return true;
+        });
+        if (!singleMessage)
+            throw new Error('this series of fragments belongs to multiple messages'); // TODO: better type?		
+    };
+    /**
+     * Checks if the provided handshake fragments form a complete message
+     */
+    FragmentedHandshake.isComplete = function (fragments) {
+        // ignore empty arrays
+        if (!(fragments && fragments.length))
+            return false;
+        FragmentedHandshake.enforceSingleMessage(fragments);
+        var firstSeqNum = fragments[0].message_seq;
+        var totalLength = fragments[0].total_length;
+        var ranges = fragments
+            .map(function (f) { return ({ start: f.fragment_offset, end: f.fragment_offset + f.fragment.length - 1 }); })
+            .sort(function (a, b) { return a.start - b.start; });
+        // check if the fragments have no holes
+        var noHoles = ranges.every(function (val, i, arr) {
+            if (i === 0) {
+                // first fragment should start at 0
+                if (val.start !== 0)
+                    return false;
+            }
+            else {
+                // every other fragment should touch or overlap the previous one
+                if (val.start - arr[i - 1].end > 1)
+                    return false;
+            }
+            // last fragment should end at totalLength-1
+            if (i === arr.length - 1) {
+                if (val.end !== totalLength - 1)
+                    return false;
+            }
+            // no problems
+            return true;
+        });
+        return noHoles;
+    };
+    /**
+     * Reassembles a series of fragmented handshake messages into a complete one.
+     * Warning: doesn't check for validity, do that in advance!
+     */
+    FragmentedHandshake.reassemble = function (messages) {
+        // cannot reassemble empty arrays
+        if (!(messages && messages.length))
+            throw new Error("cannot reassemble handshake from empty array"); // TODO: Better type?
+        // sort by fragment start
+        messages = messages.sort(function (a, b) { return a.fragment_offset - b.fragment_offset; });
+        // combine into a single buffer
+        var combined = Buffer.allocUnsafe(messages[0].total_length);
+        for (var _i = 0, messages_1 = messages; _i < messages_1.length; _i++) {
+            var msg = messages_1[_i];
+            msg.fragment.copy(combined, msg.fragment_offset);
+        }
+        // and return the complete message
+        return new FragmentedHandshake(messages[0].msg_type, messages[0].total_length, messages[0].message_seq, 0, combined);
+    };
     return FragmentedHandshake;
 }(TLSStruct_1.TLSStruct));
 FragmentedHandshake.__spec = {
@@ -60,6 +176,10 @@ FragmentedHandshake.__spec = {
     // uint24 fragment_length is implied in the variable size vector
     fragment: new TLSTypes.Vector("uint8", 0, Math.pow(2, 24) - 1)
 };
+/**
+ * The amount of data consumed by a handshake message header (without the actual fragment)
+ */
+FragmentedHandshake.headerLength = 1 + 3 + 2 + 3 + 3; // TODO: dynamisch?
 exports.FragmentedHandshake = FragmentedHandshake;
 var HandshakeType;
 (function (HandshakeType) {
@@ -75,68 +195,63 @@ var HandshakeType;
     HandshakeType[HandshakeType["client_key_exchange"] = 16] = "client_key_exchange";
     HandshakeType[HandshakeType["finished"] = 20] = "finished";
 })(HandshakeType = exports.HandshakeType || (exports.HandshakeType = {}));
+// define handshake messages for lookup
+exports.HandshakeMessages = {};
+exports.HandshakeMessages[HandshakeType.hello_request] = HelloRequest;
+exports.HandshakeMessages[HandshakeType.client_hello] = ClientHello;
+exports.HandshakeMessages[HandshakeType.server_hello] = ServerHello;
+exports.HandshakeMessages[HandshakeType.hello_verify_request] = HelloVerifyRequest;
+exports.HandshakeMessages[HandshakeType.server_hello_done] = ServerHelloDone;
+exports.HandshakeMessages[HandshakeType.finished] = Finished;
+// Handshake message implementations
 var HelloRequest = (function (_super) {
     __extends(HelloRequest, _super);
     function HelloRequest() {
-        return _super.call(this, HandshakeType.hello_request, HelloRequest.__bodySpec) || this;
+        return _super.call(this, HandshakeType.hello_request, HelloRequest.__spec) || this;
     }
     return HelloRequest;
 }(Handshake));
-HelloRequest.__bodySpec = {};
+HelloRequest.__spec = {};
 exports.HelloRequest = HelloRequest;
 var ClientHello = (function (_super) {
     __extends(ClientHello, _super);
-    function ClientHello(client_version, session_id, cookie, extensions) {
-        var _this = _super.call(this, HandshakeType.client_hello, extensions != undefined ? ClientHello.__bodySpecWithExtensions : ClientHello.__bodySpec) || this;
-        _this.client_version = client_version;
-        _this.session_id = session_id;
-        _this.cookie = cookie;
-        _this.extensions = extensions;
-        return _this;
+    function ClientHello(initial) {
+        return _super.call(this, HandshakeType.client_hello, ClientHello.__spec, initial) || this;
     }
     return ClientHello;
 }(Handshake));
-ClientHello.__bodySpec = {
+ClientHello.__spec = {
     client_version: ProtocolVersion_1.ProtocolVersion.__spec,
     random: Random_1.Random.__spec,
     session_id: SessionID_1.SessionID.__spec,
     cookie: Cookie_1.Cookie.__spec,
 };
-ClientHello.__bodySpecWithExtensions = object_polyfill_1.extend(ClientHello.__bodySpec, {});
+ClientHello.__bodySpecWithExtensions = object_polyfill_1.extend(ClientHello.__spec, {});
 exports.ClientHello = ClientHello;
 var ServerHello = (function (_super) {
     __extends(ServerHello, _super);
-    function ServerHello(server_version, session_id, cipher_suite, compression_method, extensions) {
-        var _this = _super.call(this, HandshakeType.server_hello, extensions != undefined ? ServerHello.__bodySpecWithExtensions : ServerHello.__bodySpec) || this;
-        _this.server_version = server_version;
-        _this.session_id = session_id;
-        _this.cipher_suite = cipher_suite;
-        _this.compression_method = compression_method;
-        _this.extensions = extensions;
-        return _this;
+    function ServerHello(initial) {
+        return _super.call(this, HandshakeType.server_hello, ServerHello.__spec, initial) || this;
     }
     return ServerHello;
 }(Handshake));
-ServerHello.__bodySpec = {
+ServerHello.__spec = {
     server_version: ProtocolVersion_1.ProtocolVersion.__spec,
     random: Random_1.Random.__spec,
     session_id: SessionID_1.SessionID.__spec,
     cipher_suite: CipherSuite_1.CipherSuite.__spec,
     compression_method: ConnectionState_1.CompressionMethod.__spec
 };
-ServerHello.__bodySpecWithExtensions = object_polyfill_1.extend(ServerHello.__bodySpec, {});
+ServerHello.__bodySpecWithExtensions = object_polyfill_1.extend(ServerHello.__spec, {});
 exports.ServerHello = ServerHello;
 var HelloVerifyRequest = (function (_super) {
     __extends(HelloVerifyRequest, _super);
-    function HelloVerifyRequest(server_version, cookie) {
-        var _this = _super.call(this, HandshakeType.hello_verify_request, HelloVerifyRequest.__bodySpec) || this;
-        _this.server_version = server_version;
-        _this.cookie = cookie;
-        return _this;
+    function HelloVerifyRequest(initial) {
+        return _super.call(this, HandshakeType.hello_verify_request, HelloVerifyRequest.__spec, initial) || this;
     }
     return HelloVerifyRequest;
 }(Handshake));
-HelloVerifyRequest.__bodySpec = {
+HelloVerifyRequest.__spec = {
     server_version: ProtocolVersion_1.ProtocolVersion.__spec,
     cookie: Cookie_1.Cookie.__spec
 };
@@ -144,22 +259,20 @@ exports.HelloVerifyRequest = HelloVerifyRequest;
 var ServerHelloDone = (function (_super) {
     __extends(ServerHelloDone, _super);
     function ServerHelloDone() {
-        return _super.call(this, HandshakeType.server_hello_done, ServerHelloDone.__bodySpec) || this;
+        return _super.call(this, HandshakeType.server_hello_done, ServerHelloDone.__spec) || this;
     }
     return ServerHelloDone;
 }(Handshake));
-ServerHelloDone.__bodySpec = {};
+ServerHelloDone.__spec = {};
 exports.ServerHelloDone = ServerHelloDone;
 var Finished = (function (_super) {
     __extends(Finished, _super);
-    function Finished(verify_data) {
-        var _this = _super.call(this, HandshakeType.finished, Finished.__bodySpec) || this;
-        _this.verify_data = verify_data;
-        return _this;
+    function Finished(initial) {
+        return _super.call(this, HandshakeType.finished, Finished.__spec, initial) || this;
     }
     return Finished;
 }(Handshake));
-Finished.__bodySpec = {
+Finished.__spec = {
     verify_data: new TLSTypes.Vector("uint8", 0, Math.pow(2, 16)) // TODO: wirkliche Länge "verify_data_length" herausfinden
 };
 exports.Finished = Finished;
