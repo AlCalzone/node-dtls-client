@@ -12,7 +12,6 @@ Although great care has been taken to properly implement the required encryption
 - [x] data types and conversion to/from buffers
 - [x] HMAC, PRF and key computation
 - [x] cipher suite definitions
-- [ ] message definitions (~70%)
 - [ ] record protocol implementation
   - [x] compression (no actual algorithms implemented)
   - [x] encryption and verification:
@@ -22,6 +21,9 @@ Although great care has been taken to properly implement the required encryption
   - [x] replay protection
   - [ ] managing connection states
 - [ ] handshake protocol implementation
+  - [x] fragmentation and re-assembly
+  - [ ] message definitions (~70%)
+- [ ] alert protocol implementation (optional for now)
 - [ ] testing
   - [x] implement testing framework with code coverage
   - [ ] tests
