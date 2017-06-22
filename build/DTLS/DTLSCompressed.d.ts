@@ -1,5 +1,4 @@
 /// <reference types="node" />
-import * as TLSTypes from "../TLS/TLSTypes";
 import { TLSStruct } from "../TLS/TLSStruct";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
@@ -11,14 +10,14 @@ export declare class DTLSCompressed extends TLSStruct {
     sequence_number: number;
     fragment: Buffer;
     static readonly __spec: {
-        type: TLSTypes.Enum;
+        type: any;
         version: {
             major: string;
             minor: string;
         };
         epoch: string;
         sequence_number: string;
-        fragment: TLSTypes.Vector;
+        fragment: any;
     };
     constructor(type: ContentType, version: ProtocolVersion, epoch: number, sequence_number: number, fragment: Buffer);
     /**
@@ -48,7 +47,7 @@ export declare class MACHeader extends TLSStruct {
     static readonly __spec: {
         epoch: string;
         sequence_number: string;
-        type: TLSTypes.Enum;
+        type: any;
         version: {
             major: string;
             minor: string;

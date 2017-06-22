@@ -1,21 +1,49 @@
 export declare type Numbers = "uint8" | "uint16" | "uint24" | "uint32" | "uint64";
-export declare class Enum {
-    underlyingType: Numbers;
-    enumType: any;
-    constructor(underlyingType: Numbers, enumType: any);
+export interface Number {
+    type: "number";
+    size: Numbers;
 }
-export declare class Vector {
-    constructor(underlyingType: any, minLength: any, maxLength?: any, optional?: boolean);
-    underlyingType: Numbers;
+export interface Enum {
+    type: "enum";
+    size: Numbers;
+    enumType: any;
+}
+export declare type Primitive = Number | Enum;
+export interface StructSpec {
+    [propName: string]: any;
+}
+export interface Struct {
+    type: "struct";
+    spec: StructSpec;
+}
+export declare type Complex = Primitive | Struct;
+export interface Vector {
+    type: "vector";
+    itemType: Complex;
     minLength: number;
     maxLength: number;
     optional: boolean;
 }
-export interface StructSpec {
-    [propName: string]: any;
-}
-export declare class Struct {
-    spec: StructSpec;
-    constructor(spec: StructSpec);
-}
-export declare type All = Numbers | Enum | Vector | Struct;
+export declare type All = Complex | Vector;
+export declare const make: {
+    ["enum"]: (size: Numbers, enumType: any) => {
+        type: string;
+        size: Numbers;
+        enumType: any;
+    };
+    number: (size: Numbers) => {
+        type: string;
+        size: Numbers;
+    };
+    struct: (spec: StructSpec) => {
+        type: string;
+        spec: StructSpec;
+    };
+    vector: (itemType: Complex, minLength?: number, maxLength?: number, optional?: boolean) => {
+        type: string;
+        itemType: Complex;
+        minLength: number;
+        maxLength: number;
+        optional: boolean;
+    };
+};

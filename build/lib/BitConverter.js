@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var util_1 = require("./util");
-//export type ByteArray = Uint8Array | number[];
 /**
  * Liest eine Zahl der angegebenen Länge (bits) aus dem Byte-Array (arr) ab Position (offset)
  * @param bits - Die Anzahl an Bits, die verwendet werden, um die Zahl zu repräsentieren
