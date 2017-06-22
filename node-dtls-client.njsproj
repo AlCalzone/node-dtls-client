@@ -75,6 +75,9 @@
     <TypeScriptCompile Include="src\DTLS\RecordLayer.ts" />
     <TypeScriptCompile Include="src\TLS\AntiReplayWindow.ts" />
     <TypeScriptCompile Include="src\TLS\ConnectionState.ts" />
+    <TypeScriptCompile Include="src\TLS\ISerializable.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\TLS\PRF.ts" />
     <TypeScriptCompile Include="src\TLS\KeyExchange.ts">
       <SubType>Code</SubType>
@@ -82,7 +85,7 @@
     <TypeScriptCompile Include="src\TLS\PreMasterSecret.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\TLS\TLSTypes.ts">
+    <TypeScriptCompile Include="src\TLS\TypeSpecs.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\main.ts" />
@@ -103,6 +106,9 @@
       <SubType>Code</SubType>
       <TestFramework>Mocha</TestFramework>
     </None>
+    <TypeScriptCompile Include="src\TLS\Vector.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="coverage\" />

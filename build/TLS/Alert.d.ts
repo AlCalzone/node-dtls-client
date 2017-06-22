@@ -1,11 +1,10 @@
-import * as TLSTypes from "./TLSTypes";
 import { TLSStruct } from "./TLSStruct";
 export declare class Alert extends TLSStruct {
     level: AlertLevel;
     description: AlertDescription;
     static readonly __spec: {
-        level: TLSTypes.Enum;
-        description: TLSTypes.Enum;
+        level: any;
+        description: any;
     };
     constructor(level: AlertLevel, description: AlertDescription);
 }

@@ -28,11 +28,11 @@ export declare class FragmentedHandshake extends TLSStruct {
     fragment_offset: number;
     fragment: Buffer;
     static readonly __spec: {
-        msg_type: TLSTypes.Enum;
+        msg_type: any;
         total_length: string;
         message_seq: string;
         fragment_offset: string;
-        fragment: TLSTypes.Vector;
+        fragment: any;
     };
     /**
      * The amount of data consumed by a handshake message header (without the actual fragment)
@@ -84,13 +84,13 @@ export declare class ClientHello extends Handshake {
         };
         random: {
             gmt_unix_time: string;
-            random_bytes: TLSTypes.Vector;
+            random_bytes: any;
         };
         session_id: {
-            value: TLSTypes.Vector;
+            value: any;
         };
         cookie: {
-            value: TLSTypes.Vector;
+            value: any;
         };
     };
     static readonly __bodySpecWithExtensions: any;
@@ -108,15 +108,15 @@ export declare class ServerHello extends Handshake {
         };
         random: {
             gmt_unix_time: string;
-            random_bytes: TLSTypes.Vector;
+            random_bytes: any;
         };
         session_id: {
-            value: TLSTypes.Vector;
+            value: any;
         };
         cipher_suite: {
             id: string;
         };
-        compression_method: TLSTypes.Enum;
+        compression_method: any;
     };
     static readonly __bodySpecWithExtensions: any;
     server_version: ProtocolVersion;
@@ -133,7 +133,7 @@ export declare class HelloVerifyRequest extends Handshake {
             minor: string;
         };
         cookie: {
-            value: TLSTypes.Vector;
+            value: any;
         };
     };
     server_version: ProtocolVersion;
@@ -146,7 +146,7 @@ export declare class ServerHelloDone extends Handshake {
 }
 export declare class Finished extends Handshake {
     static readonly __spec: {
-        verify_data: TLSTypes.Vector;
+        verify_data: any;
     };
     verify_data: Buffer;
     constructor(initial?: any);

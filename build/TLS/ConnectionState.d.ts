@@ -1,12 +1,11 @@
 /// <reference types="node" />
-import * as TLSTypes from "./TLSTypes";
 import { PreMasterSecret } from "./PreMasterSecret";
 import { HashAlgorithm, CipherType, KeyMaterial } from "./CipherSuite";
 export declare enum CompressionMethod {
     null = 0,
 }
 export declare namespace CompressionMethod {
-    const __spec: TLSTypes.Enum;
+    const __spec: any;
 }
 export declare type ConnectionEnd = "server" | "client";
 export declare class ConnectionState {

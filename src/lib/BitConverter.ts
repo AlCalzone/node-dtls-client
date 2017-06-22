@@ -10,8 +10,6 @@ export type BitConverterResult<T> = {
 	delta: number
 };
 
-//export type ByteArray = Uint8Array | number[];
-
 /**
  * Liest eine Zahl der angegebenen Länge (bits) aus dem Byte-Array (arr) ab Position (offset)
  * @param bits - Die Anzahl an Bits, die verwendet werden, um die Zahl zu repräsentieren
