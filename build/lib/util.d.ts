@@ -4,3 +4,7 @@
 * @returns {number}
 */
 export declare function fitToWholeBytes(value: number): number;
+/**
+ * Provides a static implementation of an interface with static and prototype methods
+ */
+export declare function staticImplements<T>(): (constructor: T) => void;

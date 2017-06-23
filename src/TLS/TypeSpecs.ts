@@ -1,4 +1,4 @@
-﻿import { Serializable } from "./Serializable";
+﻿import { ISerializable, ISerializableConstructor } from "./Serializable";
 import { applyMixins } from "../lib/Mixins";
 
 export type Numbers =
@@ -6,6 +6,7 @@ export type Numbers =
 	"uint16" |
 	"uint24" |
 	"uint32" |
+	"uint48" | // DTLS
 	"uint64"
 	;
 
@@ -21,36 +22,47 @@ export interface Enum {
 }
 
 export type Primitive = Number | Enum;
-
-export interface StructSpec {
-	[propName: string]: any
+export function getPrimitiveSize(spec: Primitive): number {
+	return +(spec as Primitive).size.substr("uint".length);
 }
-export interface Struct<T implements Serializable<T>> {
+export interface IStruct extends ISerializableConstructor {
+	readonly __spec: StructSpec;
+}
+export interface StructSpec {
+	[propName: string]: All
+}
+export interface Struct {
 	type: "struct";
 	spec: StructSpec;
-	structType: T;
+	structType: ISerializableConstructor;
 }
 
 export type Complex = Primitive | Struct;
 
 export interface Vector {
 	type: "vector";
-	itemType: Complex;
+	itemSpec: Complex;
 	minLength: number;
 	maxLength: number;
 	optional: boolean;
 }
 
+var test: Struct;
+
 export type All = Complex | Vector;
 
 // Shortcuts:
 export const define = {
-	Enum: (size: Numbers, enumType: any) => ({ type: "enum", size, enumType }),
-	Number: (size: Numbers) => ({ type: "number", size }),
-	Struct: (spec: StructSpec, structType) => ({ type: "struct", spec, structType }),
-	Vector: (itemType: Complex, minLength = 0, maxLength = minLength, optional = false) => ({
+	Enum: (size: Numbers, enumType: any): Enum => ({ type: "enum", size, enumType }),
+	Number: (size: Numbers): Number => ({ type: "number", size }),
+	Struct: (structType: any): Struct => ({
+		type: "struct",
+		spec: (structType as any as IStruct).__spec, // require this property, we don't want to repeat us that much
+		structType: (structType as ISerializableConstructor)
+	}),
+	Vector: (itemSpec: Complex, minLength = 0, maxLength = minLength, optional = false): Vector => ({
 		type: "vector",
-		itemType,
+		itemSpec,
 		minLength, maxLength,
 		optional
 	}),

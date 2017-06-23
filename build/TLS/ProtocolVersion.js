@@ -11,6 +11,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var TLSStruct_1 = require("./TLSStruct");
+var TypeSpecs = require("./TypeSpecs");
 // TLS -> Anpassen für DTLS!!!
 var ProtocolVersion = (function (_super) {
     __extends(ProtocolVersion, _super);
@@ -30,8 +31,8 @@ var ProtocolVersion = (function (_super) {
     return ProtocolVersion;
 }(TLSStruct_1.TLSStruct));
 ProtocolVersion.__spec = {
-    major: "uint8",
-    minor: "uint8"
+    major: TypeSpecs.define.Number("uint8"),
+    minor: TypeSpecs.define.Number("uint8")
 };
 exports.ProtocolVersion = ProtocolVersion;
 //# sourceMappingURL=ProtocolVersion.js.map

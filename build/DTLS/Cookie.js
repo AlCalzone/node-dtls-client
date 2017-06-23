@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TLSTypes = require("../TLS/TLSTypes");
+var TypeSpecs = require("../TLS/TypeSpecs");
 var TLSStruct_1 = require("../TLS/TLSStruct");
 var Cookie = (function (_super) {
     __extends(Cookie, _super);
@@ -23,7 +23,7 @@ var Cookie = (function (_super) {
     return Cookie;
 }(TLSStruct_1.TLSStruct));
 Cookie.__spec = {
-    value: new TLSTypes.Vector("uint8", 0, Math.pow(2, 8) - 1)
+    value: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 8) - 1)
 };
 exports.Cookie = Cookie;
 //# sourceMappingURL=Cookie.js.map

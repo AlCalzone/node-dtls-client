@@ -1,3 +1,4 @@
+import * as TypeSpecs from "./TypeSpecs";
 export declare enum ContentType {
     change_cipher_spec = 20,
     alert = 21,
@@ -5,5 +6,5 @@ export declare enum ContentType {
     application_data = 23,
 }
 export declare namespace ContentType {
-    const __spec: any;
+    const __spec: TypeSpecs.Enum;
 }

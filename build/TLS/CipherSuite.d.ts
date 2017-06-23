@@ -1,4 +1,5 @@
 /// <reference types="node" />
+import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
 import { ConnectionEnd } from "./ConnectionState";
 import { KeyExchangeAlgorithm } from "./KeyExchange";
@@ -50,7 +51,7 @@ export declare class CipherSuite extends TLSStruct {
     cipherType: CipherType;
     algorithm: (BlockCipher.BlockCipherAlgorithm | AEADAlgorithm);
     static readonly __spec: {
-        id: string;
+        id: TypeSpecs.Number;
     };
     constructor(id: number, keyExchange: KeyExchangeAlgorithm, mac: HashAlgorithm, prf: HashAlgorithm, cipherType: CipherType, algorithm?: (BlockCipher.BlockCipherAlgorithm | AEADAlgorithm));
     createCipher(connEnd: ConnectionEnd, keyMaterial: KeyMaterial): CipherDelegate;

@@ -1,10 +1,11 @@
 import { TLSStruct } from "./TLSStruct";
+import * as TypeSpecs from "./TypeSpecs";
 export declare class ProtocolVersion extends TLSStruct {
     major: number;
     minor: number;
     static readonly __spec: {
-        major: string;
-        minor: string;
+        major: TypeSpecs.Number;
+        minor: TypeSpecs.Number;
     };
     /**
      *

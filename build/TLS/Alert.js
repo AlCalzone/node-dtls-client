@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TLSTypes = require("./TLSTypes");
+var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
 var Alert = (function (_super) {
     __extends(Alert, _super);
@@ -23,8 +23,8 @@ var Alert = (function (_super) {
     return Alert;
 }(TLSStruct_1.TLSStruct));
 Alert.__spec = {
-    level: new TLSTypes.Enum("uint8", AlertLevel),
-    description: new TLSTypes.Enum("uint8", AlertDescription)
+    level: TypeSpecs.define.Enum("uint8", AlertLevel),
+    description: TypeSpecs.define.Enum("uint8", AlertDescription)
 };
 exports.Alert = Alert;
 var AlertLevel;

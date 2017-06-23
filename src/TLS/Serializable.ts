@@ -1,21 +1,21 @@
-﻿// maybe this can be done with this syntax:
-// https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-2.html
+﻿import * as TypeSpecs from "./TypeSpecs";
 
-type Constructor<T> = new(...args: any[]) => T;
-
-function Serializable<T extends Constructor<{}>>(Base: T) {
-    return abstract class extends Base {
-        _tag: string;
-        constructor(...args: any[]) {
-            super(...args);
-            this._tag = "";
-        }
-    }
+export interface DeserializationResult<T> {
+	result: T;
+	readBytes: number;
 }
 
-export abstract class Serializable<T> {
+export interface ISerializable {
+	/**
+	 * Turns this object into a buffer according to the TLS RFCs
+	 */
+	serialize(): Buffer;
+}
 
-	serialize(): Buffer {};
-	static deserialize(buf: Buffer, offset: number): T {};
-
+export interface ISerializableConstructor {
+	new (spec: TypeSpecs.StructSpec, initial?): ISerializable;
+	/**
+	 * Constructs an object of the given type from the given buffer.
+	 */
+	from(spec: TypeSpecs.All, buf: Buffer, offset?: number): DeserializationResult<ISerializable>;
 }

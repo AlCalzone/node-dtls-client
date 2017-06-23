@@ -1,5 +1,5 @@
 ﻿import * as crypto from "crypto";
-import * as TLSTypes from "./TLSTypes";
+import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
 import { ConnectionState, ConnectionEnd } from "./ConnectionState";
 import { KeyExchangeAlgorithm } from "./KeyExchange";
@@ -89,7 +89,7 @@ function createNullMAC(): MACDelegate {
 export class CipherSuite extends TLSStruct {
 
 	static readonly __spec = {
-		id: "uint16"
+		id: TypeSpecs.define.Number("uint16")
 	}
 
 	constructor(

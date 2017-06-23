@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TLSTypes = require("./TLSTypes");
+var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
 var SessionID = (function (_super) {
     __extends(SessionID, _super);
@@ -23,7 +23,7 @@ var SessionID = (function (_super) {
     return SessionID;
 }(TLSStruct_1.TLSStruct));
 SessionID.__spec = {
-    value: new TLSTypes.Vector("uint8", 0, 32)
+    value: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 32)
 };
 exports.SessionID = SessionID;
 //# sourceMappingURL=SessionID.js.map

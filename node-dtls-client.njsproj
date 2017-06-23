@@ -75,14 +75,14 @@
     <TypeScriptCompile Include="src\DTLS\RecordLayer.ts" />
     <TypeScriptCompile Include="src\TLS\AntiReplayWindow.ts" />
     <TypeScriptCompile Include="src\TLS\ConnectionState.ts" />
-    <TypeScriptCompile Include="src\TLS\ISerializable.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
     <TypeScriptCompile Include="src\TLS\PRF.ts" />
     <TypeScriptCompile Include="src\TLS\KeyExchange.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\TLS\PreMasterSecret.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="src\TLS\Serializable.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\TLS\TypeSpecs.ts">
@@ -132,11 +132,8 @@
     <Compile Include="src\lib\util.ts" />
     <Compile Include="src\TLS\Alert.ts" />
     <Compile Include="src\TLS\ChangeCipherSpec.ts" />
-    <Compile Include="src\TLS\Cipher.js" />
     <Compile Include="src\TLS\ContentType.ts" />
-    <Compile Include="src\TLS\GenericAEADCipher.js" />
     <Compile Include="src\TLS\BlockCipher.ts" />
-    <Compile Include="src\TLS\GenericStreamCipher.js" />
     <Compile Include="src\TLS\ProtocolVersion.ts" />
     <Compile Include="tests\debug.js">
       <SubType>Code</SubType>

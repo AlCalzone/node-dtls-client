@@ -1,3 +1,4 @@
+import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
 export declare enum HashAlgorithm {
     none = 0,
@@ -9,7 +10,7 @@ export declare enum HashAlgorithm {
     sha512 = 6,
 }
 export declare namespace HashAlgorithm {
-    const __spec: any;
+    const __spec: TypeSpecs.Enum;
 }
 export declare enum SignatureAlgorithm {
     anonymous = 0,
@@ -18,14 +19,14 @@ export declare enum SignatureAlgorithm {
     ecdsa = 3,
 }
 export declare namespace SignatureAlgorithm {
-    const __spec: any;
+    const __spec: TypeSpecs.Enum;
 }
 export default class SignatureAndHashAlgorithm extends TLSStruct {
     hash: HashAlgorithm;
     signature: SignatureAlgorithm;
     static readonly __spec: {
-        hash: any;
-        signature: any;
+        hash: TypeSpecs.Enum;
+        signature: TypeSpecs.Enum;
     };
     constructor(hash: HashAlgorithm, signature: SignatureAlgorithm);
 }

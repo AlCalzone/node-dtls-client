@@ -1,4 +1,4 @@
-﻿import * as TLSTypes from "../TLS/TLSTypes";
+﻿import * as TypeSpecs from "../TLS/TypeSpecs";
 import { TLSStruct } from "../TLS/TLSStruct";
 import { extend } from "../lib/object-polyfill";
 import { Random } from "../TLS/Random";
@@ -13,7 +13,7 @@ export abstract class Handshake extends TLSStruct {
 	
 	constructor(
 		public msg_type: HandshakeType,
-		bodySpec: TLSTypes.StructSpec,
+		bodySpec: TypeSpecs.StructSpec,
 		initial?: any
 		/*,
 		public body?: TLSStruct*/
@@ -89,12 +89,12 @@ export abstract class Handshake extends TLSStruct {
 export class FragmentedHandshake extends TLSStruct {
 
 	static readonly __spec = {
-		msg_type: new TLSTypes.Enum("uint8", HandshakeType),
-		total_length: "uint24",
-		message_seq: "uint16",
-		fragment_offset: "uint24",
+		msg_type: TypeSpecs.define.Enum("uint8", HandshakeType),
+		total_length: TypeSpecs.define.Number("uint24"),
+		message_seq: TypeSpecs.define.Number("uint16"),
+		fragment_offset: TypeSpecs.define.Number("uint24"),
 		// uint24 fragment_length is implied in the variable size vector
-		fragment: new TLSTypes.Vector("uint8", 0, 2**24-1)
+		fragment: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 2**24-1)
 	}
 	/**
 	 * The amount of data consumed by a handshake message header (without the actual fragment)
@@ -237,10 +237,10 @@ export class HelloRequest extends Handshake {
 export class ClientHello extends Handshake {
 
 	static readonly __spec = {
-		client_version: ProtocolVersion.__spec,
-		random: Random.__spec,
-		session_id: SessionID.__spec,
-		cookie: Cookie.__spec,
+		client_version: TypeSpecs.define.Struct(ProtocolVersion),
+		random: TypeSpecs.define.Struct(Random),
+		session_id: TypeSpecs.define.Struct(SessionID),
+		cookie: TypeSpecs.define.Struct(Cookie),
 		// TODO: Typed Vector CipherSuite cipher_suites< 1..2^ 15 - 1 > // definition differs from TLS spec: we count hte number of items, not bytes
 		// TODO: Typed Vector CompressionMethod compression_methods< 1..2^ 8 - 1 >
 	}
@@ -266,10 +266,10 @@ export class ClientHello extends Handshake {
 export class ServerHello extends Handshake {
 
 	static readonly __spec = {
-		server_version: ProtocolVersion.__spec,
-		random: Random.__spec,
-		session_id: SessionID.__spec,
-		cipher_suite: CipherSuite.__spec,
+		server_version: TypeSpecs.define.Struct(ProtocolVersion),
+		random: TypeSpecs.define.Struct(Random),
+		session_id: TypeSpecs.define.Struct(SessionID),
+		cipher_suite: TypeSpecs.define.Struct(CipherSuite),
 		compression_method: CompressionMethod.__spec
 	}
 
@@ -292,8 +292,8 @@ export class ServerHello extends Handshake {
 export class HelloVerifyRequest extends Handshake {
 
 	static readonly __spec = {
-		server_version: ProtocolVersion.__spec,
-		cookie: Cookie.__spec
+		server_version: TypeSpecs.define.Struct(ProtocolVersion),
+		cookie: TypeSpecs.define.Struct(Cookie)
 	}
 
 	public server_version: ProtocolVersion;
@@ -319,7 +319,7 @@ export class ServerHelloDone extends Handshake {
 export class Finished extends Handshake {
 
 	static readonly __spec = {
-		verify_data: new TLSTypes.Vector("uint8", 0, 2**16) // TODO: wirkliche Länge "verify_data_length" herausfinden
+		verify_data: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 2**16) // TODO: wirkliche Länge "verify_data_length" herausfinden
 	}
 
 	public verify_data: Buffer;

@@ -1,4 +1,4 @@
-﻿import * as TLSTypes from "./TLSTypes";
+﻿import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
 import { entries } from "../lib/object-polyfill";
 import { PreMasterSecret } from "./PreMasterSecret";
@@ -16,7 +16,7 @@ export enum CompressionMethod {
 	null = 0
 }
 export namespace CompressionMethod {
-	export const __spec = new TLSTypes.Enum("uint8", CompressionMethod);
+	export const __spec = TypeSpecs.define.Enum("uint8", CompressionMethod);
 }
 
 export type ConnectionEnd =

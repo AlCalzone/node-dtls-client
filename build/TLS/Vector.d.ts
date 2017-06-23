@@ -1,12 +1,11 @@
 /// <reference types="node" />
-import * as TLSTypes from "./TLSTypes";
-import { ISerializable } from "./ISerializable";
-export declare class Vector<T extends TLSTypes.Numbers | ISerializable<T>> extends Array<T> implements ISerializable<T> {
-    minLength: number;
-    maxLength: number;
-    optional: boolean;
-    constructor(source: T[], minLength?: number, maxLength?: number, optional?: boolean);
+import * as TypeSpecs from "./TypeSpecs";
+import { ISerializable, DeserializationResult } from "./Serializable";
+export declare class Vector<T extends number | ISerializable> extends Array<T> implements ISerializable {
+    spec: TypeSpecs.Vector;
+    constructor(source: T[], spec: TypeSpecs.Vector);
     readonly isVariableLength: boolean;
     serialize(): Buffer;
-    deserialize(buf: Buffer, offset: number): T;
+    private deserialize(buf, offset?);
+    static from<T extends number | ISerializable>(spec: TypeSpecs.Vector, buf: Buffer, offset?: number): DeserializationResult<Vector<T>>;
 }

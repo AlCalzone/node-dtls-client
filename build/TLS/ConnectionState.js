@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var TLSTypes = require("./TLSTypes");
+var TypeSpecs = require("./TypeSpecs");
 var object_polyfill_1 = require("../lib/object-polyfill");
 var PRF_1 = require("./PRF");
 var CompressionMethod;
@@ -8,7 +8,7 @@ var CompressionMethod;
     CompressionMethod[CompressionMethod["null"] = 0] = "null";
 })(CompressionMethod = exports.CompressionMethod || (exports.CompressionMethod = {}));
 (function (CompressionMethod) {
-    CompressionMethod.__spec = new TLSTypes.Enum("uint8", CompressionMethod);
+    CompressionMethod.__spec = TypeSpecs.define.Enum("uint8", CompressionMethod);
 })(CompressionMethod = exports.CompressionMethod || (exports.CompressionMethod = {}));
 var master_secret_length = 48;
 var client_random_length = 32;

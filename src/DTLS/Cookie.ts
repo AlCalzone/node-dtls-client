@@ -1,10 +1,10 @@
-import * as TLSTypes from "../TLS/TLSTypes";
+import * as TypeSpecs from "../TLS/TypeSpecs";
 import { TLSStruct } from "../TLS/TLSStruct";
 
 export class Cookie extends TLSStruct {
 
 	static readonly __spec = {
-		value: new TLSTypes.Vector("uint8", 0, 2**8-1)
+		value: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 2**8-1)
 	}
 
 	constructor(public value = []) {

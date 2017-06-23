@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var object_polyfill_1 = require("../lib/object-polyfill");
-var BitConverter = require("../lib/BitConverter");
-var TLSTypes = require("./TLSTypes");
+var BitConverter_1 = require("../lib/BitConverter");
+var TypeSpecs = require("./TypeSpecs");
+var Vector_1 = require("./Vector");
 /**
  * Basisklasse für TLS-Objekte
  */
@@ -17,13 +18,7 @@ var TLSStruct = (function () {
                 name: key,
                 type: value
             });
-            /*if (value instanceof TLSTypes.Calculated) {
-                // getter für berechnete Eigenschaft erstellen
-                Object.defineProperty(value, key, {
-                    get: () => this.getCalculatedPropertyValue(key)
-                })
-                // TODO: Testen!!!!
-            } else*/ if (initial != undefined && initial.hasOwnProperty(key)) {
+            if (initial != undefined && initial.hasOwnProperty(key)) {
                 // sonst evtl. die Eigenschaft initialisieren
                 this[key] = initial[key];
             }
@@ -40,45 +35,56 @@ var TLSStruct = (function () {
         for (var _i = 0, _a = this.propertyDefinitions; _i < _a.length; _i++) {
             var def = _a[_i];
             // Welche Eigenschaft wird ausgelesen?
-            var propName = def.name, type = def.type;
-            var result = void 0;
-            // Typ ermitteln
-            if (typeof type === "string") {
-                // Basistyp (Zahl)
-                result = BitConverter.readNumber[type](arr, offset + delta);
+            var propName = def.name, type = def.type, result = void 0;
+            switch (type.type) {
+                case "number":
+                case "enum":
+                    var bitSize = TypeSpecs.getPrimitiveSize(type);
+                    result = { result: BitConverter_1.bufferToNumber(arr, bitSize, offset + delta), readBytes: bitSize / 8 };
+                    break;
+                case "vector":
+                    result = Vector_1.Vector.from(type, arr, offset + delta);
+                    break;
+                case "struct":
+                    result = type.structType.from(type, arr, offset + delta);
+                    break;
             }
-            else if (type instanceof TLSTypes.Enum) {
-                // Enum
-                result = BitConverter.readNumber[type.underlyingType](arr, offset + delta);
-            }
-            else if (type instanceof TLSTypes.Vector) {
-                // Vektor (variable oder fixed)
-                if (type.optional && offset + delta >= arr.length) {
-                    // Optionaler Vektor:
-                    // Wir sind am Ende, keine weiteren Werte lesen
-                    result = { value: [], delta: 0 };
-                }
-                else {
-                    if (type.minLength === type.maxLength) {
-                        result = BitConverter.readVectorFixed[type.underlyingType](type.maxLength, arr, offset + delta);
-                    }
-                    else {
-                        result = BitConverter.readVectorVariable[type.underlyingType](type.maxLength, arr, offset + delta);
-                    }
-                }
-            }
-            else if (type instanceof TLSTypes.Struct) {
-                // Zusammengesetzter Typ
-                result = TLSStruct._from(type.spec, arr, offset + delta);
-            }
-            else {
-                throw new TypeError("unknown message type specified");
-            }
+            //let result: (
+            //	BitConverter.BitConverterResult<number> |
+            //	BitConverter.BitConverterResult<number[]> |
+            //	BitConverter.BitConverterResult<TLSStruct>
+            //	);
+            //// Typ ermitteln
+            //if (typeof type === "string") {
+            //	// Basistyp (Zahl)
+            //	result = BitConverter.readNumber[type](arr, offset + delta);
+            //} else if (type instanceof TypeSpecs.Enum) {
+            //	// Enum
+            //	result = BitConverter.readNumber[type.underlyingType](arr, offset + delta);
+            //} else if (type instanceof TypeSpecs.Vector) {
+            //	// Vektor (variable oder fixed)
+            //	if (type.optional && offset + delta >= arr.length) {
+            //		// Optionaler Vektor:
+            //		// Wir sind am Ende, keine weiteren Werte lesen
+            //		result = { value: [], readBytes: 0 };
+            //	} else {
+            //		if (type.minLength === type.maxLength) {
+            //			result = BitConverter.readVectorFixed[type.underlyingType](type.maxLength, arr, offset + delta);
+            //		} else {
+            //			result = BitConverter.readVectorVariable[type.underlyingType](type.maxLength, arr, offset + delta);
+            //		}
+            //	}
+            //} else if (type instanceof TypeSpecs.Struct) {
+            //	// Zusammengesetzter Typ
+            //	result = TLSStruct._from(type.spec, arr, offset + delta);
+            //} else {
+            //	throw new TypeError("unknown message type specified");
+            //}
             // Wert merken und im Array voranschreiten
-            this[propName] = result.value;
-            delta += result.delta;
+            this[propName] = result.result;
+            delta += result.readBytes;
         }
-        return { value: this, delta: delta };
+        return delta;
     };
     /**
      * Erzeugt eine TLSStruct der angegebenen Definition aus einem Byte-Array
@@ -86,12 +92,16 @@ var TLSStruct = (function () {
      * @param arr - Das Array, aus dem gelesen werden soll
      * @param offset - Der Index, ab dem gelesen werden soll
      */
-    TLSStruct.from = function (spec, arr, offset) {
-        return TLSStruct._from(spec, arr, offset).value;
-    };
-    TLSStruct._from = function (spec, arr, offset) {
-        var ret = new TLSStruct(spec);
-        return ret.deserialize(arr, offset);
+    //static from(spec: TypeSpecs.StructSpec, arr: Buffer, offset?: number) {
+    //	return TLSStruct._from(spec, arr, offset).value;
+    //}
+    //private static _from(spec: TypeSpecs.StructSpec, arr: Buffer, offset?: number) {
+    //	const ret = new TLSStruct(spec);
+    //	return ret.deserialize(arr, offset);
+    //}
+    TLSStruct.from = function (spec, buf, offset) {
+        var ret = new spec.structType(spec.spec);
+        return { result: ret, readBytes: ret.deserialize(buf) };
     };
     /**
      * Serialisiert das Objekt in ein ein Byte-Array
@@ -102,36 +112,39 @@ var TLSStruct = (function () {
             .map(function (def) {
             // Welche Eigenschaft wird ausgelesen?
             var propName = def.name, type = def.type, propValue = _this[propName];
-            var result;
-            // Typ ermitteln
-            if (typeof type === "string") {
-                // Basistyp (Zahl)
-                result = BitConverter.writeNumber[type](propValue);
+            switch (type.type) {
+                case "number":
+                case "enum":
+                    var bitSize = TypeSpecs.getPrimitiveSize(type);
+                    return BitConverter_1.numberToBuffer(propValue, bitSize);
+                case "vector":
+                case "struct":
+                    return propValue.serialize(); // we know this must be an ISerializable
             }
-            else if (type instanceof TLSTypes.Enum) {
-                // Enum
-                result = BitConverter.writeNumber[type.underlyingType](propValue);
-            }
-            else if (type instanceof TLSTypes.Vector) {
-                // Optionale Vektoren nur schreiben, wenn länger als 0
-                if (type.optional && propValue.length === 0)
-                    return Buffer.from([]);
-                // Vektor (variabel oder fixed)
-                if (type.minLength === type.maxLength) {
-                    result = BitConverter.writeVectorFixed[type.underlyingType](propValue);
-                }
-                else {
-                    result = BitConverter.writeVectorVariable[type.underlyingType](propValue, type.maxLength);
-                }
-            }
-            else if (type instanceof TLSTypes.Struct) {
-                // Zusammengesetzter Typ
-                return propValue.serialize();
-            }
-            else {
-                throw new TypeError("unknown message type specified");
-            }
-            return result.value;
+            //let result: BitConverter.BitConverterResult<Buffer>;
+            //// Typ ermitteln
+            //if (typeof type === "string") {
+            //	// Basistyp (Zahl)
+            //	result = BitConverter.writeNumber[type](propValue);
+            //} else if (type instanceof TypeSpecs.Enum) {
+            //	// Enum
+            //	result = BitConverter.writeNumber[type.underlyingType](propValue);
+            //} else if (type instanceof TypeSpecs.Vector) {
+            //	// Optionale Vektoren nur schreiben, wenn länger als 0
+            //	if (type.optional && propValue.length === 0) return Buffer.from([]);
+            //	// Vektor (variabel oder fixed)
+            //	if (type.minLength === type.maxLength) {
+            //		result = BitConverter.writeVectorFixed[type.underlyingType](propValue);
+            //	} else {
+            //		result = BitConverter.writeVectorVariable[type.underlyingType](propValue, type.maxLength);
+            //	}
+            //} else if (type instanceof TypeSpecs.Struct) {
+            //	// Zusammengesetzter Typ
+            //	return (propValue as TLSStruct).serialize();
+            //} else {
+            //	throw new TypeError("unknown message type specified");
+            //}
+            //return result.value;
         });
         return Buffer.concat(ret);
         //.reduce((prev, cur) => prev.concat(cur), [])
