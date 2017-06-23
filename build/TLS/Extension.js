@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TLSTypes = require("./TLSTypes");
+var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
 var ExtensionType;
 (function (ExtensionType) {
@@ -18,7 +18,7 @@ var ExtensionType;
 })(ExtensionType = exports.ExtensionType || (exports.ExtensionType = {}));
 ;
 (function (ExtensionType) {
-    ExtensionType.__spec = new TLSTypes.Enum("uint16", ExtensionType);
+    ExtensionType.__spec = TypeSpecs.define.Enum("uint16", ExtensionType);
 })(ExtensionType = exports.ExtensionType || (exports.ExtensionType = {}));
 var Extension = (function (_super) {
     __extends(Extension, _super);
@@ -32,7 +32,7 @@ var Extension = (function (_super) {
 }(TLSStruct_1.TLSStruct));
 Extension.__spec = {
     extension_type: ExtensionType.__spec,
-    extension_data: new TLSTypes.Vector("uint8", 0, Math.pow(2, 16) - 1)
+    extension_data: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 16) - 1)
 };
 exports.default = Extension;
 //# sourceMappingURL=Extension.js.map

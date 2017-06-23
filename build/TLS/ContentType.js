@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var TLSTypes = require("./TLSTypes");
+var TypeSpecs = require("./TypeSpecs");
 var ContentType;
 (function (ContentType) {
     ContentType[ContentType["change_cipher_spec"] = 20] = "change_cipher_spec";
@@ -9,6 +9,6 @@ var ContentType;
     ContentType[ContentType["application_data"] = 23] = "application_data";
 })(ContentType = exports.ContentType || (exports.ContentType = {}));
 (function (ContentType) {
-    ContentType.__spec = new TLSTypes.Enum("uint8", ContentType);
+    ContentType.__spec = TypeSpecs.define.Enum("uint8", ContentType);
 })(ContentType = exports.ContentType || (exports.ContentType = {}));
 //# sourceMappingURL=ContentType.js.map

@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TLSTypes = require("../TLS/TLSTypes");
+var TypeSpecs = require("../TLS/TypeSpecs");
 var TLSStruct_1 = require("../TLS/TLSStruct");
 var object_polyfill_1 = require("../lib/object-polyfill");
 var Random_1 = require("../TLS/Random");
@@ -169,12 +169,12 @@ var FragmentedHandshake = (function (_super) {
     return FragmentedHandshake;
 }(TLSStruct_1.TLSStruct));
 FragmentedHandshake.__spec = {
-    msg_type: new TLSTypes.Enum("uint8", HandshakeType),
-    total_length: "uint24",
-    message_seq: "uint16",
-    fragment_offset: "uint24",
+    msg_type: TypeSpecs.define.Enum("uint8", HandshakeType),
+    total_length: TypeSpecs.define.Number("uint24"),
+    message_seq: TypeSpecs.define.Number("uint16"),
+    fragment_offset: TypeSpecs.define.Number("uint24"),
     // uint24 fragment_length is implied in the variable size vector
-    fragment: new TLSTypes.Vector("uint8", 0, Math.pow(2, 24) - 1)
+    fragment: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 24) - 1)
 };
 /**
  * The amount of data consumed by a handshake message header (without the actual fragment)
@@ -221,10 +221,10 @@ var ClientHello = (function (_super) {
     return ClientHello;
 }(Handshake));
 ClientHello.__spec = {
-    client_version: ProtocolVersion_1.ProtocolVersion.__spec,
-    random: Random_1.Random.__spec,
-    session_id: SessionID_1.SessionID.__spec,
-    cookie: Cookie_1.Cookie.__spec,
+    client_version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+    random: TypeSpecs.define.Struct(Random_1.Random),
+    session_id: TypeSpecs.define.Struct(SessionID_1.SessionID),
+    cookie: TypeSpecs.define.Struct(Cookie_1.Cookie),
 };
 ClientHello.__bodySpecWithExtensions = object_polyfill_1.extend(ClientHello.__spec, {});
 exports.ClientHello = ClientHello;
@@ -236,10 +236,10 @@ var ServerHello = (function (_super) {
     return ServerHello;
 }(Handshake));
 ServerHello.__spec = {
-    server_version: ProtocolVersion_1.ProtocolVersion.__spec,
-    random: Random_1.Random.__spec,
-    session_id: SessionID_1.SessionID.__spec,
-    cipher_suite: CipherSuite_1.CipherSuite.__spec,
+    server_version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+    random: TypeSpecs.define.Struct(Random_1.Random),
+    session_id: TypeSpecs.define.Struct(SessionID_1.SessionID),
+    cipher_suite: TypeSpecs.define.Struct(CipherSuite_1.CipherSuite),
     compression_method: ConnectionState_1.CompressionMethod.__spec
 };
 ServerHello.__bodySpecWithExtensions = object_polyfill_1.extend(ServerHello.__spec, {});
@@ -252,8 +252,8 @@ var HelloVerifyRequest = (function (_super) {
     return HelloVerifyRequest;
 }(Handshake));
 HelloVerifyRequest.__spec = {
-    server_version: ProtocolVersion_1.ProtocolVersion.__spec,
-    cookie: Cookie_1.Cookie.__spec
+    server_version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+    cookie: TypeSpecs.define.Struct(Cookie_1.Cookie)
 };
 exports.HelloVerifyRequest = HelloVerifyRequest;
 var ServerHelloDone = (function (_super) {
@@ -273,7 +273,7 @@ var Finished = (function (_super) {
     return Finished;
 }(Handshake));
 Finished.__spec = {
-    verify_data: new TLSTypes.Vector("uint8", 0, Math.pow(2, 16)) // TODO: wirkliche Länge "verify_data_length" herausfinden
+    verify_data: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 16)) // TODO: wirkliche Länge "verify_data_length" herausfinden
 };
 exports.Finished = Finished;
 //# sourceMappingURL=Handshake.js.map

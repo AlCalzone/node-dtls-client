@@ -1,4 +1,4 @@
-﻿import * as TLSTypes from "./TLSTypes";
+﻿import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
 
 export enum ContentType {
@@ -8,5 +8,5 @@ export enum ContentType {
 	application_data = 23,
 }
 export namespace ContentType {
-	export const __spec = new TLSTypes.Enum("uint8", ContentType);
+	export const __spec = TypeSpecs.define.Enum("uint8", ContentType);
 }

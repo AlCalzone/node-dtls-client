@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TLSTypes = require("./TLSTypes");
+var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
 var PreMasterSecret = (function (_super) {
     __extends(PreMasterSecret, _super);
@@ -23,8 +23,8 @@ var PreMasterSecret = (function (_super) {
     return PreMasterSecret;
 }(TLSStruct_1.TLSStruct));
 PreMasterSecret.__spec = {
-    other_secret: new TLSTypes.Vector("uint8", 0, Math.pow(2, 16) - 1),
-    psk: new TLSTypes.Vector("uint8", 0, Math.pow(2, 16) - 1)
+    other_secret: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 16) - 1),
+    psk: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 16) - 1)
 };
 exports.PreMasterSecret = PreMasterSecret;
 //# sourceMappingURL=PreMasterSecret.js.map

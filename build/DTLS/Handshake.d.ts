@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import * as TLSTypes from "../TLS/TLSTypes";
+import * as TypeSpecs from "../TLS/TypeSpecs";
 import { TLSStruct } from "../TLS/TLSStruct";
 import { SessionID } from "../TLS/SessionID";
 import { Cookie } from "./Cookie";
@@ -8,7 +8,7 @@ import { CompressionMethod } from "../TLS/ConnectionState";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 export declare abstract class Handshake extends TLSStruct {
     msg_type: HandshakeType;
-    constructor(msg_type: HandshakeType, bodySpec: TLSTypes.StructSpec, initial?: any);
+    constructor(msg_type: HandshakeType, bodySpec: TypeSpecs.StructSpec, initial?: any);
     message_seq: number;
     /**
      * Fragments this packet into a series of packets according to the configured MTU
@@ -28,11 +28,11 @@ export declare class FragmentedHandshake extends TLSStruct {
     fragment_offset: number;
     fragment: Buffer;
     static readonly __spec: {
-        msg_type: any;
-        total_length: string;
-        message_seq: string;
-        fragment_offset: string;
-        fragment: any;
+        msg_type: TypeSpecs.Enum;
+        total_length: TypeSpecs.Number;
+        message_seq: TypeSpecs.Number;
+        fragment_offset: TypeSpecs.Number;
+        fragment: TypeSpecs.Vector;
     };
     /**
      * The amount of data consumed by a handshake message header (without the actual fragment)
@@ -78,20 +78,10 @@ export declare class HelloRequest extends Handshake {
 }
 export declare class ClientHello extends Handshake {
     static readonly __spec: {
-        client_version: {
-            major: string;
-            minor: string;
-        };
-        random: {
-            gmt_unix_time: string;
-            random_bytes: any;
-        };
-        session_id: {
-            value: any;
-        };
-        cookie: {
-            value: any;
-        };
+        client_version: TypeSpecs.Struct;
+        random: TypeSpecs.Struct;
+        session_id: TypeSpecs.Struct;
+        cookie: TypeSpecs.Struct;
     };
     static readonly __bodySpecWithExtensions: any;
     client_version: ProtocolVersion;
@@ -102,21 +92,11 @@ export declare class ClientHello extends Handshake {
 }
 export declare class ServerHello extends Handshake {
     static readonly __spec: {
-        server_version: {
-            major: string;
-            minor: string;
-        };
-        random: {
-            gmt_unix_time: string;
-            random_bytes: any;
-        };
-        session_id: {
-            value: any;
-        };
-        cipher_suite: {
-            id: string;
-        };
-        compression_method: any;
+        server_version: TypeSpecs.Struct;
+        random: TypeSpecs.Struct;
+        session_id: TypeSpecs.Struct;
+        cipher_suite: TypeSpecs.Struct;
+        compression_method: TypeSpecs.Enum;
     };
     static readonly __bodySpecWithExtensions: any;
     server_version: ProtocolVersion;
@@ -128,13 +108,8 @@ export declare class ServerHello extends Handshake {
 }
 export declare class HelloVerifyRequest extends Handshake {
     static readonly __spec: {
-        server_version: {
-            major: string;
-            minor: string;
-        };
-        cookie: {
-            value: any;
-        };
+        server_version: TypeSpecs.Struct;
+        cookie: TypeSpecs.Struct;
     };
     server_version: ProtocolVersion;
     cookie: Cookie;
@@ -146,7 +121,7 @@ export declare class ServerHelloDone extends Handshake {
 }
 export declare class Finished extends Handshake {
     static readonly __spec: {
-        verify_data: any;
+        verify_data: TypeSpecs.Vector;
     };
     verify_data: Buffer;
     constructor(initial?: any);

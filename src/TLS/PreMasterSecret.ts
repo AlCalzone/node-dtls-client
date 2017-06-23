@@ -1,11 +1,11 @@
-﻿import * as TLSTypes from "./TLSTypes";
+﻿import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
 
 export class PreMasterSecret extends TLSStruct {
 
 	static readonly __spec = {
-		other_secret: new TLSTypes.Vector("uint8", 0, 2 ** 16 - 1),
-		psk: new TLSTypes.Vector("uint8", 0, 2 ** 16 - 1)
+		other_secret: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 2 ** 16 - 1),
+		psk: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 2 ** 16 - 1)
 	}
 
 	constructor(

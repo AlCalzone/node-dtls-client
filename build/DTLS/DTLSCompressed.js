@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TLSTypes = require("../TLS/TLSTypes");
+var TypeSpecs = require("../TLS/TypeSpecs");
 var TLSStruct_1 = require("../TLS/TLSStruct");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var ContentType_1 = require("../TLS/ContentType");
@@ -53,11 +53,11 @@ var DTLSCompressed = (function (_super) {
 }(TLSStruct_1.TLSStruct));
 DTLSCompressed.__spec = {
     type: ContentType_1.ContentType.__spec,
-    version: ProtocolVersion_1.ProtocolVersion.__spec,
-    epoch: "uint16",
-    sequence_number: "uint48",
-    // length field is implied in the variable length vector //length: new TLSTypes.Calculated("uint16", "serializedLength", "fragment"),
-    fragment: new TLSTypes.Vector("uint8", 0, 1024 + Math.pow(2, 14))
+    version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+    epoch: TypeSpecs.define.Number("uint16"),
+    sequence_number: TypeSpecs.define.Number("uint48"),
+    // length field is implied in the variable length vector //length: new TypeSpecs.Calculated("uint16", "serializedLength", "fragment"),
+    fragment: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 1024 + Math.pow(2, 14))
 };
 exports.DTLSCompressed = DTLSCompressed;
 var MACHeader = (function (_super) {
@@ -74,11 +74,11 @@ var MACHeader = (function (_super) {
     return MACHeader;
 }(TLSStruct_1.TLSStruct));
 MACHeader.__spec = {
-    epoch: "uint16",
-    sequence_number: "uint48",
+    epoch: TypeSpecs.define.Number("uint16"),
+    sequence_number: TypeSpecs.define.Number("uint48"),
     type: ContentType_1.ContentType.__spec,
-    version: ProtocolVersion_1.ProtocolVersion.__spec,
-    fragment_length: "uint16"
+    version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+    fragment_length: TypeSpecs.define.Number("uint16")
 };
 exports.MACHeader = MACHeader;
 //# sourceMappingURL=DTLSCompressed.js.map

@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TLSTypes = require("./TLSTypes");
+var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
 var HashAlgorithm;
 (function (HashAlgorithm) {
@@ -23,7 +23,7 @@ var HashAlgorithm;
     HashAlgorithm[HashAlgorithm["sha512"] = 6] = "sha512";
 })(HashAlgorithm = exports.HashAlgorithm || (exports.HashAlgorithm = {}));
 (function (HashAlgorithm) {
-    HashAlgorithm.__spec = new TLSTypes.Enum("uint8", HashAlgorithm);
+    HashAlgorithm.__spec = TypeSpecs.define.Enum("uint8", HashAlgorithm);
 })(HashAlgorithm = exports.HashAlgorithm || (exports.HashAlgorithm = {}));
 var SignatureAlgorithm;
 (function (SignatureAlgorithm) {
@@ -33,7 +33,7 @@ var SignatureAlgorithm;
     SignatureAlgorithm[SignatureAlgorithm["ecdsa"] = 3] = "ecdsa";
 })(SignatureAlgorithm = exports.SignatureAlgorithm || (exports.SignatureAlgorithm = {}));
 (function (SignatureAlgorithm) {
-    SignatureAlgorithm.__spec = new TLSTypes.Enum("uint8", SignatureAlgorithm);
+    SignatureAlgorithm.__spec = TypeSpecs.define.Enum("uint8", SignatureAlgorithm);
 })(SignatureAlgorithm = exports.SignatureAlgorithm || (exports.SignatureAlgorithm = {}));
 var SignatureAndHashAlgorithm = (function (_super) {
     __extends(SignatureAndHashAlgorithm, _super);

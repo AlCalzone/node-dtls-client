@@ -1,4 +1,4 @@
-﻿import * as TLSTypes from "../TLS/TLSTypes";
+﻿import * as TypeSpecs from "../TLS/TypeSpecs";
 import { TLSStruct } from "../TLS/TLSStruct";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
@@ -6,12 +6,12 @@ import { ContentType } from "../TLS/ContentType";
 export class DTLSPlaintext extends TLSStruct {
 
 	static readonly __spec = {
-		type: ContentType.__spec,
-		version: ProtocolVersion.__spec,
-		epoch: "uint16",
-		sequence_number: "uint48",
-		// length field is implied in the variable length vector //length: new TLSTypes.Calculated("uint16", "serializedLength", "fragment"),
-		fragment: new TLSTypes.Vector("uint8", 0, 2**14)
+		type: TypeSpecs.define.Struct(ContentType),
+		version: TypeSpecs.define.Struct(ProtocolVersion),
+		epoch: TypeSpecs.define.Number("uint16"),
+		sequence_number: TypeSpecs.define.Number("uint48"),
+		// length field is implied in the variable length vector //length: new TypeSpecs.Calculated("uint16", "serializedLength", "fragment"),
+		fragment: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 2**14)
 	};
 
 	constructor(

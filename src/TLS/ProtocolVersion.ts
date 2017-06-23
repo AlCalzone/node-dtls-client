@@ -1,13 +1,13 @@
 ﻿import { TLSStruct } from "./TLSStruct";
-import * as TLSTypes from "./TLSTypes";
+import * as TypeSpecs from "./TypeSpecs";
 
 // TLS -> Anpassen für DTLS!!!
 
 export class ProtocolVersion extends TLSStruct {
 
 	static readonly __spec = {
-		major: "uint8",
-		minor: "uint8"
+		major: TypeSpecs.define.Number("uint8"),
+		minor: TypeSpecs.define.Number("uint8")
 	};
 
 	/**

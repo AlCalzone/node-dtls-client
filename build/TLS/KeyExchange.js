@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TLSTypes = require("./TLSTypes");
+var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
 var ServerKeyExchange = (function (_super) {
     __extends(ServerKeyExchange, _super);
@@ -23,7 +23,7 @@ var ServerKeyExchange = (function (_super) {
 }(TLSStruct_1.TLSStruct));
 ServerKeyExchange.__specs = {
     psk: {
-        psk_identity_hint: new TLSTypes.Vector("uint8", 0, Math.pow(2, 16) - 1)
+        psk_identity_hint: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 16) - 1)
     }
 };
 exports.ServerKeyExchange = ServerKeyExchange;
@@ -38,7 +38,7 @@ var ClientKeyExchange = (function (_super) {
 }(TLSStruct_1.TLSStruct));
 ClientKeyExchange.__specs = {
     psk: {
-        psk_identity: new TLSTypes.Vector("uint8", 0, Math.pow(2, 16) - 1)
+        psk_identity: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 16) - 1)
     }
 };
 exports.ClientKeyExchange = ClientKeyExchange;

@@ -10,6 +10,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
 var BlockCipher = require("./BlockCipher");
 var PRF_1 = require("./PRF");
@@ -94,7 +95,7 @@ var CipherSuite = (function (_super) {
     return CipherSuite;
 }(TLSStruct_1.TLSStruct));
 CipherSuite.__spec = {
-    id: "uint16"
+    id: TypeSpecs.define.Number("uint16")
 };
 exports.CipherSuite = CipherSuite;
 //# sourceMappingURL=CipherSuite.js.map

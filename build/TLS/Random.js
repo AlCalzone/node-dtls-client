@@ -10,7 +10,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TLSTypes = require("./TLSTypes");
+var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
 var Random = (function (_super) {
     __extends(Random, _super);
@@ -20,8 +20,8 @@ var Random = (function (_super) {
     return Random;
 }(TLSStruct_1.TLSStruct));
 Random.__spec = {
-    gmt_unix_time: "uint32",
-    random_bytes: new TLSTypes.Vector("uint8", 28)
+    gmt_unix_time: TypeSpecs.define.Number("uint32"),
+    random_bytes: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 28)
 };
 exports.Random = Random;
 //# sourceMappingURL=Random.js.map

@@ -1,4 +1,4 @@
-﻿import * as TLSTypes from "./TLSTypes";
+﻿import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
 
 export type KeyExchangeAlgorithm =
@@ -11,10 +11,10 @@ export type KeyExchangeAlgorithm =
 export class ServerKeyExchange extends TLSStruct {
 
 	static readonly __specs: {
-		[algorithm in KeyExchangeAlgorithm]?: TLSTypes.StructSpec
+		[algorithm in KeyExchangeAlgorithm]?: TypeSpecs.StructSpec
 	} = {
 		psk: {
-			psk_identity_hint: new TLSTypes.Vector("uint8", 0, 2**16-1)
+			psk_identity_hint: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 2**16-1)
 		}
 	}
 
@@ -27,10 +27,10 @@ export class ServerKeyExchange extends TLSStruct {
 export class ClientKeyExchange extends TLSStruct {
 
 	static readonly __specs: {
-		[algorithm in KeyExchangeAlgorithm]?: TLSTypes.StructSpec
+		[algorithm in KeyExchangeAlgorithm]?: TypeSpecs.StructSpec
 	} = {
 		psk: {
-			psk_identity: new TLSTypes.Vector("uint8", 0, 2 ** 16 - 1)
+			psk_identity: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 2 ** 16 - 1)
 		}
 	}
 
