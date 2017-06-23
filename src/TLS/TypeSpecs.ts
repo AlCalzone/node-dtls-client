@@ -1,4 +1,7 @@
-﻿export type Numbers =
+﻿import { Serializable } from "./Serializable";
+import { applyMixins } from "../lib/Mixins";
+
+export type Numbers =
 	"uint8" |
 	"uint16" |
 	"uint24" |
@@ -22,9 +25,10 @@ export type Primitive = Number | Enum;
 export interface StructSpec {
 	[propName: string]: any
 }
-export interface Struct {
+export interface Struct<T implements Serializable<T>> {
 	type: "struct";
 	spec: StructSpec;
+	structType: T;
 }
 
 export type Complex = Primitive | Struct;
@@ -40,11 +44,11 @@ export interface Vector {
 export type All = Complex | Vector;
 
 // Shortcuts:
-export const make = {
-	["enum"]: (size: Numbers, enumType: any) => ({ type: "enum", size, enumType }),
-	number: (size: Numbers) => ({ type: "number", size }),
-	struct: (spec: StructSpec) => ({ type: "struct", spec }),
-	vector: (itemType: Complex, minLength = 0, maxLength = minLength, optional = false) => ({
+export const define = {
+	Enum: (size: Numbers, enumType: any) => ({ type: "enum", size, enumType }),
+	Number: (size: Numbers) => ({ type: "number", size }),
+	Struct: (spec: StructSpec, structType) => ({ type: "struct", spec, structType }),
+	Vector: (itemType: Complex, minLength = 0, maxLength = minLength, optional = false) => ({
 		type: "vector",
 		itemType,
 		minLength, maxLength,
