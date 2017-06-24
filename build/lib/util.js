@@ -16,11 +16,4 @@ function fitToWholeBytes(value) {
     return ret;
 }
 exports.fitToWholeBytes = fitToWholeBytes;
-/**
- * Provides a static implementation of an interface with static and prototype methods
- */
-function staticImplements() {
-    return function (constructor) { };
-}
-exports.staticImplements = staticImplements;
 //# sourceMappingURL=util.js.map

@@ -8,7 +8,7 @@ var Vector_1 = require("./Vector");
  * Basisklasse für TLS-Objekte
  */
 var TLSStruct = (function () {
-    function TLSStruct(spec, initial) {
+    function TLSStruct(spec /*, initial?*/) {
         this.propertyDefinitions = [];
         // Eigenschaften aus Spec kopieren
         this.__spec__ = spec;
@@ -18,10 +18,10 @@ var TLSStruct = (function () {
                 name: key,
                 type: value
             });
-            if (initial != undefined && initial.hasOwnProperty(key)) {
+            /*if (initial != undefined && initial.hasOwnProperty(key)) {
                 // sonst evtl. die Eigenschaft initialisieren
                 this[key] = initial[key];
-            }
+            }*/
         }
     }
     /**
@@ -101,7 +101,7 @@ var TLSStruct = (function () {
     //}
     TLSStruct.from = function (spec, buf, offset) {
         var ret = new spec.structType(spec.spec);
-        return { result: ret, readBytes: ret.deserialize(buf) };
+        return { result: ret, readBytes: ret.deserialize(buf, offset) };
     };
     /**
      * Serialisiert das Objekt in ein ein Byte-Array

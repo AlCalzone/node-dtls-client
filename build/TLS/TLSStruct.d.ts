@@ -9,7 +9,7 @@ export declare type PropertyDefinition = {
  * Basisklasse für TLS-Objekte
  */
 export declare class TLSStruct {
-    constructor(spec: TypeSpecs.StructSpec, initial?: any);
+    constructor(spec: TypeSpecs.StructSpec);
     private __spec__;
     private propertyDefinitions;
     /**
