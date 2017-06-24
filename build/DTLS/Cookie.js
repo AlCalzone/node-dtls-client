@@ -23,7 +23,7 @@ var Cookie = (function (_super) {
     return Cookie;
 }(TLSStruct_1.TLSStruct));
 Cookie.__spec = {
-    value: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 8) - 1)
+    value: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 8) - 1)
 };
 exports.Cookie = Cookie;
 //# sourceMappingURL=Cookie.js.map

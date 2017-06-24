@@ -4,8 +4,8 @@ import { TLSStruct } from "./TLSStruct";
 export class PreMasterSecret extends TLSStruct {
 
 	static readonly __spec = {
-		other_secret: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 2 ** 16 - 1),
-		psk: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 2 ** 16 - 1)
+		other_secret: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1),
+		psk: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1)
 	}
 
 	constructor(

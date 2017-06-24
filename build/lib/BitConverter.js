@@ -2,6 +2,13 @@
 //import * as TypeSpecs from "./TypeSpecs";
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+//export type Vector = number[];
+//export type BitConverterResult<T> = {
+//	/** Das Ergebnis der BitConverter-Funktion */
+//	value: T,
+//	/** Die Anzahl an Bytes die gelesen bzw. geschrieben wurden */
+//	delta: number
+//};
 function numberToBuffer(value, size) {
     var n = size / 8;
     var ret = Buffer.alloc(n);

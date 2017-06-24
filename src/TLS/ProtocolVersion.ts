@@ -6,8 +6,8 @@ import * as TypeSpecs from "./TypeSpecs";
 export class ProtocolVersion extends TLSStruct {
 
 	static readonly __spec = {
-		major: TypeSpecs.define.Number("uint8"),
-		minor: TypeSpecs.define.Number("uint8")
+		major: TypeSpecs.uint8,
+		minor: TypeSpecs.uint8
 	};
 
 	/**

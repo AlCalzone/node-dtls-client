@@ -1,32 +1,61 @@
-﻿//import { expect } from "chai";
+﻿import { expect } from "chai";
 
-//import * as BitConverter from "./BitConverter";
+import { BitSizes, numberToBuffer, bufferToNumber } from "./BitConverter";
 //import { fitToWholeBytes } from "./util";
 
-//const msg_data_mismatch = "Daten stimmen nicht mit dem erwarteten Ergebnis überein";
-//const msg_delta_mismatch = "Delta stimmt nicht mit dem erwarteten Wert überein";
+const msg_data_mismatch = "Daten stimmen nicht mit dem erwarteten Ergebnis überein";
+const msg_delta_mismatch = "Delta stimmt nicht mit dem erwarteten Wert überein";
 
-//describe('BitConverter Number Tests =>', () => {
+describe('BitConverter Number Tests =>', () => {
 
-//	it('uint8 read', () => {
-//		const input = Buffer.from([0xFE]);
-//		const expected = 0xFE;
-//		const expectedDelta = 1;
-//		const output = BitConverter.readNumber["uint8"](input);
+	it('uint8 read 1', () => {
+		const input = Buffer.from([0xFE]);
+		const expected = 0xFE;
+		const output = bufferToNumber(input, 8);
 
-//		expect(output.value, msg_data_mismatch).to.equal(expected);
-//		expect(output.delta, msg_delta_mismatch).to.equal(expectedDelta);
-//	});
+		expect(output).to.equal(expected, msg_data_mismatch);
+	});
 
-//	it('uint8 write 1', () => {
-//		const input = 0xFE;
-//		const expected = Buffer.from([0xFE]);
-//		const expectedDelta = 1;
-//		const output = BitConverter.writeNumber["uint8"](input);
+	it('uint8 read 2', () => {
+		const input = Buffer.from([0, 0xFE, 0]);
+		const expected = 0xFE;
+		const output = bufferToNumber(input, 8, 1);
+
+		expect(output).to.equal(expected, msg_data_mismatch);
+	});
+
+	it('uint8 write', () => {
+		const input = 0xFE;
+		const expected = Buffer.from([0xFE]);
+		const output = numberToBuffer(input, 8);
 		
-//		expect(expected, msg_data_mismatch).to.deep.equal(output.value);
-//		expect(output.delta, msg_delta_mismatch).to.equal(expectedDelta);
-//	});
+		expect(output).to.deep.equal(expected, msg_data_mismatch);
+	});
+
+	it('uint24 read 1', () => {
+		const input = Buffer.from([0xFE, 0xFD, 0xFC]);
+		const expected = 0xFEFDFC;
+		const output = bufferToNumber(input, 24);
+
+		expect(output).to.equal(expected, msg_data_mismatch);
+	});
+
+	it('uint24 read 2', () => {
+		const input = Buffer.from([0, 0xFE, 0xFD, 0xFC, 0]);
+		const expected = 0xFEFDFC;
+		const output = bufferToNumber(input, 24, 1);
+
+		expect(output).to.equal(expected, msg_data_mismatch);
+	});
+
+	it('uint24 write', () => {
+		const input = 0xFEFDFC;
+		const expected = Buffer.from([0xFE, 0xFD, 0xFC]);
+		const output = numberToBuffer(input, 24);
+
+		expect(output).to.deep.equal(expected, msg_data_mismatch);
+	});
+
 //	it('uint8 write 2', () => {
 //		const input = 0xFE;
 //		const expected = Buffer.from([0, 0, 0xFE]);
@@ -128,7 +157,7 @@
 //		expect(output.delta, msg_delta_mismatch).to.equal(expectedDelta);
 //	});
 
-//});
+});
 
 //describe('BitConverter fixed vector Tests =>', () => {
 

@@ -13,8 +13,8 @@ export declare class DTLSCompressed extends TLSStruct {
     static readonly __spec: {
         type: TypeSpecs.Enum;
         version: TypeSpecs.Struct;
-        epoch: TypeSpecs.Number;
-        sequence_number: TypeSpecs.Number;
+        epoch: Readonly<TypeSpecs.Number>;
+        sequence_number: Readonly<TypeSpecs.Number>;
         fragment: TypeSpecs.Vector;
     };
     constructor(type: ContentType, version: ProtocolVersion, epoch: number, sequence_number: number, fragment: Buffer);
@@ -43,11 +43,11 @@ export declare class MACHeader extends TLSStruct {
     version: ProtocolVersion;
     fragment_length: number;
     static readonly __spec: {
-        epoch: TypeSpecs.Number;
-        sequence_number: TypeSpecs.Number;
+        epoch: Readonly<TypeSpecs.Number>;
+        sequence_number: Readonly<TypeSpecs.Number>;
         type: TypeSpecs.Enum;
         version: TypeSpecs.Struct;
-        fragment_length: TypeSpecs.Number;
+        fragment_length: Readonly<TypeSpecs.Number>;
     };
     constructor(epoch: number, sequence_number: number, type: ContentType, version: ProtocolVersion, fragment_length: number);
 }

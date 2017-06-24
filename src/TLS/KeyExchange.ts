@@ -14,7 +14,7 @@ export class ServerKeyExchange extends TLSStruct {
 		[algorithm in KeyExchangeAlgorithm]?: TypeSpecs.StructSpec
 	} = {
 		psk: {
-			psk_identity_hint: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 2**16-1)
+			psk_identity_hint: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2**16-1)
 		}
 	}
 
@@ -30,7 +30,7 @@ export class ClientKeyExchange extends TLSStruct {
 		[algorithm in KeyExchangeAlgorithm]?: TypeSpecs.StructSpec
 	} = {
 		psk: {
-			psk_identity: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 2 ** 16 - 1)
+			psk_identity: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1)
 		}
 	}
 

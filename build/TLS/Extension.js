@@ -32,7 +32,7 @@ var Extension = (function (_super) {
 }(TLSStruct_1.TLSStruct));
 Extension.__spec = {
     extension_type: ExtensionType.__spec,
-    extension_data: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 16) - 1)
+    extension_data: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 16) - 1)
 };
 exports.default = Extension;
 //# sourceMappingURL=Extension.js.map

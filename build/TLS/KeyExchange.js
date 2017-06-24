@@ -23,7 +23,7 @@ var ServerKeyExchange = (function (_super) {
 }(TLSStruct_1.TLSStruct));
 ServerKeyExchange.__specs = {
     psk: {
-        psk_identity_hint: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 16) - 1)
+        psk_identity_hint: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 16) - 1)
     }
 };
 exports.ServerKeyExchange = ServerKeyExchange;
@@ -38,7 +38,7 @@ var ClientKeyExchange = (function (_super) {
 }(TLSStruct_1.TLSStruct));
 ClientKeyExchange.__specs = {
     psk: {
-        psk_identity: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 16) - 1)
+        psk_identity: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 16) - 1)
     }
 };
 exports.ClientKeyExchange = ClientKeyExchange;

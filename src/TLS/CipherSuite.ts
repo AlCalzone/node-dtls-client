@@ -89,7 +89,7 @@ function createNullMAC(): MACDelegate {
 export class CipherSuite extends TLSStruct {
 
 	static readonly __spec = {
-		id: TypeSpecs.define.Number("uint16")
+		id: TypeSpecs.uint16
 	}
 
 	constructor(

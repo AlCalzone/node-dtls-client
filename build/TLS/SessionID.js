@@ -23,7 +23,7 @@ var SessionID = (function (_super) {
     return SessionID;
 }(TLSStruct_1.TLSStruct));
 SessionID.__spec = {
-    value: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 32)
+    value: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 32)
 };
 exports.SessionID = SessionID;
 //# sourceMappingURL=SessionID.js.map

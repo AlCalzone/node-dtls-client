@@ -51,7 +51,7 @@ export declare class CipherSuite extends TLSStruct {
     cipherType: CipherType;
     algorithm: (BlockCipher.BlockCipherAlgorithm | AEADAlgorithm);
     static readonly __spec: {
-        id: TypeSpecs.Number;
+        id: Readonly<TypeSpecs.Number>;
     };
     constructor(id: number, keyExchange: KeyExchangeAlgorithm, mac: HashAlgorithm, prf: HashAlgorithm, cipherType: CipherType, algorithm?: (BlockCipher.BlockCipherAlgorithm | AEADAlgorithm));
     createCipher(connEnd: ConnectionEnd, keyMaterial: KeyMaterial): CipherDelegate;

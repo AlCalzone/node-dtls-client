@@ -170,11 +170,11 @@ var FragmentedHandshake = (function (_super) {
 }(TLSStruct_1.TLSStruct));
 FragmentedHandshake.__spec = {
     msg_type: TypeSpecs.define.Enum("uint8", HandshakeType),
-    total_length: TypeSpecs.define.Number("uint24"),
-    message_seq: TypeSpecs.define.Number("uint16"),
-    fragment_offset: TypeSpecs.define.Number("uint24"),
+    total_length: TypeSpecs.uint24,
+    message_seq: TypeSpecs.uint16,
+    fragment_offset: TypeSpecs.uint24,
     // uint24 fragment_length is implied in the variable size vector
-    fragment: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 24) - 1)
+    fragment: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 24) - 1)
 };
 /**
  * The amount of data consumed by a handshake message header (without the actual fragment)
@@ -273,7 +273,7 @@ var Finished = (function (_super) {
     return Finished;
 }(Handshake));
 Finished.__spec = {
-    verify_data: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 16)) // TODO: wirkliche Länge "verify_data_length" herausfinden
+    verify_data: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 16)) // TODO: wirkliche Länge "verify_data_length" herausfinden
 };
 exports.Finished = Finished;
 //# sourceMappingURL=Handshake.js.map

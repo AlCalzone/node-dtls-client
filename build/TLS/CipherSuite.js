@@ -95,7 +95,7 @@ var CipherSuite = (function (_super) {
     return CipherSuite;
 }(TLSStruct_1.TLSStruct));
 CipherSuite.__spec = {
-    id: TypeSpecs.define.Number("uint16")
+    id: TypeSpecs.uint16
 };
 exports.CipherSuite = CipherSuite;
 //# sourceMappingURL=CipherSuite.js.map

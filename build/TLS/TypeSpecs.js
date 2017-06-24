@@ -26,4 +26,10 @@ exports.define = {
         });
     },
 };
+exports.uint8 = Object.freeze(exports.define.Number("uint8"));
+exports.uint16 = Object.freeze(exports.define.Number("uint16"));
+exports.uint24 = Object.freeze(exports.define.Number("uint24"));
+exports.uint32 = Object.freeze(exports.define.Number("uint32"));
+exports.uint48 = Object.freeze(exports.define.Number("uint48"));
+exports.uint64 = Object.freeze(exports.define.Number("uint64"));
 //# sourceMappingURL=TypeSpecs.js.map

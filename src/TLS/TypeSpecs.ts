@@ -1,5 +1,4 @@
 ﻿import { ISerializable, ISerializableConstructor } from "./Serializable";
-import { applyMixins } from "../lib/Mixins";
 
 export type Numbers =
 	"uint8" |
@@ -67,3 +66,9 @@ export const define = {
 		optional
 	}),
 };
+export const uint8 = Object.freeze(define.Number("uint8"));
+export const uint16 = Object.freeze(define.Number("uint16"));
+export const uint24 = Object.freeze(define.Number("uint24"));
+export const uint32 = Object.freeze(define.Number("uint32"));
+export const uint48 = Object.freeze(define.Number("uint48"));
+export const uint64 = Object.freeze(define.Number("uint64"));
