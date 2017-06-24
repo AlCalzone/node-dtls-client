@@ -37,3 +37,9 @@ export declare const define: {
     Struct: (structType: any) => Struct;
     Vector: (itemSpec: Complex, minLength?: number, maxLength?: number, optional?: boolean) => Vector;
 };
+export declare const uint8: Readonly<Number>;
+export declare const uint16: Readonly<Number>;
+export declare const uint24: Readonly<Number>;
+export declare const uint32: Readonly<Number>;
+export declare const uint48: Readonly<Number>;
+export declare const uint64: Readonly<Number>;

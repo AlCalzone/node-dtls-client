@@ -23,8 +23,8 @@ var PreMasterSecret = (function (_super) {
     return PreMasterSecret;
 }(TLSStruct_1.TLSStruct));
 PreMasterSecret.__spec = {
-    other_secret: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 16) - 1),
-    psk: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 16) - 1)
+    other_secret: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 16) - 1),
+    psk: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 16) - 1)
 };
 exports.PreMasterSecret = PreMasterSecret;
 //# sourceMappingURL=PreMasterSecret.js.map

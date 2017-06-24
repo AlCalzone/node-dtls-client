@@ -29,9 +29,9 @@ export declare class FragmentedHandshake extends TLSStruct {
     fragment: Buffer;
     static readonly __spec: {
         msg_type: TypeSpecs.Enum;
-        total_length: TypeSpecs.Number;
-        message_seq: TypeSpecs.Number;
-        fragment_offset: TypeSpecs.Number;
+        total_length: Readonly<TypeSpecs.Number>;
+        message_seq: Readonly<TypeSpecs.Number>;
+        fragment_offset: Readonly<TypeSpecs.Number>;
         fragment: TypeSpecs.Vector;
     };
     /**

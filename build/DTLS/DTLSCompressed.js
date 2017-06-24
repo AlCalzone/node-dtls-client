@@ -54,10 +54,10 @@ var DTLSCompressed = (function (_super) {
 DTLSCompressed.__spec = {
     type: ContentType_1.ContentType.__spec,
     version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    epoch: TypeSpecs.define.Number("uint16"),
-    sequence_number: TypeSpecs.define.Number("uint48"),
+    epoch: TypeSpecs.uint16,
+    sequence_number: TypeSpecs.uint48,
     // length field is implied in the variable length vector //length: new TypeSpecs.Calculated("uint16", "serializedLength", "fragment"),
-    fragment: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 1024 + Math.pow(2, 14))
+    fragment: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 1024 + Math.pow(2, 14))
 };
 exports.DTLSCompressed = DTLSCompressed;
 var MACHeader = (function (_super) {
@@ -74,11 +74,11 @@ var MACHeader = (function (_super) {
     return MACHeader;
 }(TLSStruct_1.TLSStruct));
 MACHeader.__spec = {
-    epoch: TypeSpecs.define.Number("uint16"),
-    sequence_number: TypeSpecs.define.Number("uint48"),
+    epoch: TypeSpecs.uint16,
+    sequence_number: TypeSpecs.uint48,
     type: ContentType_1.ContentType.__spec,
     version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    fragment_length: TypeSpecs.define.Number("uint16")
+    fragment_length: TypeSpecs.uint16
 };
 exports.MACHeader = MACHeader;
 //# sourceMappingURL=DTLSCompressed.js.map

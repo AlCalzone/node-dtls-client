@@ -10,10 +10,10 @@ export class DTLSCiphertext extends TLSStruct {
 	static readonly __spec = {
 		type: ContentType.__spec,
 		version: TypeSpecs.define.Struct(ProtocolVersion),
-		epoch: TypeSpecs.define.Number("uint16"),
-		sequence_number: TypeSpecs.define.Number("uint48"),
+		epoch: TypeSpecs.uint16,
+		sequence_number: TypeSpecs.uint48,
 		// length field is implied in the variable length vector //length: new TypeSpecs.Calculated("uint16", "serializedLength", "fragment"),
-		fragment: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, 2048 + 2 ** 14)
+		fragment: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2048 + 2 ** 14)
 	};
 
 	constructor(

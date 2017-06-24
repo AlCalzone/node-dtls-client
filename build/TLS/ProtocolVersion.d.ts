@@ -4,8 +4,8 @@ export declare class ProtocolVersion extends TLSStruct {
     major: number;
     minor: number;
     static readonly __spec: {
-        major: TypeSpecs.Number;
-        minor: TypeSpecs.Number;
+        major: Readonly<TypeSpecs.Number>;
+        minor: Readonly<TypeSpecs.Number>;
     };
     /**
      *

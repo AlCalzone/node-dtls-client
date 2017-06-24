@@ -31,10 +31,10 @@ var DTLSPlaintext = (function (_super) {
 DTLSPlaintext.__spec = {
     type: TypeSpecs.define.Struct(ContentType_1.ContentType),
     version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    epoch: TypeSpecs.define.Number("uint16"),
-    sequence_number: TypeSpecs.define.Number("uint48"),
+    epoch: TypeSpecs.uint16,
+    sequence_number: TypeSpecs.uint48,
     // length field is implied in the variable length vector //length: new TypeSpecs.Calculated("uint16", "serializedLength", "fragment"),
-    fragment: TypeSpecs.define.Vector(TypeSpecs.define.Number("uint8"), 0, Math.pow(2, 14))
+    fragment: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 14))
 };
 exports.DTLSPlaintext = DTLSPlaintext;
 //# sourceMappingURL=DTLSPlaintext.js.map

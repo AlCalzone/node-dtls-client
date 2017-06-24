@@ -2,13 +2,13 @@
 //import * as TypeSpecs from "./TypeSpecs";
 
 export type BitSizes = 8 | 16 | 24 | 32 | 48 | 64;
-export type Vector = number[];
-export type BitConverterResult<T> = {
-	/** Das Ergebnis der BitConverter-Funktion */
-	value: T,
-	/** Die Anzahl an Bytes die gelesen bzw. geschrieben wurden */
-	delta: number
-};
+//export type Vector = number[];
+//export type BitConverterResult<T> = {
+//	/** Das Ergebnis der BitConverter-Funktion */
+//	value: T,
+//	/** Die Anzahl an Bytes die gelesen bzw. geschrieben wurden */
+//	delta: number
+//};
 
 export function numberToBuffer(value: number, size: BitSizes) {
 	const n = size / 8;
