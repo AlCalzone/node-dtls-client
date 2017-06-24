@@ -13,10 +13,3 @@ export function fitToWholeBytes(value: number): number {
 	if (ret === 0) ret++;
 	return ret;
 }
-
-/**
- * Provides a static implementation of an interface with static and prototype methods
- */
-export function staticImplements<T>() {
-	return (constructor: T) => { }
-}

@@ -50,7 +50,7 @@ export class Vector<T extends number | ISerializable> {
 		let delta = 0;
 		if (this.isVariableLength) {
 			const lengthBits = (8 * fitToWholeBytes(this.spec.maxLength)) as BitSizes;
-			length = bufferToNumber(buf, lengthBits);
+			length = bufferToNumber(buf, lengthBits, offset);
 			delta += lengthBits / 8;
 		}
 		switch (this.spec.itemSpec.type) {
@@ -58,15 +58,16 @@ export class Vector<T extends number | ISerializable> {
 			case "enum":
 				const bitSize = TypeSpecs.getPrimitiveSize(this.spec.itemSpec) as BitSizes;
 				for (let i = 0; i < length; i += bitSize / 8) {
-					this.items.push(bufferToNumber(buf, bitSize, delta) as any as T); // we know this is a number!
+					this.items.push(bufferToNumber(buf, bitSize, offset + delta) as any as T); // we know this is a number!
 					delta += bitSize / 8;
 				}
 				break;
 			case "struct":
 				let i = 0;
 				while (i < length) {
-					let item = this.spec.itemSpec.structType.from(this.spec.itemSpec, buf, offset + i);
+					let item = this.spec.itemSpec.structType.from(this.spec.itemSpec, buf, offset + delta);
 					i += item.readBytes;
+					delta += item.readBytes;
 					this.items.push(item.result as any as T); // we know this is a struct/ISerializable
 				}
 		}
@@ -79,7 +80,7 @@ export class Vector<T extends number | ISerializable> {
 			if (spec.optional) return { result: ret, readBytes: 0 };
 			throw new Error("nothing to deserialize");
 		} else {
-			return { result: ret, readBytes: ret.deserialize(buf) };
+			return { result: ret, readBytes: ret.deserialize(buf, offset) };
 		}
 	}
 

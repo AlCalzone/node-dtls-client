@@ -45,7 +45,7 @@ var Vector = (function () {
         var delta = 0;
         if (this.isVariableLength) {
             var lengthBits = (8 * util_1.fitToWholeBytes(this.spec.maxLength));
-            length = BitConverter_1.bufferToNumber(buf, lengthBits);
+            length = BitConverter_1.bufferToNumber(buf, lengthBits, offset);
             delta += lengthBits / 8;
         }
         switch (this.spec.itemSpec.type) {
@@ -53,15 +53,16 @@ var Vector = (function () {
             case "enum":
                 var bitSize = TypeSpecs.getPrimitiveSize(this.spec.itemSpec);
                 for (var i_1 = 0; i_1 < length; i_1 += bitSize / 8) {
-                    this.items.push(BitConverter_1.bufferToNumber(buf, bitSize, delta)); // we know this is a number!
+                    this.items.push(BitConverter_1.bufferToNumber(buf, bitSize, offset + delta)); // we know this is a number!
                     delta += bitSize / 8;
                 }
                 break;
             case "struct":
                 var i = 0;
                 while (i < length) {
-                    var item = this.spec.itemSpec.structType.from(this.spec.itemSpec, buf, offset + i);
+                    var item = this.spec.itemSpec.structType.from(this.spec.itemSpec, buf, offset + delta);
                     i += item.readBytes;
+                    delta += item.readBytes;
                     this.items.push(item.result); // we know this is a struct/ISerializable
                 }
         }
@@ -75,7 +76,7 @@ var Vector = (function () {
             throw new Error("nothing to deserialize");
         }
         else {
-            return { result: ret, readBytes: ret.deserialize(buf) };
+            return { result: ret, readBytes: ret.deserialize(buf, offset) };
         }
     };
     Object.defineProperty(Vector.prototype, "isVariableLength", {
