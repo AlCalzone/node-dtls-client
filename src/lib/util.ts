@@ -8,7 +8,7 @@ export function fitToWholeBytes(value: number): number {
 	while (value !== 0)
 	{
 		ret++;
-		value >>= 8;
+		value >>>= 8;
 	}
 	if (ret === 0) ret++;
 	return ret;
