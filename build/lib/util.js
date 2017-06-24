@@ -9,7 +9,7 @@ function fitToWholeBytes(value) {
     var ret = 0;
     while (value !== 0) {
         ret++;
-        value >>= 8;
+        value >>>= 8;
     }
     if (ret === 0)
         ret++;
