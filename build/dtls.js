@@ -12,6 +12,11 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var events_1 = require("events");
 var dgram = require("dgram");
+var RecordLayer_1 = require("./DTLS/RecordLayer");
+var ContentType_1 = require("./TLS/ContentType");
+//import { DTLSPlaintext } from "./DTLS/DTLSPlaintext";
+//import { DTLSCompressed } from "./DTLS/DTLSCompressed";
+//import { DTLSCiphertext } from "./DTLS/DTLSCiphertext";
 var dtls;
 (function (dtls) {
     /**
@@ -21,6 +26,7 @@ var dtls;
      */
     function createSocket(options, callback) {
         var ret = new Socket(options);
+        // TODO: only bind "message" event after the handshake is finished
         if (callback != null)
             ret.on("message", callback);
         return ret;
@@ -43,14 +49,19 @@ var dtls;
                 .on("message", _this.udp_onMessage)
                 .on("close", _this.udp_onClose)
                 .on("error", _this.udp_onError);
+            _this.recordLayer = new RecordLayer_1.RecordLayer(_this.udp, _this.options);
             return _this;
         }
-        Socket.prototype.send = function (msg, port, address, callback) {
-            //send(msg: Buffer, offset: number, length: number, port: number, address?: string, callback?: SendCallback) {
-            // TODO: for now only allow the short syntax. Enable alternative definitions later
-            // TODO: modify data
+        /**
+         * Send the given data. It is automatically compressed and encrypted.
+         */
+        Socket.prototype.send = function (data, callback) {
             // send finished data over UDP
-            this.udp.send(msg, port, address, callback);
+            var packet = {
+                type: ContentType_1.ContentType.application_data,
+                data: data
+            };
+            this.recordLayer.send(packet, callback);
         };
         Socket.prototype.close = function (callback) {
             if (callback)
@@ -59,6 +70,7 @@ var dtls;
         };
         Socket.prototype.udp_onListening = function () {
             // TODO handle data
+            // TODO only emit the event after finishing the handshake
             this.emit("listening");
         };
         Socket.prototype.udp_onMessage = function (msg, rinfo) {

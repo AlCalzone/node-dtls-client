@@ -15,10 +15,12 @@ var client_random_length = 32;
 var server_random_length = 32;
 var ConnectionState = (function () {
     function ConnectionState(values) {
-        for (var _i = 0, _a = object_polyfill_1.entries(values); _i < _a.length; _i++) {
-            var _b = _a[_i], key = _b[0], value = _b[1];
-            if (this.hasOwnProperty(key))
-                this[key] = value;
+        if (values) {
+            for (var _i = 0, _a = object_polyfill_1.entries(values); _i < _a.length; _i++) {
+                var _b = _a[_i], key = _b[0], value = _b[1];
+                if (this.hasOwnProperty(key))
+                    this[key] = value;
+            }
         }
     }
     Object.defineProperty(ConnectionState.prototype, "Cipher", {
@@ -39,11 +41,20 @@ var ConnectionState = (function () {
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(ConnectionState.prototype, "Mac", {
+    Object.defineProperty(ConnectionState.prototype, "OutgoingMac", {
         get: function () {
-            if (this._mac == undefined)
-                this._mac = this.cipherSuite.specifyMAC(this.key_material, this.entity);
-            return this._mac;
+            if (this._outgoingMac == undefined)
+                this._outgoingMac = this.cipherSuite.specifyMAC(this.key_material, this.entity);
+            return this._outgoingMac;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ConnectionState.prototype, "IncomingMac", {
+        get: function () {
+            if (this._incomingMac == undefined)
+                this._incomingMac = this.cipherSuite.specifyMAC(this.key_material, this.entity === "client" ? "server" : "client");
+            return this._incomingMac;
         },
         enumerable: true,
         configurable: true

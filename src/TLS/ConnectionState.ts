@@ -33,9 +33,11 @@ const server_random_length = 32;
 
 export class ConnectionState {
 
-	constructor(values) {
-		for (let [key, value] of entries(values)) {
-			if (this.hasOwnProperty(key)) this[key] = value;
+	constructor(values?) {
+		if (values) {
+			for (let [key, value] of entries(values)) {
+				if (this.hasOwnProperty(key)) this[key] = value;
+			}
 		}
 	}
 
@@ -72,11 +74,17 @@ export class ConnectionState {
 			this._decipher = this.cipherSuite.specifyDecipher(this.key_material, this.entity);
 		return this._decipher;
 	}
-	private _mac: MacDelegate;
-	public get Mac(): MacDelegate {
-		if (this._mac == undefined)
-			this._mac = this.cipherSuite.specifyMAC(this.key_material, this.entity);
-		return this._mac;
+	private _outgoingMac: MacDelegate;
+	public get OutgoingMac(): MacDelegate {
+		if (this._outgoingMac == undefined)
+			this._outgoingMac = this.cipherSuite.specifyMAC(this.key_material, this.entity);
+		return this._outgoingMac;
+	}
+	private _incomingMac: MacDelegate;
+	public get IncomingMac(): MacDelegate {
+		if (this._incomingMac == undefined)
+			this._incomingMac = this.cipherSuite.specifyMAC(this.key_material, this.entity === "client" ? "server" : "client");
+		return this._incomingMac;
 	}
 
 	/**

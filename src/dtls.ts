@@ -1,5 +1,11 @@
 ﻿import { EventEmitter } from "events";
 import * as dgram from "dgram";
+import { RecordLayer } from "./DTLS/RecordLayer";
+import { Message } from "./TLS/Message";
+import { ContentType } from "./TLS/ContentType";
+//import { DTLSPlaintext } from "./DTLS/DTLSPlaintext";
+//import { DTLSCompressed } from "./DTLS/DTLSCompressed";
+//import { DTLSCiphertext } from "./DTLS/DTLSCiphertext";
 
 export module dtls {
 
@@ -10,6 +16,7 @@ export module dtls {
 	 */
 	export function createSocket(options: Options, callback?: MessageEventHandler): Socket {
 		const ret = new Socket(options);
+		// TODO: only bind "message" event after the handshake is finished
 		if (callback != null) ret.on("message", callback);
 		return ret;
 	}
@@ -31,16 +38,23 @@ export module dtls {
 				.on("close", this.udp_onClose)
 				.on("error", this.udp_onError)
 				;
+			this.recordLayer = new RecordLayer(this.udp, this.options);
 		}
 
-		send(msg: Buffer, port: number, address?: string, callback?: SendCallback) {
-		//send(msg: Buffer, offset: number, length: number, port: number, address?: string, callback?: SendCallback) {
-			// TODO: for now only allow the short syntax. Enable alternative definitions later
+		private recordLayer: RecordLayer;
 
-			// TODO: modify data
+		/**
+		 * Send the given data. It is automatically compressed and encrypted.
+		 */
+		send(data: Buffer, callback?: SendCallback) {
 
 			// send finished data over UDP
-			this.udp.send(msg, port, address, callback);
+			const packet: Message = {
+				type: ContentType.application_data,
+				data: data
+			};
+
+			this.recordLayer.send(packet, callback);
 		}
 
 		close(callback?: CloseEventHandler) {
@@ -56,6 +70,7 @@ export module dtls {
 		private udp_onListening() {
 			// TODO handle data
 
+			// TODO only emit the event after finishing the handshake
 			this.emit("listening");
 		}
 		private udp_onMessage(msg: Buffer, rinfo: dgram.RemoteInfo) {
@@ -77,7 +92,9 @@ export module dtls {
 	export interface Options {
 		type: "udp4" | "udp6";
 		reuseAddr: boolean;
-	// TODO: DTLS-security options
+		address: string;
+		port: number;
+		keyContext: any; // TODO: DTLS-security options
 	}
 
 	export type ListeningEventHandler = () => void;

@@ -17,7 +17,11 @@ export declare module dtls {
          * INTERNAL USE, DON'T CALL DIRECTLY. use createSocket instead!
          */
         constructor(options: Options);
-        send(msg: Buffer, port: number, address?: string, callback?: SendCallback): void;
+        private recordLayer;
+        /**
+         * Send the given data. It is automatically compressed and encrypted.
+         */
+        send(data: Buffer, callback?: SendCallback): void;
         close(callback?: CloseEventHandler): void;
         private udp;
         private udp_onListening();
@@ -28,6 +32,9 @@ export declare module dtls {
     interface Options {
         type: "udp4" | "udp6";
         reuseAddr: boolean;
+        address: string;
+        port: number;
+        keyContext: any;
     }
     type ListeningEventHandler = () => void;
     type MessageEventHandler = (msg: Buffer, rinfo: dgram.RemoteInfo) => void;
