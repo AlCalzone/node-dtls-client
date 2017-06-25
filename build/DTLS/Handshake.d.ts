@@ -8,7 +8,7 @@ import { CompressionMethod } from "../TLS/ConnectionState";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 export declare abstract class Handshake extends TLSStruct {
     msg_type: HandshakeType;
-    constructor(msg_type: HandshakeType, bodySpec: TypeSpecs.StructSpec, initial?: any);
+    constructor(msg_type: HandshakeType, bodySpec: TypeSpecs.StructSpec);
     message_seq: number;
     /**
      * Fragments this packet into a series of packets according to the configured MTU
@@ -88,7 +88,7 @@ export declare class ClientHello extends Handshake {
     session_id: SessionID;
     cookie: Cookie;
     extensions: any;
-    constructor(initial?: any);
+    constructor();
 }
 export declare class ServerHello extends Handshake {
     static readonly __spec: {
@@ -104,7 +104,7 @@ export declare class ServerHello extends Handshake {
     cipher_suite: CipherSuite;
     compression_method: CompressionMethod;
     extensions: any;
-    constructor(initial?: any);
+    constructor();
 }
 export declare class HelloVerifyRequest extends Handshake {
     static readonly __spec: {
@@ -113,7 +113,7 @@ export declare class HelloVerifyRequest extends Handshake {
     };
     server_version: ProtocolVersion;
     cookie: Cookie;
-    constructor(initial?: any);
+    constructor();
 }
 export declare class ServerHelloDone extends Handshake {
     static readonly __spec: {};
@@ -124,5 +124,5 @@ export declare class Finished extends Handshake {
         verify_data: TypeSpecs.Vector;
     };
     verify_data: Buffer;
-    constructor(initial?: any);
+    constructor();
 }

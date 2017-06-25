@@ -15,21 +15,77 @@ export declare enum AEADAlgorithm {
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used
- * @param sourceConnEnd - Denotes which connection end the packet is coming from
- * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the encryption
  */
-export declare function createMAC(algorithm: HashAlgorithm, sourceConnEnd: ConnectionEnd, keyMaterial: KeyMaterial): MACDelegate;
-export declare type CipherDelegate = (plaintext: Buffer) => Buffer;
-export declare type DecipherDelegate = (ciphertext: Buffer) => {
-    err?: Error;
-    result: Buffer;
-};
-export interface MACDelegate {
+export declare function createMAC(algorithm: HashAlgorithm): GenericMacDelegate;
+export interface CipherDelegate {
+    /**
+     * Encrypts the given plaintext buffer using previously defined parameters
+     * @param plaintext - The plaintext to be encrypted
+     */
+    (plaintext: Buffer): Buffer;
+}
+export interface GenericCipherDelegate {
+    /**
+     * Encrypts the given plaintext buffer
+     * @param plaintext - The plaintext to be encrypted
+     * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the encryption
+     * @param connEnd - Denotes if the current entity is the server or client
+     */
+    (plaintext: Buffer, keyMaterial: KeyMaterial, connEnd: ConnectionEnd): Buffer;
+    /**
+     * The length of encryption keys in bytes
+     */
+    keyLength: number;
+    /**
+     * The length of IVs for each record
+     */
+    recordIvLength: number;
+}
+export interface DecipherDelegate {
+    /**
+     * Decrypts the given plaintext buffer using previously defined parameters
+     * @param ciphertext - The ciphertext to be decrypted
+     */
+    (plaintext: Buffer): {
+        err?: Error;
+        result: Buffer;
+    };
+}
+export interface GenericDecipherDelegate {
+    /**
+     * Decrypts the given plaintext buffer
+     * @param ciphertext - The ciphertext to be decrypted
+     * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the decryption
+     * @param connEnd - Denotes if the current entity is the server or client
+     */
+    (ciphertext: Buffer, keyMaterial: KeyMaterial, connEnd: ConnectionEnd): {
+        err?: Error;
+        result: Buffer;
+    };
+    /**
+     * The length of decryption keys in bytes
+     */
+    keyLength: number;
+    /**
+     * The length of IVs for each record
+     */
+    recordIvLength: number;
+}
+export interface MacDelegate {
     /**
      * Generates a MAC hash from the given data using the underlying HMAC function.
      * @param data - The data to be hashed
      */
     (data: Buffer): Buffer;
+}
+export interface GenericMacDelegate {
+    /**
+     * Generates a MAC hash from the given data using the underlying HMAC function.
+     * @param data - The data to be hashed
+     * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the encryption
+     * @param sourceConnEnd - Denotes which connection end the packet is coming from
+     */
+    (data: Buffer, keyMaterial: KeyMaterial, sourceConnEnd: ConnectionEnd): Buffer;
     /**
      * The key and hash output length of this hash function
      */
@@ -44,17 +100,26 @@ export interface KeyMaterial {
     server_write_IV: Buffer;
 }
 export declare class CipherSuite extends TLSStruct {
-    id: number;
-    keyExchange: KeyExchangeAlgorithm;
-    mac: HashAlgorithm;
-    prf: HashAlgorithm;
-    cipherType: CipherType;
-    algorithm: (BlockCipher.BlockCipherAlgorithm | AEADAlgorithm);
+    readonly id: number;
+    readonly keyExchange: KeyExchangeAlgorithm;
+    readonly macAlgorithm: HashAlgorithm;
+    readonly prfAlgorithm: HashAlgorithm;
+    readonly cipherType: CipherType;
+    readonly algorithm: (BlockCipher.BlockCipherAlgorithm | AEADAlgorithm);
     static readonly __spec: {
         id: Readonly<TypeSpecs.Number>;
     };
-    constructor(id: number, keyExchange: KeyExchangeAlgorithm, mac: HashAlgorithm, prf: HashAlgorithm, cipherType: CipherType, algorithm?: (BlockCipher.BlockCipherAlgorithm | AEADAlgorithm));
-    createCipher(connEnd: ConnectionEnd, keyMaterial: KeyMaterial): CipherDelegate;
-    createDecipher(connEnd: ConnectionEnd, keyMaterial: KeyMaterial): DecipherDelegate;
-    createMAC(sourceConnEnd: ConnectionEnd, keyMaterial: KeyMaterial): MACDelegate;
+    constructor(id: number, keyExchange: KeyExchangeAlgorithm, macAlgorithm: HashAlgorithm, prfAlgorithm: HashAlgorithm, cipherType: CipherType, algorithm?: (BlockCipher.BlockCipherAlgorithm | AEADAlgorithm));
+    private _cipher;
+    readonly Cipher: GenericCipherDelegate;
+    private createCipher();
+    specifyCipher(keyMaterial: KeyMaterial, connEnd: ConnectionEnd): CipherDelegate;
+    private _decipher;
+    readonly Decipher: GenericDecipherDelegate;
+    private createDecipher();
+    specifyDecipher(keyMaterial: KeyMaterial, connEnd: ConnectionEnd): DecipherDelegate;
+    private _mac;
+    readonly MAC: GenericMacDelegate;
+    private createMAC();
+    specifyMAC(keyMaterial: KeyMaterial, sourceConnEnd: ConnectionEnd): MacDelegate;
 }

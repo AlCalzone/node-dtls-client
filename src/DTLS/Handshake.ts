@@ -14,11 +14,10 @@ export abstract class Handshake extends TLSStruct {
 	constructor(
 		public msg_type: HandshakeType,
 		bodySpec: TypeSpecs.StructSpec,
-		initial?: any
 		/*,
 		public body?: TLSStruct*/
 	) {
-		super(bodySpec, initial); //, (body ? {body: body} : null));
+		super(bodySpec); //, (body ? {body: body} : null));
 	}
 
 	public message_seq: number;
@@ -257,8 +256,8 @@ export class ClientHello extends Handshake {
 	public cookie: Cookie;
 	public extensions: any;
 
-	constructor(initial?) {
-		super(HandshakeType.client_hello, ClientHello.__spec, initial);
+	constructor() {
+		super(HandshakeType.client_hello, ClientHello.__spec);
 	}
 
 }
@@ -283,8 +282,8 @@ export class ServerHello extends Handshake {
 	public compression_method: CompressionMethod;
 	public extensions: any;
 
-	constructor(initial?) {
-		super(HandshakeType.server_hello, ServerHello.__spec, initial);
+	constructor() {
+		super(HandshakeType.server_hello, ServerHello.__spec);
 	}
 
 }
@@ -299,8 +298,8 @@ export class HelloVerifyRequest extends Handshake {
 	public server_version: ProtocolVersion;
 	public cookie: Cookie;
 
-	constructor(initial?) {
-		super(HandshakeType.hello_verify_request, HelloVerifyRequest.__spec, initial);
+	constructor() {
+		super(HandshakeType.hello_verify_request, HelloVerifyRequest.__spec);
 	}
 
 }
@@ -324,8 +323,8 @@ export class Finished extends Handshake {
 
 	public verify_data: Buffer;
 
-	constructor(initial?) {
-		super(HandshakeType.finished, Finished.__spec, initial);
+	constructor() {
+		super(HandshakeType.finished, Finished.__spec);
 	}
 
 }

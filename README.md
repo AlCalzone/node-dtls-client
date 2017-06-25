@@ -24,8 +24,7 @@ Although great care has been taken to properly implement the required encryption
 - [ ] handshake protocol implementation
   - [ ] extend TLSStruct:
 	- [x] support optional vectors 
-	- [ ] support non-primitive vector items
-	- [ ] support parser function for vector items
+	- [x] support non-primitive vector items
   - [ ] handle message flow, including retransmission
   - [x] fragmentation and re-assembly
   - [ ] message definitions (~70%)

@@ -21,21 +21,47 @@ var ConnectionState = (function () {
                 this[key] = value;
         }
     }
-    // TODO: Gehört das wirklich hier hin?
+    Object.defineProperty(ConnectionState.prototype, "Cipher", {
+        get: function () {
+            if (this._cipher == undefined)
+                this._cipher = this.cipherSuite.specifyCipher(this.key_material, this.entity);
+            return this._cipher;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ConnectionState.prototype, "Decipher", {
+        get: function () {
+            if (this._decipher == undefined)
+                this._decipher = this.cipherSuite.specifyDecipher(this.key_material, this.entity);
+            return this._decipher;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ConnectionState.prototype, "Mac", {
+        get: function () {
+            if (this._mac == undefined)
+                this._mac = this.cipherSuite.specifyMAC(this.key_material, this.entity);
+            return this._mac;
+        },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * Compute the master secret from a given premaster secret
      * @param preMasterSecret - The secret used to calculate the master secret
      * @param clientHelloRandom - The random data from the client hello message
      * @param serverHelloRandom - The random data from the server hello message
      */
-    ConnectionState.prototype.computeMasterSecret = function (preMasterSecret, clientHelloRandom, serverHelloRandom) {
-        this.master_secret = PRF_1.PRF[this.prf_algorithm](preMasterSecret.serialize(), "master secret", Buffer.concat([clientHelloRandom, serverHelloRandom]), master_secret_length);
+    ConnectionState.prototype.computeMasterSecret = function (preMasterSecret) {
+        this.master_secret = PRF_1.PRF[this.cipherSuite.prfAlgorithm](preMasterSecret.serialize(), "master secret", Buffer.concat([this.client_random, this.server_random]), master_secret_length);
     };
     /**
      * Berechnet die Schlüsselkomponenten
      */
     ConnectionState.prototype.computeKeyMaterial = function () {
-        var keyBlock = PRF_1.PRF[this.prf_algorithm](this.master_secret, "key expansion", Buffer.concat([this.server_random, this.client_random]), 2 * (this.mac_key_length + this.enc_key_length + this.fixed_iv_length));
+        var keyBlock = PRF_1.PRF[this.cipherSuite.prfAlgorithm](this.master_secret, "key expansion", Buffer.concat([this.server_random, this.client_random]), 2 * (this.cipherSuite.MAC.length + this.cipherSuite.Cipher.keyLength + this.fixed_iv_length));
         var offset = 0;
         function read(length) {
             var ret = keyBlock.slice(offset, offset + length);
@@ -43,10 +69,10 @@ var ConnectionState = (function () {
             return ret;
         }
         this.key_material = {
-            client_write_MAC_key: read(this.mac_key_length),
-            server_write_MAC_key: read(this.mac_key_length),
-            client_write_key: read(this.enc_key_length),
-            server_write_key: read(this.enc_key_length),
+            client_write_MAC_key: read(this.cipherSuite.MAC.length),
+            server_write_MAC_key: read(this.cipherSuite.MAC.length),
+            client_write_key: read(this.cipherSuite.Cipher.keyLength),
+            server_write_key: read(this.cipherSuite.Cipher.keyLength),
             client_write_IV: read(this.fixed_iv_length),
             server_write_IV: read(this.fixed_iv_length)
         };

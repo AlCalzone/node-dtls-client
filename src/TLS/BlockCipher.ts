@@ -1,11 +1,24 @@
 ﻿import * as crypto from "crypto";
-import { CipherDelegate, DecipherDelegate, MACDelegate, KeyMaterial } from "./CipherSuite";
+import { GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial } from "./CipherSuite";
 import { ConnectionEnd } from "./ConnectionState";
 
 export type BlockCipherAlgorithm =
 	"aes-128-cbc" | "aes-256-cbc" |
 	"des-ede3-cbc"
 	;
+
+export interface BlockCipherDelegate extends GenericCipherDelegate {
+	/**
+	 * The block size of this algorithm
+	 */
+	blockSize: number;
+}
+export interface BlockDecipherDelegate extends GenericDecipherDelegate {
+	/**
+	 * The block size of this algorithm
+	 */
+	blockSize: number;
+}
 
 interface BlockCipherParameter {
 	keyLength: number,
@@ -21,20 +34,13 @@ const BlockCipherParameters: { [algorithm in BlockCipherAlgorithm]?: BlockCipher
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used
- * @param connEnd - Denotes if the current entity is the server or client
- * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the encryption
  */
 export function createCipher(
-	algorithm: BlockCipherAlgorithm,
-	connEnd: ConnectionEnd, 
-	keyMaterial: KeyMaterial,
-	): CipherDelegate
+	algorithm: BlockCipherAlgorithm, 
+): BlockCipherDelegate
 {
 	const keyLengths = BlockCipherParameters[algorithm];
-	/**
-	 * @param plaintext - The plaintext to be encrypted
-	 */
-	return (plaintext: Buffer) => {
+	const ret = ((plaintext: Buffer, keyMaterial: KeyMaterial, connEnd: ConnectionEnd) => {
 		// figure out how much padding we need
 		const overflow = ((plaintext.length + 1) % keyLengths.blockSize);
 		const padLength = (overflow > 0) ? (keyLengths.blockSize - overflow) : 0;
@@ -58,26 +64,23 @@ export function createCipher(
 			record_iv,
 			ciphertext
 		]);
-	}
+	}) as BlockCipherDelegate;
+	// append key length information
+	ret.keyLength = keyLengths.keyLength;
+	ret.recordIvLength = ret.blockSize = keyLengths.blockSize;
+	return ret;
 }
 
 /**
  * Creates a block cipher delegate used to decrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used
- * @param connEnd - Denotes if the current entity is the server or client
- * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the decryption
  */
 export function createDecipher(
 	algorithm: BlockCipherAlgorithm,
-	connEnd: ConnectionEnd, 
-	keyMaterial: KeyMaterial
-	): DecipherDelegate
+): BlockDecipherDelegate
 {
 	const keyLengths = BlockCipherParameters[algorithm];
-	/**
-	 * @param ciphertext - The ciphertext to be decrypted
-	 */
-	return (ciphertext: Buffer) => {
+	const ret = ((ciphertext: Buffer, keyMaterial: KeyMaterial, connEnd: ConnectionEnd) => {
 		// find the right decryption params
 		const record_iv = ciphertext.slice(0, keyLengths.blockSize);
 		const decipher_key = (connEnd === "client") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
@@ -117,7 +120,12 @@ export function createDecipher(
 
 		// contains fragment + MAC
 		return { result: plaintext };
-	}
+	}) as BlockDecipherDelegate;
+
+	// append key length information
+	ret.keyLength = keyLengths.keyLength;
+	ret.recordIvLength = ret.blockSize = keyLengths.blockSize;
+	return ret;
 }
 
 

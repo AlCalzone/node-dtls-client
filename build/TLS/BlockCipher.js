@@ -9,15 +9,10 @@ var BlockCipherParameters = {
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used
- * @param connEnd - Denotes if the current entity is the server or client
- * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the encryption
  */
-function createCipher(algorithm, connEnd, keyMaterial) {
+function createCipher(algorithm) {
     var keyLengths = BlockCipherParameters[algorithm];
-    /**
-     * @param plaintext - The plaintext to be encrypted
-     */
-    return function (plaintext) {
+    var ret = (function (plaintext, keyMaterial, connEnd) {
         // figure out how much padding we need
         var overflow = ((plaintext.length + 1) % keyLengths.blockSize);
         var padLength = (overflow > 0) ? (keyLengths.blockSize - overflow) : 0;
@@ -38,21 +33,20 @@ function createCipher(algorithm, connEnd, keyMaterial) {
             record_iv,
             ciphertext
         ]);
-    };
+    });
+    // append key length information
+    ret.keyLength = keyLengths.keyLength;
+    ret.recordIvLength = ret.blockSize = keyLengths.blockSize;
+    return ret;
 }
 exports.createCipher = createCipher;
 /**
  * Creates a block cipher delegate used to decrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used
- * @param connEnd - Denotes if the current entity is the server or client
- * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the decryption
  */
-function createDecipher(algorithm, connEnd, keyMaterial) {
+function createDecipher(algorithm) {
     var keyLengths = BlockCipherParameters[algorithm];
-    /**
-     * @param ciphertext - The ciphertext to be decrypted
-     */
-    return function (ciphertext) {
+    var ret = (function (ciphertext, keyMaterial, connEnd) {
         // find the right decryption params
         var record_iv = ciphertext.slice(0, keyLengths.blockSize);
         var decipher_key = (connEnd === "client") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
@@ -88,7 +82,11 @@ function createDecipher(algorithm, connEnd, keyMaterial) {
         var plaintext = Buffer.from(deciphered.slice(0, -1 - paddingLength));
         // contains fragment + MAC
         return { result: plaintext };
-    };
+    });
+    // append key length information
+    ret.keyLength = keyLengths.keyLength;
+    ret.recordIvLength = ret.blockSize = keyLengths.blockSize;
+    return ret;
 }
 exports.createDecipher = createDecipher;
 //# sourceMappingURL=BlockCipher.js.map

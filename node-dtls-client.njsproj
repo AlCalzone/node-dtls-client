@@ -92,7 +92,7 @@
     <TypeScriptCompile Include="src\TLS\TypeSpecs.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\main.ts" />
+    <TypeScriptCompile Include="src\dtls.ts" />
     <Content Include="package.json" />
     <Content Include="README.md" />
     <TypeScriptCompile Include="src\TLS\Extension.ts">

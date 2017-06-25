@@ -3,7 +3,7 @@ import { TLSStruct } from "../TLS/TLSStruct";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
 import { DTLSCompressed } from "./DTLSCompressed";
-import { CipherDelegate, DecipherDelegate, MACDelegate } from "../TLS/CipherSuite";
+import { CipherDelegate, DecipherDelegate, MacDelegate } from "../TLS/CipherSuite";
 
 export class DTLSCiphertext extends TLSStruct {
 
@@ -33,7 +33,7 @@ export class DTLSCiphertext extends TLSStruct {
 	 * @param cipher - The cipher used to encrypt the given packet
 	 * @param outgoingMac - The MAC function used for outgoing packets
 	 */
-	static encrypt(packet: DTLSCompressed, cipher: CipherDelegate, outgoingMac: MACDelegate): DTLSCiphertext {
+	static encrypt(packet: DTLSCompressed, cipher: CipherDelegate, outgoingMac: MacDelegate): DTLSCiphertext {
 
 		// compute the MAC for this packet
 		const MAC = outgoingMac(
@@ -64,7 +64,7 @@ export class DTLSCiphertext extends TLSStruct {
 	 * @param decipher - The decipher used to decrypt this packet
 	 * @param incomingMac - The MAC function used for incoming packets
 	 */
-	decrypt(decipher: DecipherDelegate, incomingMac: MACDelegate): DTLSCompressed {
+	decrypt(decipher: DecipherDelegate, incomingMac: MacDelegate): DTLSCompressed {
 
 		const decipherResult = decipher(this.fragment);
 		if (decipherResult.err) {

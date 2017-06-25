@@ -22,11 +22,8 @@ var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var RecordLayer_1 = require("./RecordLayer");
 var Handshake = (function (_super) {
     __extends(Handshake, _super);
-    function Handshake(msg_type, bodySpec, initial
-        /*,
-        public body?: TLSStruct*/
-    ) {
-        var _this = _super.call(this, bodySpec, initial) || this;
+    function Handshake(msg_type, bodySpec) {
+        var _this = _super.call(this, bodySpec) || this;
         _this.msg_type = msg_type;
         return _this;
     }
@@ -215,8 +212,8 @@ HelloRequest.__spec = {};
 exports.HelloRequest = HelloRequest;
 var ClientHello = (function (_super) {
     __extends(ClientHello, _super);
-    function ClientHello(initial) {
-        return _super.call(this, HandshakeType.client_hello, ClientHello.__spec, initial) || this;
+    function ClientHello() {
+        return _super.call(this, HandshakeType.client_hello, ClientHello.__spec) || this;
     }
     return ClientHello;
 }(Handshake));
@@ -230,8 +227,8 @@ ClientHello.__bodySpecWithExtensions = object_polyfill_1.extend(ClientHello.__sp
 exports.ClientHello = ClientHello;
 var ServerHello = (function (_super) {
     __extends(ServerHello, _super);
-    function ServerHello(initial) {
-        return _super.call(this, HandshakeType.server_hello, ServerHello.__spec, initial) || this;
+    function ServerHello() {
+        return _super.call(this, HandshakeType.server_hello, ServerHello.__spec) || this;
     }
     return ServerHello;
 }(Handshake));
@@ -246,8 +243,8 @@ ServerHello.__bodySpecWithExtensions = object_polyfill_1.extend(ServerHello.__sp
 exports.ServerHello = ServerHello;
 var HelloVerifyRequest = (function (_super) {
     __extends(HelloVerifyRequest, _super);
-    function HelloVerifyRequest(initial) {
-        return _super.call(this, HandshakeType.hello_verify_request, HelloVerifyRequest.__spec, initial) || this;
+    function HelloVerifyRequest() {
+        return _super.call(this, HandshakeType.hello_verify_request, HelloVerifyRequest.__spec) || this;
     }
     return HelloVerifyRequest;
 }(Handshake));
@@ -267,8 +264,8 @@ ServerHelloDone.__spec = {};
 exports.ServerHelloDone = ServerHelloDone;
 var Finished = (function (_super) {
     __extends(Finished, _super);
-    function Finished(initial) {
-        return _super.call(this, HandshakeType.finished, Finished.__spec, initial) || this;
+    function Finished() {
+        return _super.call(this, HandshakeType.finished, Finished.__spec) || this;
     }
     return Finished;
 }(Handshake));

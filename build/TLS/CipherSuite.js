@@ -28,24 +28,32 @@ var AEADAlgorithm;
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used
- * @param sourceConnEnd - Denotes which connection end the packet is coming from
- * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the encryption
  */
-function createMAC(algorithm, sourceConnEnd, keyMaterial) {
-    // find the right hash params
-    var mac_key = (sourceConnEnd === "server") ? keyMaterial.server_write_MAC_key : keyMaterial.client_write_MAC_key;
+function createMAC(algorithm) {
     //const keyLength = MACKeyLengths[algorithm];
     var MAC = PRF_1.HMAC[algorithm];
-    var ret = (function (data) { return MAC(mac_key, data); });
+    var ret = (function (data, keyMaterial, sourceConnEnd) {
+        // find the right hash params
+        var mac_key = (sourceConnEnd === "server") ? keyMaterial.server_write_MAC_key : keyMaterial.client_write_MAC_key;
+        // and return the hash
+        return MAC(mac_key, data);
+    });
+    // append length information
     ret.length = MAC.length;
     return ret;
 }
 exports.createMAC = createMAC;
 function createNullCipher() {
-    return function (plaintext) { return Buffer.from(plaintext); };
+    var ret = (function (plaintext, _1, _2) { return Buffer.from(plaintext); });
+    ret.keyLength = 0;
+    ret.recordIvLength = 0;
+    return ret;
 }
 function createNullDecipher() {
-    return function (ciphertext) { return ({ result: Buffer.from(ciphertext) }); };
+    var ret = (function (ciphertext, _1, _2) { return ({ result: Buffer.from(ciphertext) }); });
+    ret.keyLength = 0;
+    ret.recordIvLength = 0;
+    return ret;
 }
 function createNullMAC() {
     var ret = (function (data) { return Buffer.from(data); });
@@ -54,43 +62,82 @@ function createNullMAC() {
 }
 var CipherSuite = (function (_super) {
     __extends(CipherSuite, _super);
-    function CipherSuite(id, keyExchange, mac, prf, cipherType, algorithm) {
+    function CipherSuite(id, keyExchange, macAlgorithm, prfAlgorithm, cipherType, algorithm) {
         var _this = _super.call(this, CipherSuite.__spec) || this;
         _this.id = id;
         _this.keyExchange = keyExchange;
-        _this.mac = mac;
-        _this.prf = prf;
+        _this.macAlgorithm = macAlgorithm;
+        _this.prfAlgorithm = prfAlgorithm;
         _this.cipherType = cipherType;
         _this.algorithm = algorithm;
         return _this;
     }
-    CipherSuite.prototype.createCipher = function (connEnd, keyMaterial) {
+    Object.defineProperty(CipherSuite.prototype, "Cipher", {
+        get: function () {
+            if (this._cipher == undefined)
+                this._cipher = this.createCipher();
+            return this._cipher;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    CipherSuite.prototype.createCipher = function () {
         switch (this.cipherType) {
             case null:
                 return createNullCipher();
             case "block":
-                return BlockCipher.createCipher(this.algorithm, connEnd, keyMaterial);
+                return BlockCipher.createCipher(this.algorithm);
         }
     };
-    CipherSuite.prototype.createDecipher = function (connEnd, keyMaterial) {
+    CipherSuite.prototype.specifyCipher = function (keyMaterial, connEnd) {
+        var _this = this;
+        return function (plaintext) { return _this.Cipher(plaintext, keyMaterial, connEnd); };
+    };
+    Object.defineProperty(CipherSuite.prototype, "Decipher", {
+        get: function () {
+            if (this._decipher == undefined)
+                this._decipher = this.createDecipher();
+            return this._decipher;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    CipherSuite.prototype.createDecipher = function () {
         switch (this.cipherType) {
             case null:
                 return createNullDecipher();
             case "block":
-                return BlockCipher.createDecipher(this.algorithm, connEnd, keyMaterial);
+                return BlockCipher.createDecipher(this.algorithm);
         }
     };
-    CipherSuite.prototype.createMAC = function (sourceConnEnd, keyMaterial) {
+    CipherSuite.prototype.specifyDecipher = function (keyMaterial, connEnd) {
+        var _this = this;
+        return function (plaintext) { return _this.Decipher(plaintext, keyMaterial, connEnd); };
+    };
+    Object.defineProperty(CipherSuite.prototype, "MAC", {
+        get: function () {
+            if (this._mac == undefined)
+                this._mac = this.createMAC();
+            return this._mac;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    CipherSuite.prototype.createMAC = function () {
         // TODO: detect special cases
         switch (this.cipherType) {
             case null:
                 return createNullMAC();
             case "stream":
             case "block":
-                if (this.mac == null)
+                if (this.macAlgorithm == null)
                     return createNullMAC();
-                return createMAC(this.mac, sourceConnEnd, keyMaterial);
+                return createMAC(this.macAlgorithm);
         }
+    };
+    CipherSuite.prototype.specifyMAC = function (keyMaterial, sourceConnEnd) {
+        var _this = this;
+        return function (data) { return _this.MAC(data, keyMaterial, sourceConnEnd); };
     };
     return CipherSuite;
 }(TLSStruct_1.TLSStruct));

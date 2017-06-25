@@ -8,7 +8,11 @@ import {
 	//BulkCipherAlgorithm,
 	AEADAlgorithm,
 	CipherType,
-	KeyMaterial
+	KeyMaterial,
+	CipherSuite,
+	GenericCipherDelegate, CipherDelegate,
+	GenericDecipherDelegate, DecipherDelegate,
+	GenericMacDelegate, MacDelegate
 } from "./CipherSuite";
 import { KeyExchangeAlgorithm } from "./KeyExchange";
 
@@ -36,16 +40,17 @@ export class ConnectionState {
 	}
 
 	entity: ConnectionEnd;
-	prf_algorithm: HashAlgorithm;
+	cipherSuite: CipherSuite;
+	//prf_algorithm: HashAlgorithm;
 	//bulk_cipher_algorithm: BulkCipherAlgorithm;
-	cipher_type: CipherType;
-	enc_key_length: number;
-	block_length: number;
-	fixed_iv_length: number;
-	record_iv_length: number;
-	mac_algorithm: HashAlgorithm;
-	mac_length: number;
-	mac_key_length: number;
+	//cipher_type: CipherType;
+	//enc_key_length: number;
+	//block_length: number;
+	fixed_iv_length: number; // TODO: put it into cipher suite?
+	//record_iv_length: number;
+	//mac_algorithm: HashAlgorithm;
+	//mac_length: number;
+	//mac_key_length: number;
 	compression_algorithm: CompressionMethod;
 	master_secret: Buffer /*48*/;
 	client_random: Buffer /*32*/;
@@ -54,17 +59,37 @@ export class ConnectionState {
 	key_material: KeyMaterial
 
 	// TODO: Gehört das wirklich hier hin?
+
+	private _cipher: CipherDelegate;
+	public get Cipher(): CipherDelegate {
+		if (this._cipher == undefined)
+			this._cipher = this.cipherSuite.specifyCipher(this.key_material, this.entity);
+		return this._cipher;
+	}
+	private _decipher: DecipherDelegate;
+	public get Decipher(): DecipherDelegate {
+		if (this._decipher == undefined)
+			this._decipher = this.cipherSuite.specifyDecipher(this.key_material, this.entity);
+		return this._decipher;
+	}
+	private _mac: MacDelegate;
+	public get Mac(): MacDelegate {
+		if (this._mac == undefined)
+			this._mac = this.cipherSuite.specifyMAC(this.key_material, this.entity);
+		return this._mac;
+	}
+
 	/**
 	 * Compute the master secret from a given premaster secret
 	 * @param preMasterSecret - The secret used to calculate the master secret
 	 * @param clientHelloRandom - The random data from the client hello message
 	 * @param serverHelloRandom - The random data from the server hello message
 	 */
-	computeMasterSecret(preMasterSecret: PreMasterSecret, clientHelloRandom: Buffer, serverHelloRandom: Buffer): void {
-		this.master_secret = PRF[this.prf_algorithm](
+	computeMasterSecret(preMasterSecret: PreMasterSecret): void {
+		this.master_secret = PRF[this.cipherSuite.prfAlgorithm](
 			preMasterSecret.serialize(),
 			"master secret",
-			Buffer.concat([clientHelloRandom, serverHelloRandom]),
+			Buffer.concat([this.client_random, this.server_random]),
 			master_secret_length
 		);
 	}
@@ -73,11 +98,11 @@ export class ConnectionState {
 	 * Berechnet die Schlüsselkomponenten
 	 */
 	computeKeyMaterial(): void {
-		const keyBlock = PRF[this.prf_algorithm](
+		const keyBlock = PRF[this.cipherSuite.prfAlgorithm](
 			this.master_secret,
 			"key expansion",
 			Buffer.concat([this.server_random, this.client_random]),
-			2 * (this.mac_key_length + this.enc_key_length + this.fixed_iv_length)
+			2 * (this.cipherSuite.MAC.length + this.cipherSuite.Cipher.keyLength + this.fixed_iv_length)
 		);
 
 		let offset = 0;
@@ -88,10 +113,10 @@ export class ConnectionState {
 		}
 		
 		this.key_material = {
-			client_write_MAC_key: read(this.mac_key_length),
-			server_write_MAC_key: read(this.mac_key_length),
-			client_write_key: read(this.enc_key_length),
-			server_write_key: read(this.enc_key_length),
+			client_write_MAC_key: read(this.cipherSuite.MAC.length),
+			server_write_MAC_key: read(this.cipherSuite.MAC.length),
+			client_write_key: read(this.cipherSuite.Cipher.keyLength),
+			server_write_key: read(this.cipherSuite.Cipher.keyLength),
 			client_write_IV: read(this.fixed_iv_length),
 			server_write_IV: read(this.fixed_iv_length)
 		};
