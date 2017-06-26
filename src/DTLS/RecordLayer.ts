@@ -55,6 +55,7 @@ export class RecordLayer {
 
 		// get send buffer
 		const buf = packet.serialize();
+		// TODO: check if the buffer satisfies the configured MTU
 		// and send it
 		this.udpSocket.send(buf, this.options.port, this.options.address, callback);
 	}
@@ -98,6 +99,9 @@ export class RecordLayer {
 				// parse the packet
 				return true;
 			});
+
+		// TODO: check MAC etc...
+
 		// decompress and decrypt packets
 		const decompressor = (identity) => identity; // TODO implement actual compression methods
 		packets = packets
