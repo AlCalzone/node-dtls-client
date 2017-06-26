@@ -100,10 +100,9 @@ export class RecordLayer {
 				return true;
 			});
 
-		// TODO: check MAC etc...
-
 		// decompress and decrypt packets
 		const decompressor = (identity) => identity; // TODO implement actual compression methods
+		// TODO: generate bad_record_mac ALERT on decryption error and terminate connection
 		packets = packets
 			.map((p: DTLSCiphertext) => {
 				const connectionState = this.epochs[p.epoch].connectionState;

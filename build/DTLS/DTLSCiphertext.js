@@ -88,5 +88,6 @@ DTLSCiphertext.__spec = {
     // length field is implied in the variable length vector //length: new TypeSpecs.Calculated("uint16", "serializedLength", "fragment"),
     fragment: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2048 + Math.pow(2, 14))
 };
+DTLSCiphertext.spec = TypeSpecs.define.Struct(DTLSCiphertext);
 exports.DTLSCiphertext = DTLSCiphertext;
 //# sourceMappingURL=DTLSCiphertext.js.map

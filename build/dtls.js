@@ -74,7 +74,9 @@ var dtls;
             this.emit("listening");
         };
         Socket.prototype.udp_onMessage = function (msg, rinfo) {
-            // TODO handle data
+            // decode the messages
+            var messages = this.recordLayer.receive(msg);
+            // TODO do something with the messages
             // TODO: extend params?
             this.emit("message", msg, rinfo);
         };

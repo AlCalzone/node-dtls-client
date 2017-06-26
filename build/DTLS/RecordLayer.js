@@ -2,27 +2,28 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var ConnectionState_1 = require("../TLS/ConnectionState");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
+var TLSStruct_1 = require("../TLS/TLSStruct");
 var DTLSPlaintext_1 = require("./DTLSPlaintext");
 var DTLSCompressed_1 = require("./DTLSCompressed");
 var DTLSCiphertext_1 = require("./DTLSCiphertext");
+var AntiReplayWindow_1 = require("../TLS/AntiReplayWindow");
 var RecordLayer = (function () {
     function RecordLayer(udpSocket, options) {
         this.udpSocket = udpSocket;
         this.options = options;
         /**
-         * Connection states ordered by epochs
+         * All known connection epochs
          */
-        this.connectionStates = [];
+        this.epochs = [];
+        //private connectionStates: ConnectionState[/* epoch */] = [];
         /**
          * The current epoch used for reading data
          */
         this._readEpoch = 0;
-        // TODO: use anti replay window
         /**
          * The current epoch used for writing data
          */
         this._writeEpoch = 0;
-        this._writeSequenceNumber = 0;
         // TODO: mal sehen, ob das nicht woanders besser aufgehoben ist
         /**
          * Maximum transfer unit of the underlying connection.
@@ -32,24 +33,83 @@ var RecordLayer = (function () {
         this.MTU_OVERHEAD = 20 + 8;
         // initialize with NULL cipherspec
         // current state
-        this.connectionStates[0] = new ConnectionState_1.ConnectionState();
+        this.epochs[0] = this.createEpoch(0);
         // pending state
-        this.ensurePendingState();
+        this.epochs[1] = this.createEpoch(1);
     }
+    /**
+     * Transforms the given message into a DTLSCiphertext packet and sends it via UDP
+     * @param msg The message to be sent
+     * @param callback The function to be called after sending the message.
+     */
     RecordLayer.prototype.send = function (msg, callback) {
-        var currentWriteState = this.connectionStates[this.writeEpoch];
+        var epoch = this.epochs[this.writeEpoch];
         var packet = new DTLSPlaintext_1.DTLSPlaintext(msg.type, new ProtocolVersion_1.ProtocolVersion(~1, ~2), // 2's complement of 1.2
-        this._writeEpoch, ++this._writeSequenceNumber, // sequence number increased by 1
+        this._writeEpoch, ++epoch.writeSequenceNumber, // sequence number increased by 1
         msg.data);
         // compress packet
         var compressor = function (identity) { return identity; }; // TODO: implement compression algorithms
         packet = DTLSCompressed_1.DTLSCompressed.compress(packet, compressor);
         // encrypt packet
-        packet = DTLSCiphertext_1.DTLSCiphertext.encrypt(packet, currentWriteState.Cipher, currentWriteState.OutgoingMac);
+        packet = DTLSCiphertext_1.DTLSCiphertext.encrypt(packet, epoch.connectionState.Cipher, epoch.connectionState.OutgoingMac);
         // get send buffer
         var buf = packet.serialize();
+        // TODO: check if the buffer satisfies the configured MTU
         // and send it
         this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+    };
+    /**
+     * Receives DTLS messages from the given buffer.
+     * @param buf The buffer containing DTLSCiphertext packets
+     */
+    RecordLayer.prototype.receive = function (buf) {
+        var _this = this;
+        var offset = 0;
+        var packets = [];
+        while (offset < buf.length) {
+            try {
+                var packet = TLSStruct_1.TLSStruct.from(DTLSCiphertext_1.DTLSCiphertext.spec, buf, offset);
+                packets.push(packet.result);
+                offset += packet.readBytes;
+            }
+            catch (e) {
+                // TODO: cancel connection or what?
+                break;
+            }
+        }
+        // now filter packets
+        var knownEpochs = Object.keys(this.epochs).map(function (k) { return +k; });
+        packets = packets
+            .filter(function (p) {
+            if (!(p.epoch in knownEpochs)) {
+                // discard packets from an unknown epoch
+                // this will keep packets from the upcoming one
+                return false;
+            }
+            else if (p.epoch < _this.readEpoch) {
+                // discard old packets
+                return false;
+            }
+            // discard packets that are not supposed to be received
+            if (!_this.epochs[p.epoch].antiReplayWindow.mayReceive(p.sequence_number)) {
+                return false;
+            }
+            // parse the packet
+            return true;
+        });
+        // decompress and decrypt packets
+        var decompressor = function (identity) { return identity; }; // TODO implement actual compression methods
+        // TODO: generate bad_record_mac ALERT on decryption error and terminate connection
+        packets = packets
+            .map(function (p) {
+            var connectionState = _this.epochs[p.epoch].connectionState;
+            return p.decrypt(connectionState.Decipher, connectionState.IncomingMac);
+        })
+            .map(function (p) { return p.decompress(decompressor); });
+        return packets.map(function (p) { return ({
+            type: p.type,
+            data: p.fragment
+        }); });
     };
     Object.defineProperty(RecordLayer.prototype, "readEpoch", {
         get: function () { return this._readEpoch; },
@@ -61,27 +121,10 @@ var RecordLayer = (function () {
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(RecordLayer.prototype, "writeSequenceNumber", {
-        get: function () { return this._writeSequenceNumber; },
-        enumerable: true,
-        configurable: true
-    });
-    ;
-    RecordLayer.prototype.advanceReadEpoch = function () {
-        this._readEpoch++;
-        this.ensurePendingState();
-    };
-    RecordLayer.prototype.advanceWriteEpoch = function () {
-        this._writeEpoch++;
-        this._writeSequenceNumber = 0;
-        this.ensurePendingState();
-    };
-    RecordLayer.prototype.ensurePendingState = function () {
-        // makes sure a pending state exists
-        if (!this.connectionStates[this.nextEpoch])
-            this.connectionStates[this.nextEpoch] = new ConnectionState_1.ConnectionState();
-    };
     Object.defineProperty(RecordLayer.prototype, "nextEpoch", {
+        /**
+         * The epoch that will be used next
+         */
         get: function () {
             return Math.max(this.readEpoch, this.writeEpoch) + 1;
         },
@@ -89,13 +132,38 @@ var RecordLayer = (function () {
         configurable: true
     });
     ;
+    /**
+     * Ensure there's a next epoch to switch to
+     */
+    RecordLayer.prototype.ensureNextEpoch = function () {
+        // makes sure a pending state exists
+        if (!this.epochs[this.nextEpoch]) {
+            this.epochs[this.nextEpoch] = this.createEpoch(this.nextEpoch);
+        }
+    };
+    RecordLayer.prototype.createEpoch = function (index) {
+        return {
+            index: index,
+            connectionState: new ConnectionState_1.ConnectionState(),
+            antiReplayWindow: new AntiReplayWindow_1.AntiReplayWindow(),
+            writeSequenceNumber: 0,
+        };
+    };
+    RecordLayer.prototype.advanceReadEpoch = function () {
+        this._readEpoch++;
+        this.ensureNextEpoch();
+    };
+    RecordLayer.prototype.advanceWriteEpoch = function () {
+        this._writeEpoch++;
+        this.ensureNextEpoch();
+    };
     Object.defineProperty(RecordLayer.prototype, "MAX_PAYLOAD_SIZE", {
         get: function () { return this.MTU - this.MTU_OVERHEAD; },
         enumerable: true,
         configurable: true
     });
+    ;
     return RecordLayer;
 }());
-RecordLayer.IMPLEMENTED_PROTOCOL_VERSION = ;
 exports.RecordLayer = RecordLayer;
 //# sourceMappingURL=RecordLayer.js.map

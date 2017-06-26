@@ -18,6 +18,7 @@ export declare class DTLSCiphertext extends TLSStruct {
         sequence_number: Readonly<TypeSpecs.Number>;
         fragment: TypeSpecs.Vector;
     };
+    static readonly spec: TypeSpecs.Struct;
     constructor(type: ContentType, version: ProtocolVersion, epoch: number, sequence_number: number, fragment: Buffer);
     /**
      * Encrypts the given compressed packet
