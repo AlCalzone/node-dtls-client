@@ -15,6 +15,7 @@ export class DTLSCompressed extends TLSStruct {
 		// length field is implied in the variable length vector //length: new TypeSpecs.Calculated("uint16", "serializedLength", "fragment"),
 		fragment: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 1024 + 2 ** 14)
 	};
+	static readonly spec = TypeSpecs.define.Struct(DTLSCompressed);
 
 	constructor(
 		public type: ContentType,

@@ -74,7 +74,9 @@ export module dtls {
 			this.emit("listening");
 		}
 		private udp_onMessage(msg: Buffer, rinfo: dgram.RemoteInfo) {
-			// TODO handle data
+			const messages = this.recordLayer.receive(msg);
+
+			// TODO do something with the messages
 
 			// TODO: extend params?
 			this.emit("message", msg, rinfo);
