@@ -80,6 +80,23 @@ export module dtls {
 			// TODO: only for handshake messages, if they are received out of sequence,
 			// buffer them up and serve them with the next batch of messages
 			// also implement retransmission.
+			for (let msg of messages) {
+				switch (msg.type) {
+					case ContentType.handshake:
+						// TODO: forward to handshake handler
+						break;
+					case ContentType.change_cipher_spec:
+						// TODO: forward to handshake handler
+						break;
+					case ContentType.alert:
+						// TODO: read spec to see how we handle this
+						break;
+					case ContentType.application_data:
+						// TODO: if we are still shaking hands, buffer the message until we're done
+						// else emit the message
+						break;
+				}
+			}
 
 			// TODO do something with the messages
 
