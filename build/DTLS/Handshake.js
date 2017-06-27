@@ -20,6 +20,20 @@ var CipherSuite_1 = require("../TLS/CipherSuite");
 var ConnectionState_1 = require("../TLS/ConnectionState");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var RecordLayer_1 = require("./RecordLayer");
+var HandshakeType;
+(function (HandshakeType) {
+    HandshakeType[HandshakeType["hello_request"] = 0] = "hello_request";
+    HandshakeType[HandshakeType["client_hello"] = 1] = "client_hello";
+    HandshakeType[HandshakeType["server_hello"] = 2] = "server_hello";
+    HandshakeType[HandshakeType["hello_verify_request"] = 3] = "hello_verify_request";
+    HandshakeType[HandshakeType["certificate"] = 11] = "certificate";
+    HandshakeType[HandshakeType["server_key_exchange"] = 12] = "server_key_exchange";
+    HandshakeType[HandshakeType["certificate_request"] = 13] = "certificate_request";
+    HandshakeType[HandshakeType["server_hello_done"] = 14] = "server_hello_done";
+    HandshakeType[HandshakeType["certificate_verify"] = 15] = "certificate_verify";
+    HandshakeType[HandshakeType["client_key_exchange"] = 16] = "client_key_exchange";
+    HandshakeType[HandshakeType["finished"] = 20] = "finished";
+})(HandshakeType = exports.HandshakeType || (exports.HandshakeType = {}));
 var Handshake = (function (_super) {
     __extends(Handshake, _super);
     function Handshake(msg_type, bodySpec) {
@@ -61,9 +75,11 @@ var Handshake = (function (_super) {
             // find the right type for the body object
             var msgClass = exports.HandshakeMessages[assembled.msg_type];
             // extract the struct spec
-            var spec = msgClass.__spec; // we can expect this to exist
+            var __spec = msgClass.__spec; // we can expect this to exist
+            // turn it into the correct type
+            var spec = TypeSpecs.define.Struct(__spec);
             // parse the body object into a new Handshake instance
-            var ret = msgClass.from(spec, assembled.fragment);
+            var ret = TLSStruct_1.TLSStruct.from(spec, assembled.fragment).result;
             ret.message_seq = assembled.message_seq;
             return ret;
         }
@@ -173,33 +189,12 @@ FragmentedHandshake.__spec = {
     // uint24 fragment_length is implied in the variable size vector
     fragment: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 24) - 1)
 };
+FragmentedHandshake.spec = TypeSpecs.define.Struct(FragmentedHandshake.__spec);
 /**
  * The amount of data consumed by a handshake message header (without the actual fragment)
  */
 FragmentedHandshake.headerLength = 1 + 3 + 2 + 3 + 3; // TODO: dynamisch?
 exports.FragmentedHandshake = FragmentedHandshake;
-var HandshakeType;
-(function (HandshakeType) {
-    HandshakeType[HandshakeType["hello_request"] = 0] = "hello_request";
-    HandshakeType[HandshakeType["client_hello"] = 1] = "client_hello";
-    HandshakeType[HandshakeType["server_hello"] = 2] = "server_hello";
-    HandshakeType[HandshakeType["hello_verify_request"] = 3] = "hello_verify_request";
-    HandshakeType[HandshakeType["certificate"] = 11] = "certificate";
-    HandshakeType[HandshakeType["server_key_exchange"] = 12] = "server_key_exchange";
-    HandshakeType[HandshakeType["certificate_request"] = 13] = "certificate_request";
-    HandshakeType[HandshakeType["server_hello_done"] = 14] = "server_hello_done";
-    HandshakeType[HandshakeType["certificate_verify"] = 15] = "certificate_verify";
-    HandshakeType[HandshakeType["client_key_exchange"] = 16] = "client_key_exchange";
-    HandshakeType[HandshakeType["finished"] = 20] = "finished";
-})(HandshakeType = exports.HandshakeType || (exports.HandshakeType = {}));
-// define handshake messages for lookup
-exports.HandshakeMessages = {};
-exports.HandshakeMessages[HandshakeType.hello_request] = HelloRequest;
-exports.HandshakeMessages[HandshakeType.client_hello] = ClientHello;
-exports.HandshakeMessages[HandshakeType.server_hello] = ServerHello;
-exports.HandshakeMessages[HandshakeType.hello_verify_request] = HelloVerifyRequest;
-exports.HandshakeMessages[HandshakeType.server_hello_done] = ServerHelloDone;
-exports.HandshakeMessages[HandshakeType.finished] = Finished;
 // Handshake message implementations
 var HelloRequest = (function (_super) {
     __extends(HelloRequest, _super);
@@ -273,4 +268,12 @@ Finished.__spec = {
     verify_data: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 16)) // TODO: wirkliche Länge "verify_data_length" herausfinden
 };
 exports.Finished = Finished;
+// define handshake messages for lookup
+exports.HandshakeMessages = {};
+exports.HandshakeMessages[HandshakeType.hello_request] = HelloRequest;
+exports.HandshakeMessages[HandshakeType.client_hello] = ClientHello;
+exports.HandshakeMessages[HandshakeType.server_hello] = ServerHello;
+exports.HandshakeMessages[HandshakeType.hello_verify_request] = HelloVerifyRequest;
+exports.HandshakeMessages[HandshakeType.server_hello_done] = ServerHelloDone;
+exports.HandshakeMessages[HandshakeType.finished] = Finished;
 //# sourceMappingURL=Handshake.js.map

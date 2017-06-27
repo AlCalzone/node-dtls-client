@@ -3,6 +3,10 @@ import * as dgram from "dgram";
 import { RecordLayer } from "./DTLS/RecordLayer";
 import { Message } from "./TLS/Message";
 import { ContentType } from "./TLS/ContentType";
+import { ClientHandshakeHandler } from "./DTLS/HandshakeHandler";
+import { FragmentedHandshake } from "./DTLS/Handshake";
+import { ChangeCipherSpec } from "./TLS/ChangeCipherSpec";
+import { TLSStruct } from "./TLS/TLSStruct";
 //import { DTLSPlaintext } from "./DTLS/DTLSPlaintext";
 //import { DTLSCompressed } from "./DTLS/DTLSCompressed";
 //import { DTLSCiphertext } from "./DTLS/DTLSCiphertext";
@@ -31,6 +35,7 @@ export module dtls {
 		 */
 		constructor(private options: Options) {
 			super();
+			// setup the connection
 			this.udp = dgram
 				.createSocket(options, this.udp_onMessage)
 				.on("listening", this.udp_onListening)
@@ -38,10 +43,10 @@ export module dtls {
 				.on("close", this.udp_onClose)
 				.on("error", this.udp_onError)
 				;
-			this.recordLayer = new RecordLayer(this.udp, this.options);
 		}
 
 		private recordLayer: RecordLayer;
+		private handshakeHandler: ClientHandshakeHandler;
 
 		/**
 		 * Send the given data. It is automatically compressed and encrypted.
@@ -62,17 +67,23 @@ export module dtls {
 			this.udp.close();
 		}
 
+		// buffer messages while handshaking
+		private isShakingHands: boolean = true;
+		private bufferedMessages: Message[] = [];
+
 		/*
 			Internal Socket handler functions
 		*/
 		private udp: dgram.Socket;
 
 		private udp_onListening() {
-			// TODO handle data
-
-			// TODO only emit the event after finishing the handshake
-			this.emit("listening");
+			// initialize record layer
+			this.recordLayer = new RecordLayer(this.udp, this.options);
+			// also start handshake
+			this.handshakeHandler = new ClientHandshakeHandler(this.recordLayer);
+			// TODO: when done, emit event
 		}
+
 		private udp_onMessage(msg: Buffer, rinfo: dgram.RemoteInfo) {
 			// decode the messages
 			const messages = this.recordLayer.receive(msg);
@@ -83,26 +94,30 @@ export module dtls {
 			for (let msg of messages) {
 				switch (msg.type) {
 					case ContentType.handshake:
-						// TODO: forward to handshake handler
+						const handshake = TLSStruct.from(FragmentedHandshake.spec, msg.data).result as FragmentedHandshake;
+						this.handshakeHandler.processMessage(handshake);
 						break;
 					case ContentType.change_cipher_spec:
-						// TODO: forward to handshake handler
+						this.handshakeHandler.changeCipherSpec();
 						break;
 					case ContentType.alert:
 						// TODO: read spec to see how we handle this
 						break;
+
 					case ContentType.application_data:
-						// TODO: if we are still shaking hands, buffer the message until we're done
-						// else emit the message
+						if (this.isShakingHands) {
+							// if we are still shaking hands, buffer the message until we're done
+							this.bufferedMessages.push(msg);
+						} else {
+							// else emit the message
+							// TODO: extend params?
+							this.emit("message", msg, rinfo);
+						}
 						break;
 				}
 			}
-
-			// TODO do something with the messages
-
-			// TODO: extend params?
-			this.emit("message", msg, rinfo);
 		}
+
 		private udp_onClose() {
 			// TODO
 			this.emit("close");

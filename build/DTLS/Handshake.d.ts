@@ -6,6 +6,19 @@ import { Cookie } from "./Cookie";
 import { CipherSuite } from "../TLS/CipherSuite";
 import { CompressionMethod } from "../TLS/ConnectionState";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
+export declare enum HandshakeType {
+    hello_request = 0,
+    client_hello = 1,
+    server_hello = 2,
+    hello_verify_request = 3,
+    certificate = 11,
+    server_key_exchange = 12,
+    certificate_request = 13,
+    server_hello_done = 14,
+    certificate_verify = 15,
+    client_key_exchange = 16,
+    finished = 20,
+}
 export declare abstract class Handshake extends TLSStruct {
     msg_type: HandshakeType;
     constructor(msg_type: HandshakeType, bodySpec: TypeSpecs.StructSpec);
@@ -34,6 +47,7 @@ export declare class FragmentedHandshake extends TLSStruct {
         fragment_offset: Readonly<TypeSpecs.Number>;
         fragment: TypeSpecs.Vector;
     };
+    static readonly spec: TypeSpecs.Struct;
     /**
      * The amount of data consumed by a handshake message header (without the actual fragment)
      */
@@ -58,20 +72,6 @@ export declare class FragmentedHandshake extends TLSStruct {
      */
     static reassemble(messages: FragmentedHandshake[]): FragmentedHandshake;
 }
-export declare enum HandshakeType {
-    hello_request = 0,
-    client_hello = 1,
-    server_hello = 2,
-    hello_verify_request = 3,
-    certificate = 11,
-    server_key_exchange = 12,
-    certificate_request = 13,
-    server_hello_done = 14,
-    certificate_verify = 15,
-    client_key_exchange = 16,
-    finished = 20,
-}
-export declare const HandshakeMessages: {};
 export declare class HelloRequest extends Handshake {
     static readonly __spec: {};
     constructor();
@@ -126,3 +126,8 @@ export declare class Finished extends Handshake {
     verify_data: Buffer;
     constructor();
 }
+export declare const HandshakeMessages: {
+    [type: number]: {
+        __spec: any;
+    };
+};

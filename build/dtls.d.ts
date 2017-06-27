@@ -18,11 +18,14 @@ export declare module dtls {
          */
         constructor(options: Options);
         private recordLayer;
+        private handshakeHandler;
         /**
          * Send the given data. It is automatically compressed and encrypted.
          */
         send(data: Buffer, callback?: SendCallback): void;
         close(callback?: CloseEventHandler): void;
+        private isShakingHands;
+        private bufferedMessages;
         private udp;
         private udp_onListening();
         private udp_onMessage(msg, rinfo);

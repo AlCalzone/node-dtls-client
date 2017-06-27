@@ -111,6 +111,7 @@ export class FragmentedHandshake extends TLSStruct {
 		// uint24 fragment_length is implied in the variable size vector
 		fragment: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2**24-1)
 	}
+	static readonly spec = TypeSpecs.define.Struct(FragmentedHandshake.__spec);
 	/**
 	 * The amount of data consumed by a handshake message header (without the actual fragment)
 	 */

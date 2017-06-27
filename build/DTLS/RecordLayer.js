@@ -24,13 +24,6 @@ var RecordLayer = (function () {
          * The current epoch used for writing data
          */
         this._writeEpoch = 0;
-        // TODO: mal sehen, ob das nicht woanders besser aufgehoben ist
-        /**
-         * Maximum transfer unit of the underlying connection.
-         * Note: Ethernet supports up to 1500 bytes, of which 20 bytes are reserved for the IP header and 8 for the UDP header
-         */
-        this.MTU = 1280;
-        this.MTU_OVERHEAD = 20 + 8;
         // initialize with NULL cipherspec
         // current state
         this.epochs[0] = this.createEpoch(0);
@@ -99,12 +92,19 @@ var RecordLayer = (function () {
         });
         // decompress and decrypt packets
         var decompressor = function (identity) { return identity; }; // TODO implement actual compression methods
-        // TODO: generate bad_record_mac ALERT on decryption error and terminate connection
         packets = packets
             .map(function (p) {
             var connectionState = _this.epochs[p.epoch].connectionState;
-            return p.decrypt(connectionState.Decipher, connectionState.IncomingMac);
+            try {
+                return p.decrypt(connectionState.Decipher, connectionState.IncomingMac);
+            }
+            catch (e) {
+                // decryption can fail because of bad MAC etc...
+                // TODO: terminate connection if some threshold is passed (bad_record_mac)
+                return null;
+            }
         })
+            .filter(function (p) { return p != null; }) // filter out packets that couldn't be decrypted
             .map(function (p) { return p.decompress(decompressor); });
         return packets.map(function (p) { return ({
             type: p.type,
@@ -157,13 +157,20 @@ var RecordLayer = (function () {
         this._writeEpoch++;
         this.ensureNextEpoch();
     };
-    Object.defineProperty(RecordLayer.prototype, "MAX_PAYLOAD_SIZE", {
-        get: function () { return this.MTU - this.MTU_OVERHEAD; },
+    Object.defineProperty(RecordLayer, "MAX_PAYLOAD_SIZE", {
+        get: function () { return RecordLayer.MTU - RecordLayer.MTU_OVERHEAD; },
         enumerable: true,
         configurable: true
     });
     ;
     return RecordLayer;
 }());
+// TODO: mal sehen, ob das nicht woanders besser aufgehoben ist
+/**
+ * Maximum transfer unit of the underlying connection.
+ * Note: Ethernet supports up to 1500 bytes, of which 20 bytes are reserved for the IP header and 8 for the UDP header
+ */
+RecordLayer.MTU = 1280;
+RecordLayer.MTU_OVERHEAD = 20 + 8;
 exports.RecordLayer = RecordLayer;
 //# sourceMappingURL=RecordLayer.js.map
