@@ -77,6 +77,10 @@ export module dtls {
 			// decode the messages
 			const messages = this.recordLayer.receive(msg);
 
+			// TODO: only for handshake messages, if they are received out of sequence,
+			// buffer them up and serve them with the next batch of messages
+			// also implement retransmission.
+
 			// TODO do something with the messages
 
 			// TODO: extend params?

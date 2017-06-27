@@ -102,12 +102,19 @@ export class RecordLayer {
 
 		// decompress and decrypt packets
 		const decompressor = (identity) => identity; // TODO implement actual compression methods
-		// TODO: generate bad_record_mac ALERT on decryption error and terminate connection
+
 		packets = packets
 			.map((p: DTLSCiphertext) => {
 				const connectionState = this.epochs[p.epoch].connectionState;
-				return p.decrypt(connectionState.Decipher, connectionState.IncomingMac);
+				try {
+					return p.decrypt(connectionState.Decipher, connectionState.IncomingMac);
+				} catch (e) {
+					// decryption can fail because of bad MAC etc...
+					// TODO: terminate connection if some threshold is passed (bad_record_mac)
+					return null;
+				}
 			})
+			.filter(p => p != null) // filter out packets that couldn't be decrypted
 			.map(p => p.decompress(decompressor))
 		;
 
@@ -175,8 +182,8 @@ export class RecordLayer {
 	 * Maximum transfer unit of the underlying connection.
 	 * Note: Ethernet supports up to 1500 bytes, of which 20 bytes are reserved for the IP header and 8 for the UDP header
 	 */
-	public MTU: number = 1280;
-	public readonly MTU_OVERHEAD = 20+8;
-	public get MAX_PAYLOAD_SIZE() { return this.MTU - this.MTU_OVERHEAD };
+	public static MTU: number = 1280;
+	public static readonly MTU_OVERHEAD = 20+8;
+	public static get MAX_PAYLOAD_SIZE() { return RecordLayer.MTU - RecordLayer.MTU_OVERHEAD };
 
 }

@@ -9,6 +9,20 @@ import { CompressionMethod } from "../TLS/ConnectionState";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { RecordLayer } from "./RecordLayer";
 
+export enum HandshakeType {
+	hello_request = 0,
+	client_hello = 1,
+	server_hello = 2,
+	hello_verify_request = 3,
+	certificate = 11,
+	server_key_exchange = 12,
+	certificate_request = 13,
+	server_hello_done = 14,
+	certificate_verify = 15,
+	client_key_exchange = 16,
+	finished = 20
+}
+
 export abstract class Handshake extends TLSStruct {
 	
 	constructor(
@@ -66,12 +80,14 @@ export abstract class Handshake extends TLSStruct {
 			// find the right type for the body object
 			const msgClass = HandshakeMessages[assembled.msg_type];
 			// extract the struct spec
-			const spec = (msgClass as any).__spec; // we can expect this to exist
+			const __spec = msgClass.__spec; // we can expect this to exist
+			// turn it into the correct type
+			const spec = TypeSpecs.define.Struct(__spec);
 			// parse the body object into a new Handshake instance
-			const ret = msgClass.from(
+			const ret = TLSStruct.from(
 				spec,
 				assembled.fragment
-				);
+				).result as Handshake;
 			ret.message_seq = assembled.message_seq;
 			return ret;
 		} else {
@@ -200,27 +216,6 @@ export class FragmentedHandshake extends TLSStruct {
 }
 
 
-export enum HandshakeType {
-	hello_request = 0,
-	client_hello = 1,
-	server_hello = 2,
-	hello_verify_request = 3,
-	certificate = 11,
-	server_key_exchange = 12,
-	certificate_request = 13,
-	server_hello_done = 14,
-	certificate_verify = 15,
-	client_key_exchange = 16,
-	finished = 20
-}
-// define handshake messages for lookup
-export const HandshakeMessages = {};
-HandshakeMessages[HandshakeType.hello_request] = HelloRequest;
-HandshakeMessages[HandshakeType.client_hello] = ClientHello;
-HandshakeMessages[HandshakeType.server_hello] = ServerHello;
-HandshakeMessages[HandshakeType.hello_verify_request] = HelloVerifyRequest;
-HandshakeMessages[HandshakeType.server_hello_done] = ServerHelloDone;
-HandshakeMessages[HandshakeType.finished] = Finished;
 
 // Handshake message implementations
 export class HelloRequest extends Handshake {
@@ -329,3 +324,13 @@ export class Finished extends Handshake {
 
 }
 
+// define handshake messages for lookup
+export const HandshakeMessages: {
+	[type: number]: {__spec: any}
+} = {};
+HandshakeMessages[HandshakeType.hello_request] = HelloRequest;
+HandshakeMessages[HandshakeType.client_hello] = ClientHello;
+HandshakeMessages[HandshakeType.server_hello] = ServerHello;
+HandshakeMessages[HandshakeType.hello_verify_request] = HelloVerifyRequest;
+HandshakeMessages[HandshakeType.server_hello_done] = ServerHelloDone;
+HandshakeMessages[HandshakeType.finished] = Finished;
