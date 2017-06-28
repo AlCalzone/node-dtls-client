@@ -3,7 +3,7 @@ import * as dgram from "dgram";
 import { RecordLayer } from "./DTLS/RecordLayer";
 import { Message } from "./TLS/Message";
 import { ContentType } from "./TLS/ContentType";
-import { ClientHandshakeHandler } from "./DTLS/HandshakeHandler";
+import { ClientHandshakeHandler, HandshakeStates } from "./DTLS/HandshakeHandler";
 import { FragmentedHandshake } from "./DTLS/Handshake";
 import { ChangeCipherSpec } from "./TLS/ChangeCipherSpec";
 import { TLSStruct } from "./TLS/TLSStruct";
@@ -68,7 +68,6 @@ export module dtls {
 		}
 
 		// buffer messages while handshaking
-		private isShakingHands: boolean = true;
 		private bufferedMessages: Message[] = [];
 
 		/*
@@ -105,10 +104,10 @@ export module dtls {
 						break;
 
 					case ContentType.application_data:
-						if (this.isShakingHands) {
+						if (this.handshakeHandler.state !== HandshakeStates.finished) {
 							// if we are still shaking hands, buffer the message until we're done
 							this.bufferedMessages.push(msg);
-						} else {
+						} else /* finished */ {
 							// else emit the message
 							// TODO: extend params?
 							this.emit("message", msg, rinfo);
