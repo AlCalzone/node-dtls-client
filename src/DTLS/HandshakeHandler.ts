@@ -16,7 +16,7 @@ export enum HandshakeStates {
 
 export class ClientHandshakeHandler {
 
-	constructor(private recordLayer: RecordLayer) {
+	constructor(private recordLayer: RecordLayer, private finishedCallback: Function) {
 		this._state = HandshakeStates.preparing;
 	}
 

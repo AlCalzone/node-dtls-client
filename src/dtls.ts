@@ -53,6 +53,10 @@ export module dtls {
 		 */
 		send(data: Buffer, callback?: SendCallback) {
 
+			if (this._isClosed) {
+				throw new Error("the socket is closed. cannot send data.");
+			}
+
 			// send finished data over UDP
 			const packet: Message = {
 				type: ContentType.application_data,
@@ -68,7 +72,7 @@ export module dtls {
 		}
 
 		// buffer messages while handshaking
-		private bufferedMessages: Message[] = [];
+		private bufferedMessages: {msg: Message, rinfo: dgram.RemoteInfo}[] = [];
 
 		/*
 			Internal Socket handler functions
@@ -79,8 +83,15 @@ export module dtls {
 			// initialize record layer
 			this.recordLayer = new RecordLayer(this.udp, this.options);
 			// also start handshake
-			this.handshakeHandler = new ClientHandshakeHandler(this.recordLayer);
-			// TODO: when done, emit event
+			this.handshakeHandler = new ClientHandshakeHandler(this.recordLayer, () => {
+				// when done, emit "connected" event
+				this.emit("connected");
+				// also emit all buffered messages
+				while (this.bufferedMessages.length > 0) {
+					let {msg, rinfo} = this.bufferedMessages.shift();
+					this.emit("message", msg, rinfo);
+				}
+			});
 		}
 
 		private udp_onMessage(msg: Buffer, rinfo: dgram.RemoteInfo) {
@@ -106,10 +117,11 @@ export module dtls {
 					case ContentType.application_data:
 						if (this.handshakeHandler.state !== HandshakeStates.finished) {
 							// if we are still shaking hands, buffer the message until we're done
-							this.bufferedMessages.push(msg);
+							this.bufferedMessages.push({msg, rinfo});
 						} else /* finished */ {
 							// else emit the message
 							// TODO: extend params?
+							// TODO: do we need to emit rinfo?
 							this.emit("message", msg, rinfo);
 						}
 						break;
@@ -117,8 +129,9 @@ export module dtls {
 			}
 		}
 
+		private _isClosed: boolean = false;
 		private udp_onClose() {
-			// TODO
+			this._isClosed = true;
 			this.emit("close");
 		}
 		private udp_onError(exception: Error) {
