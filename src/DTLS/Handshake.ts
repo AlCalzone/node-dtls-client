@@ -152,6 +152,23 @@ export class FragmentedHandshake extends TLSStruct {
 		if (!singleMessage) 
 			throw new Error('this series of fragments belongs to multiple messages'); // TODO: better type?		
 	}
+
+	/**
+	 * In the given array of fragments, find all that belong to the reference fragment
+	 * @param fragments - Array of fragments to be searched
+	 * @param reference - The reference fragment whose siblings should be found
+	 */
+	static findAllFragments(fragments: FragmentedHandshake[], reference: FragmentedHandshake): FragmentedHandshake[] {
+		// ignore empty arrays
+		if (!(fragments && fragments.length)) return [];
+
+		// return all fragments with matching msg_type, message_seq and total length
+		return fragments.filter(f => {
+			return f.msg_type === reference.msg_type &&
+					f.message_seq === reference.message_seq &&
+					f.total_length === reference.total_length;
+		});
+	}
 	
 	/**
 	 * Checks if the provided handshake fragments form a complete message
