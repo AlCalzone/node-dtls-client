@@ -24,11 +24,11 @@ export declare module dtls {
          */
         send(data: Buffer, callback?: SendCallback): void;
         close(callback?: CloseEventHandler): void;
-        private isShakingHands;
         private bufferedMessages;
         private udp;
         private udp_onListening();
         private udp_onMessage(msg, rinfo);
+        private _isClosed;
         private udp_onClose();
         private udp_onError(exception);
     }

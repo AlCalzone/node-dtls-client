@@ -47,8 +47,8 @@ var dtls;
             var _this = _super.call(this) || this;
             _this.options = options;
             // buffer messages while handshaking
-            _this.isShakingHands = true;
             _this.bufferedMessages = [];
+            _this._isClosed = false;
             // setup the connection
             _this.udp = dgram
                 .createSocket(options, _this.udp_onMessage)
@@ -62,6 +62,9 @@ var dtls;
          * Send the given data. It is automatically compressed and encrypted.
          */
         Socket.prototype.send = function (data, callback) {
+            if (this._isClosed) {
+                throw new Error("the socket is closed. cannot send data.");
+            }
             // send finished data over UDP
             var packet = {
                 type: ContentType_1.ContentType.application_data,
@@ -75,11 +78,19 @@ var dtls;
             this.udp.close();
         };
         Socket.prototype.udp_onListening = function () {
+            var _this = this;
             // initialize record layer
             this.recordLayer = new RecordLayer_1.RecordLayer(this.udp, this.options);
             // also start handshake
-            this.handshakeHandler = new HandshakeHandler_1.ClientHandshakeHandler(this.recordLayer);
-            // TODO: when done, emit event
+            this.handshakeHandler = new HandshakeHandler_1.ClientHandshakeHandler(this.recordLayer, function () {
+                // when done, emit "connected" event
+                _this.emit("connected");
+                // also emit all buffered messages
+                while (_this.bufferedMessages.length > 0) {
+                    var _a = _this.bufferedMessages.shift(), msg = _a.msg, rinfo = _a.rinfo;
+                    _this.emit("message", msg, rinfo);
+                }
+            });
         };
         Socket.prototype.udp_onMessage = function (msg, rinfo) {
             // decode the messages
@@ -101,13 +112,14 @@ var dtls;
                         // TODO: read spec to see how we handle this
                         break;
                     case ContentType_1.ContentType.application_data:
-                        if (this.isShakingHands) {
+                        if (this.handshakeHandler.state !== HandshakeHandler_1.HandshakeStates.finished) {
                             // if we are still shaking hands, buffer the message until we're done
-                            this.bufferedMessages.push(msg_1);
+                            this.bufferedMessages.push({ msg: msg_1, rinfo: rinfo });
                         }
                         else {
                             // else emit the message
                             // TODO: extend params?
+                            // TODO: do we need to emit rinfo?
                             this.emit("message", msg_1, rinfo);
                         }
                         break;
@@ -115,7 +127,7 @@ var dtls;
             }
         };
         Socket.prototype.udp_onClose = function () {
-            // TODO
+            this._isClosed = true;
             this.emit("close");
         };
         Socket.prototype.udp_onError = function (exception) {
