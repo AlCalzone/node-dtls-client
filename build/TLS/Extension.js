@@ -18,7 +18,7 @@ var ExtensionType;
 })(ExtensionType = exports.ExtensionType || (exports.ExtensionType = {}));
 ;
 (function (ExtensionType) {
-    ExtensionType.__spec = TypeSpecs.define.Enum("uint16", ExtensionType);
+    ExtensionType.spec = TypeSpecs.define.Enum("uint16", ExtensionType);
 })(ExtensionType = exports.ExtensionType || (exports.ExtensionType = {}));
 var Extension = (function (_super) {
     __extends(Extension, _super);
@@ -31,8 +31,9 @@ var Extension = (function (_super) {
     return Extension;
 }(TLSStruct_1.TLSStruct));
 Extension.__spec = {
-    extension_type: ExtensionType.__spec,
+    extension_type: ExtensionType.spec,
     extension_data: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 16) - 1)
 };
-exports.default = Extension;
+Extension.spec = TypeSpecs.define.Struct(Extension);
+exports.Extension = Extension;
 //# sourceMappingURL=Extension.js.map

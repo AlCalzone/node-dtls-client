@@ -59,6 +59,7 @@ DTLSCompressed.__spec = {
     // length field is implied in the variable length vector //length: new TypeSpecs.Calculated("uint16", "serializedLength", "fragment"),
     fragment: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 1024 + Math.pow(2, 14))
 };
+DTLSCompressed.spec = TypeSpecs.define.Struct(DTLSCompressed);
 exports.DTLSCompressed = DTLSCompressed;
 var MACHeader = (function (_super) {
     __extends(MACHeader, _super);

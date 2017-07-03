@@ -109,6 +109,7 @@ export declare class CipherSuite extends TLSStruct {
     static readonly __spec: {
         id: Readonly<TypeSpecs.Number>;
     };
+    static readonly spec: TypeSpecs.Struct;
     constructor(id: number, keyExchange: KeyExchangeAlgorithm, macAlgorithm: HashAlgorithm, prfAlgorithm: HashAlgorithm, cipherType: CipherType, algorithm?: (BlockCipher.BlockCipherAlgorithm | AEADAlgorithm));
     private _cipher;
     readonly Cipher: GenericCipherDelegate;

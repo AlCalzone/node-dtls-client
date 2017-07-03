@@ -4,6 +4,8 @@ var TypeSpecs = require("./TypeSpecs");
 var util_1 = require("../lib/util");
 var BitConverter_1 = require("../lib/BitConverter");
 var Vector = (function () {
+    // TODO: this has to be possible without the spec param
+    // maybe pass it when serializing?
     function Vector(spec, items) {
         if (items === void 0) { items = []; }
         this.spec = spec;

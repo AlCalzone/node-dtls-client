@@ -28,8 +28,8 @@ export class RecordLayer {
 
 	/**
 	 * Transforms the given message into a DTLSCiphertext packet and sends it via UDP
-	 * @param msg The message to be sent
-	 * @param callback The function to be called after sending the message.
+	 * @param msg - The message to be sent
+	 * @param callback - The function to be called after sending the message.
 	 */
 	public send(msg: Message, callback?: dtls.SendCallback) {
 		const epoch = this.epochs[this.writeEpoch];
@@ -58,6 +58,14 @@ export class RecordLayer {
 		// TODO: check if the buffer satisfies the configured MTU
 		// and send it
 		this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+	}
+	/**
+	 * Sends all given messages
+	 * @param messages - The messages to be sent
+	 */
+	public sendAll(messages: Message[]) {
+		// TODO: enable send callbacks for bulk sending
+		messages.forEach(msg => this.send(msg));
 	}
 
 	/**

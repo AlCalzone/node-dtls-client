@@ -1,14 +1,13 @@
 import * as TypeSpecs from "../TLS/TypeSpecs";
 import { TLSStruct } from "../TLS/TLSStruct";
+import { Vector } from "../TLS/Vector";
 
-export class Cookie extends TLSStruct {
+export namespace Cookie {
 
-	static readonly __spec = {
-		value: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2**8-1)
-	}
+	export const spec = TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 8 - 1);
 
-	constructor(public value = []) {
-		super(Cookie.__spec);
+	export function create(items: number[] = []) {
+		return new Vector<number>(spec, items);
 	}
 
 }

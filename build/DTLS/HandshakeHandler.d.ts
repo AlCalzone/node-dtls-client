@@ -27,7 +27,7 @@ export declare class ClientHandshakeHandler {
     private incompleteMessages;
     private completeMessages;
     /** The currently expected flight, designated by the type of its last message */
-    private expectedFlight;
+    private expectedResponses;
     /**
      * Processes a received handshake message
      */
@@ -40,6 +40,12 @@ export declare class ClientHandshakeHandler {
      * reacts to a ChangeCipherSpec message
      */
     changeCipherSpec(): void;
+    private sendFlight(flight, expectedResponses);
+    /**
+     * Fragments a handshake message, serializes the fragements into single messages and sends them over the record layer
+     * @param handshake - The handshake message to be sent
+     */
+    private sendHandshakeMessage(handshake);
     /**
      * handles server messages
      */

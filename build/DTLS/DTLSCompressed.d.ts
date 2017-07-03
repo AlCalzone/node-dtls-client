@@ -17,6 +17,7 @@ export declare class DTLSCompressed extends TLSStruct {
         sequence_number: Readonly<TypeSpecs.Number>;
         fragment: TypeSpecs.Vector;
     };
+    static readonly spec: TypeSpecs.Struct;
     constructor(type: ContentType, version: ProtocolVersion, epoch: number, sequence_number: number, fragment: Buffer);
     /**
      * Compresses the given plaintext packet

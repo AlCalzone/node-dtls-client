@@ -1,7 +1,20 @@
 ﻿import { ConnectionEnd } from "../TLS/ConnectionState";
 import { RecordLayer } from "./RecordLayer";
 import * as Handshake from "./Handshake";
+import { CipherSuite } from "../TLS/CipherSuite";
+import { CipherSuites } from "../DTLS/CipherSuites";
 import { ChangeCipherSpec } from "../TLS/ChangeCipherSpec";
+import { Message } from "../TLS/Message";
+import { ContentType } from "../TLS/ContentType";
+import { ProtocolVersion } from "../TLS/ProtocolVersion";
+import { SessionID } from "../TLS/SessionID";
+import { Random } from "../TLS/Random";
+import { Cookie } from "../DTLS/Cookie";
+import { Vector } from "../TLS/Vector";
+import { CompressionMethod } from "../TLS/ConnectionState";
+import { Extension } from "../TLS/Extension";
+
+
 /**
 * DTLS Timeout and retransmission state machine for the handshake protocol
 * according to https://tools.ietf.org/html/rfc6347#section-4.2.4
@@ -41,7 +54,37 @@ export class ClientHandshakeHandler {
 		this.lastSentSeqNum = -1;
 		this.incompleteMessages = [];
 		this.completeMessages = {};
-		this.expectedFlight = [];
+		this.expectedResponses = [];
+
+		// start by sending a ClientHello
+		const hello = new Handshake.ClientHello();
+		hello.message_seq = ++this.lastSentSeqNum;
+		hello.client_version = new ProtocolVersion(~1, ~2);
+		hello.random = Random.createNew();
+		hello.session_id = SessionID.create();
+		hello.cookie = Cookie.create();
+		hello.cipher_suites = new Vector<CipherSuite>(
+			Handshake.ClientHello.__spec.cipher_suites,
+			[
+				// TODO: allow more
+				CipherSuites.TLS_PSK_WITH_AES_128_CCM_8,
+				CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA
+			]
+		);
+		hello.compression_methods = new Vector<CompressionMethod>(
+			Handshake.ClientHello.__spec.compression_methods,
+			[CompressionMethod.null]
+		);
+		hello.extensions = new Vector<Extension>(
+			Handshake.ClientHello.__spec.extensions
+		);
+		this.sendFlight(
+			[hello],
+			[
+				Handshake.HandshakeType.server_hello,
+				Handshake.HandshakeType.hello_verify_request
+			]
+		);
 	}
 
 	/** The last message seq number that has been processed already */
@@ -52,7 +95,7 @@ export class ClientHandshakeHandler {
 	private incompleteMessages: Handshake.FragmentedHandshake[];
 	private completeMessages: { [index: number]: Handshake.Handshake };
 	/** The currently expected flight, designated by the type of its last message */
-	private expectedFlight: Handshake.HandshakeType[];
+	private expectedResponses: Handshake.HandshakeType[];
 
 
 	/**
@@ -79,16 +122,17 @@ export class ClientHandshakeHandler {
 			if (!isComplete) return;
 
 			const lastMsg = this.completeMessages[Math.max(...completeMsgIndizes)];
-			if (this.expectedFlight != null) {
+			if (this.expectedResponses != null) {
 				// if we expect a flight and this is the one, call the handler
-				if (this.expectedFlight.indexOf(lastMsg.msg_type) > -1) {
-					this.expectedFlight = null;
+				if (this.expectedResponses.indexOf(lastMsg.msg_type) > -1) {
+					this.expectedResponses = null;
 					// and remember the seq number
 					this.lastProcessedSeqNum = lastMsg.message_seq;
 					// call the handler and clear the buffer
 					const messages = completeMsgIndizes.map(i => this.completeMessages[i]);
 					this.completeMessages = {};
 					this.handle[lastMsg.msg_type](messages);
+					// TODO: clear a retransmission timer
 				}
 			} else {
 				// if we don't expect a flight, maybe do something depending on the type of the message
@@ -124,6 +168,27 @@ export class ClientHandshakeHandler {
 	 */
 	public changeCipherSpec() {
 
+	}
+
+	private sendFlight(flight: Handshake.Handshake[], expectedResponses: Handshake.HandshakeType[]) {
+		// TODO: buffer the flight for retransmission
+		this.expectedResponses = expectedResponses;
+		flight.forEach(handshake => this.sendHandshakeMessage(handshake));
+	}
+
+	/**
+	 * Fragments a handshake message, serializes the fragements into single messages and sends them over the record layer
+	 * @param handshake - The handshake message to be sent
+	 */
+	private sendHandshakeMessage(handshake: Handshake.Handshake) {
+		const messages = handshake
+			.fragmentMessage()
+			.map(fragment => ({
+				type: ContentType.handshake,
+				data: fragment.serialize()
+			}))
+			;
+		this.recordLayer.sendAll(messages);
 	}
 
 	/**

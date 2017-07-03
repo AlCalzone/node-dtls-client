@@ -6,8 +6,10 @@ import { BitSizes, numberToBuffer, bufferToNumber } from "../lib/BitConverter";
 
 export class Vector<T extends number | ISerializable> {
 
+	// TODO: this has to be possible without the spec param
+	// maybe pass it when serializing?
 	constructor(
-		public spec: TypeSpecs.Vector,
+		public spec: TypeSpecs.Vector, 
 		public items: T[] = []
 	) { }
 

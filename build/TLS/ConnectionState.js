@@ -8,7 +8,7 @@ var CompressionMethod;
     CompressionMethod[CompressionMethod["null"] = 0] = "null";
 })(CompressionMethod = exports.CompressionMethod || (exports.CompressionMethod = {}));
 (function (CompressionMethod) {
-    CompressionMethod.__spec = TypeSpecs.define.Enum("uint8", CompressionMethod);
+    CompressionMethod.spec = TypeSpecs.define.Enum("uint8", CompressionMethod);
 })(CompressionMethod = exports.CompressionMethod || (exports.CompressionMethod = {}));
 var master_secret_length = 48;
 var client_random_length = 32;

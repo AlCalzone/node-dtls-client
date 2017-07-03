@@ -7,6 +7,8 @@ import { Cookie } from "./Cookie";
 import { CipherSuite } from "../TLS/CipherSuite";
 import { CompressionMethod } from "../TLS/ConnectionState";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
+import { Extension } from "../TLS/Extension";
+import { Vector } from "../TLS/Vector";
 import { RecordLayer } from "./RecordLayer";
 
 export enum HandshakeType {
@@ -28,10 +30,9 @@ export abstract class Handshake extends TLSStruct {
 	constructor(
 		public msg_type: HandshakeType,
 		bodySpec: TypeSpecs.StructSpec,
-		/*,
-		public body?: TLSStruct*/
+		initial?: any
 	) {
-		super(bodySpec); //, (body ? {body: body} : null));
+		super(bodySpec, initial);
 	}
 
 	public message_seq: number;
@@ -251,23 +252,20 @@ export class ClientHello extends Handshake {
 	static readonly __spec = {
 		client_version: TypeSpecs.define.Struct(ProtocolVersion),
 		random: TypeSpecs.define.Struct(Random),
-		session_id: TypeSpecs.define.Struct(SessionID),
-		cookie: TypeSpecs.define.Struct(Cookie),
-		// TODO: Typed Vector CipherSuite cipher_suites< 1..2^ 15 - 1 > // definition differs from TLS spec: we count hte number of items, not bytes
-		// TODO: Typed Vector CompressionMethod compression_methods< 1..2^ 8 - 1 >
+		session_id: SessionID.spec,
+		cookie: Cookie.spec,
+		cipher_suites: TypeSpecs.define.Vector(CipherSuite.spec, 2, 2 ** 16 - 2),
+		compression_methods: TypeSpecs.define.Vector(CompressionMethod.spec, 1, 2 ** 8 - 1),
+		extensions: TypeSpecs.define.Vector(Extension.spec, 0, 2 ** 16 - 1, true),
 	}
 
-	static readonly __bodySpecWithExtensions = extend(ClientHello.__spec, {
-		// see http://wiki.osdev.org/TLS_Handshake
-		// TODO: TypedVector Extension extensions< 0..2^ 16 - 1 >;
-		// TODO: optional type -> may only appear last, present if bytes follow
-		// TODO: item parser function
-	})
-
 	public client_version: ProtocolVersion;
-	public session_id: SessionID;
-	public cookie: Cookie;
-	public extensions: any;
+	public random: Random;
+	public session_id: Vector<number>;
+	public cookie: Vector<number>;
+	public cipher_suites: Vector<CipherSuite>;
+	public compression_methods: Vector<CompressionMethod>;
+	public extensions: Vector<Extension>;
 
 	constructor() {
 		super(HandshakeType.client_hello, ClientHello.__spec);
@@ -280,20 +278,17 @@ export class ServerHello extends Handshake {
 	static readonly __spec = {
 		server_version: TypeSpecs.define.Struct(ProtocolVersion),
 		random: TypeSpecs.define.Struct(Random),
-		session_id: TypeSpecs.define.Struct(SessionID),
+		session_id: SessionID.spec,
 		cipher_suite: TypeSpecs.define.Struct(CipherSuite),
-		compression_method: CompressionMethod.__spec
+		compression_method: CompressionMethod.spec,
+		extensions: TypeSpecs.define.Vector(Extension.spec, 0, 2 ** 16 - 1, true),
 	}
 
-	static readonly __bodySpecWithExtensions = extend(ServerHello.__spec, {
-		// TODO: TypedVector Extension extensions< 0..2^ 16 - 1 >;
-	})
-
 	public server_version: ProtocolVersion;
-	public session_id: SessionID;
+	public session_id: Vector<number>;
 	public cipher_suite: CipherSuite;
 	public compression_method: CompressionMethod;
-	public extensions: any;
+	public extensions: Vector<Extension>;
 
 	constructor() {
 		super(HandshakeType.server_hello, ServerHello.__spec);
@@ -305,11 +300,11 @@ export class HelloVerifyRequest extends Handshake {
 
 	static readonly __spec = {
 		server_version: TypeSpecs.define.Struct(ProtocolVersion),
-		cookie: TypeSpecs.define.Struct(Cookie)
+		cookie: Cookie.spec
 	}
 
 	public server_version: ProtocolVersion;
-	public cookie: Cookie;
+	public cookie: Vector<number>;
 
 	constructor() {
 		super(HandshakeType.hello_verify_request, HelloVerifyRequest.__spec);

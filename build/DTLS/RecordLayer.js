@@ -32,8 +32,8 @@ var RecordLayer = (function () {
     }
     /**
      * Transforms the given message into a DTLSCiphertext packet and sends it via UDP
-     * @param msg The message to be sent
-     * @param callback The function to be called after sending the message.
+     * @param msg - The message to be sent
+     * @param callback - The function to be called after sending the message.
      */
     RecordLayer.prototype.send = function (msg, callback) {
         var epoch = this.epochs[this.writeEpoch];
@@ -50,6 +50,15 @@ var RecordLayer = (function () {
         // TODO: check if the buffer satisfies the configured MTU
         // and send it
         this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+    };
+    /**
+     * Sends all given messages
+     * @param messages - The messages to be sent
+     */
+    RecordLayer.prototype.sendAll = function (messages) {
+        var _this = this;
+        // TODO: enable send callbacks for bulk sending
+        messages.forEach(function (msg) { return _this.send(msg); });
     };
     /**
      * Receives DTLS messages from the given buffer.

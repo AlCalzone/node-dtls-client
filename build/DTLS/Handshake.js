@@ -12,13 +12,13 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var TypeSpecs = require("../TLS/TypeSpecs");
 var TLSStruct_1 = require("../TLS/TLSStruct");
-var object_polyfill_1 = require("../lib/object-polyfill");
 var Random_1 = require("../TLS/Random");
 var SessionID_1 = require("../TLS/SessionID");
 var Cookie_1 = require("./Cookie");
 var CipherSuite_1 = require("../TLS/CipherSuite");
 var ConnectionState_1 = require("../TLS/ConnectionState");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
+var Extension_1 = require("../TLS/Extension");
 var RecordLayer_1 = require("./RecordLayer");
 var HandshakeType;
 (function (HandshakeType) {
@@ -36,8 +36,8 @@ var HandshakeType;
 })(HandshakeType = exports.HandshakeType || (exports.HandshakeType = {}));
 var Handshake = (function (_super) {
     __extends(Handshake, _super);
-    function Handshake(msg_type, bodySpec) {
-        var _this = _super.call(this, bodySpec) || this;
+    function Handshake(msg_type, bodySpec, initial) {
+        var _this = _super.call(this, bodySpec, initial) || this;
         _this.msg_type = msg_type;
         return _this;
     }
@@ -124,6 +124,22 @@ var FragmentedHandshake = (function (_super) {
         });
         if (!singleMessage)
             throw new Error('this series of fragments belongs to multiple messages'); // TODO: better type?		
+    };
+    /**
+     * In the given array of fragments, find all that belong to the reference fragment
+     * @param fragments - Array of fragments to be searched
+     * @param reference - The reference fragment whose siblings should be found
+     */
+    FragmentedHandshake.findAllFragments = function (fragments, reference) {
+        // ignore empty arrays
+        if (!(fragments && fragments.length))
+            return [];
+        // return all fragments with matching msg_type, message_seq and total length
+        return fragments.filter(function (f) {
+            return f.msg_type === reference.msg_type &&
+                f.message_seq === reference.message_seq &&
+                f.total_length === reference.total_length;
+        });
     };
     /**
      * Checks if the provided handshake fragments form a complete message
@@ -215,10 +231,12 @@ var ClientHello = (function (_super) {
 ClientHello.__spec = {
     client_version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
     random: TypeSpecs.define.Struct(Random_1.Random),
-    session_id: TypeSpecs.define.Struct(SessionID_1.SessionID),
-    cookie: TypeSpecs.define.Struct(Cookie_1.Cookie),
+    session_id: SessionID_1.SessionID.spec,
+    cookie: Cookie_1.Cookie.spec,
+    cipher_suites: TypeSpecs.define.Vector(CipherSuite_1.CipherSuite.spec, 2, Math.pow(2, 16) - 2),
+    compression_methods: TypeSpecs.define.Vector(ConnectionState_1.CompressionMethod.spec, 1, Math.pow(2, 8) - 1),
+    extensions: TypeSpecs.define.Vector(Extension_1.Extension.spec, 0, Math.pow(2, 16) - 1, true),
 };
-ClientHello.__bodySpecWithExtensions = object_polyfill_1.extend(ClientHello.__spec, {});
 exports.ClientHello = ClientHello;
 var ServerHello = (function (_super) {
     __extends(ServerHello, _super);
@@ -230,11 +248,11 @@ var ServerHello = (function (_super) {
 ServerHello.__spec = {
     server_version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
     random: TypeSpecs.define.Struct(Random_1.Random),
-    session_id: TypeSpecs.define.Struct(SessionID_1.SessionID),
+    session_id: SessionID_1.SessionID.spec,
     cipher_suite: TypeSpecs.define.Struct(CipherSuite_1.CipherSuite),
-    compression_method: ConnectionState_1.CompressionMethod.__spec
+    compression_method: ConnectionState_1.CompressionMethod.spec,
+    extensions: TypeSpecs.define.Vector(Extension_1.Extension.spec, 0, Math.pow(2, 16) - 1, true),
 };
-ServerHello.__bodySpecWithExtensions = object_polyfill_1.extend(ServerHello.__spec, {});
 exports.ServerHello = ServerHello;
 var HelloVerifyRequest = (function (_super) {
     __extends(HelloVerifyRequest, _super);
@@ -245,7 +263,7 @@ var HelloVerifyRequest = (function (_super) {
 }(Handshake));
 HelloVerifyRequest.__spec = {
     server_version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    cookie: TypeSpecs.define.Struct(Cookie_1.Cookie)
+    cookie: Cookie_1.Cookie.spec
 };
 exports.HelloVerifyRequest = HelloVerifyRequest;
 var ServerHelloDone = (function (_super) {

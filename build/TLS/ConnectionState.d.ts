@@ -6,7 +6,7 @@ export declare enum CompressionMethod {
     null = 0,
 }
 export declare namespace CompressionMethod {
-    const __spec: TypeSpecs.Enum;
+    const spec: TypeSpecs.Enum;
 }
 export declare type ConnectionEnd = "server" | "client";
 export declare class ConnectionState {

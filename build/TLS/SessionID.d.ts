@@ -1,9 +1,6 @@
 import * as TypeSpecs from "./TypeSpecs";
-import { TLSStruct } from "./TLSStruct";
-export declare class SessionID extends TLSStruct {
-    value: any[];
-    static readonly __spec: {
-        value: TypeSpecs.Vector;
-    };
-    constructor(value?: any[]);
+import { Vector } from "../TLS/Vector";
+export declare namespace SessionID {
+    const spec: TypeSpecs.Vector;
+    function create(items?: number[]): Vector<number>;
 }

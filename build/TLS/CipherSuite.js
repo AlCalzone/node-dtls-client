@@ -144,5 +144,6 @@ var CipherSuite = (function (_super) {
 CipherSuite.__spec = {
     id: TypeSpecs.uint16
 };
+CipherSuite.spec = TypeSpecs.define.Struct(CipherSuite);
 exports.CipherSuite = CipherSuite;
 //# sourceMappingURL=CipherSuite.js.map

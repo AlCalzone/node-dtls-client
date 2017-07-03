@@ -8,10 +8,15 @@ export declare class RecordLayer {
     constructor(udpSocket: dgram.Socket, options: dtls.Options);
     /**
      * Transforms the given message into a DTLSCiphertext packet and sends it via UDP
-     * @param msg The message to be sent
-     * @param callback The function to be called after sending the message.
+     * @param msg - The message to be sent
+     * @param callback - The function to be called after sending the message.
      */
     send(msg: Message, callback?: dtls.SendCallback): void;
+    /**
+     * Sends all given messages
+     * @param messages - The messages to be sent
+     */
+    sendAll(messages: Message[]): void;
     /**
      * Receives DTLS messages from the given buffer.
      * @param buf The buffer containing DTLSCiphertext packets

@@ -158,7 +158,8 @@ export class CipherSuite extends TLSStruct {
 
 	static readonly __spec = {
 		id: TypeSpecs.uint16
-	}
+	};
+	static readonly spec = TypeSpecs.define.Struct(CipherSuite);
 
 	constructor(
 		public readonly id: number,

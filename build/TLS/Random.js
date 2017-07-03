@@ -10,13 +10,28 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+var crypto = require("crypto");
 var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
+var Vector_1 = require("../TLS/Vector");
+function getRandomArray(length) {
+    var random = crypto.randomBytes(length);
+    return Array.prototype.slice.apply(random);
+}
 var Random = (function (_super) {
     __extends(Random, _super);
-    function Random() {
-        return _super.call(this, Random.__spec) || this;
+    function Random(gmt_unix_time, random_bytes) {
+        var _this = _super.call(this, Random.__spec) || this;
+        _this.gmt_unix_time = gmt_unix_time;
+        _this.random_bytes = random_bytes;
+        return _this;
     }
+    /**
+     * Creates a new Random structure and initializes it.
+     */
+    Random.createNew = function () {
+        return new Random(Math.floor(Date.now() / 1000), new Vector_1.Vector(Random.__spec.random_bytes, getRandomArray(Random.__spec.random_bytes.maxLength)));
+    };
     return Random;
 }(TLSStruct_1.TLSStruct));
 Random.__spec = {

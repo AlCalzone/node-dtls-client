@@ -9,15 +9,15 @@ export declare type PropertyDefinition = {
  * Basisklasse für TLS-Objekte
  */
 export declare class TLSStruct {
-    constructor(spec: TypeSpecs.StructSpec);
+    constructor(spec: TypeSpecs.StructSpec, initial?: any);
     private __spec__;
     private propertyDefinitions;
     /**
-     * Deserialisiert die Eigenschaften dieses Objekts aus dem angegebenen Byte-Array
-     * @param arr - Das Array, aus dem gelesen werden soll
+     * Deserialisiert die Eigenschaften dieses Objekts aus dem angegebenen Buffer
+     * @param buf - Der Buffer, aus dem gelesen werden soll
      * @param offset - Der Index, ab dem gelesen werden soll
      */
-    deserialize(arr: Buffer, offset?: number): number;
+    deserialize(buf: Buffer, offset?: number): number;
     /**
      * Erzeugt eine TLSStruct der angegebenen Definition aus einem Byte-Array
      * @param spec - Definiert, wie das deserialisierte Objekt aufgebaut ist

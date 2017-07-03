@@ -36,5 +36,6 @@ DTLSPlaintext.__spec = {
     // length field is implied in the variable length vector //length: new TypeSpecs.Calculated("uint16", "serializedLength", "fragment"),
     fragment: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 14))
 };
+DTLSPlaintext.spec = TypeSpecs.define.Struct(DTLSPlaintext);
 exports.DTLSPlaintext = DTLSPlaintext;
 //# sourceMappingURL=DTLSPlaintext.js.map

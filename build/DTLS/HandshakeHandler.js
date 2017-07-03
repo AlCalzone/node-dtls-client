@@ -1,6 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var Handshake = require("./Handshake");
+var CipherSuites_1 = require("../DTLS/CipherSuites");
+var ContentType_1 = require("../TLS/ContentType");
+var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
+var SessionID_1 = require("../TLS/SessionID");
+var Random_1 = require("../TLS/Random");
+var Cookie_1 = require("../DTLS/Cookie");
+var Vector_1 = require("../TLS/Vector");
+var ConnectionState_1 = require("../TLS/ConnectionState");
 /**
 * DTLS Timeout and retransmission state machine for the handshake protocol
 * according to https://tools.ietf.org/html/rfc6347#section-4.2.4
@@ -44,7 +52,25 @@ var ClientHandshakeHandler = (function () {
         this.lastSentSeqNum = -1;
         this.incompleteMessages = [];
         this.completeMessages = {};
-        this.expectedFlight = [];
+        this.expectedResponses = [];
+        // start by sending a ClientHello
+        var hello = new Handshake.ClientHello();
+        hello.message_seq = ++this.lastSentSeqNum;
+        hello.client_version = new ProtocolVersion_1.ProtocolVersion(~1, ~2);
+        hello.random = Random_1.Random.createNew();
+        hello.session_id = SessionID_1.SessionID.create();
+        hello.cookie = Cookie_1.Cookie.create();
+        hello.cipher_suites = new Vector_1.Vector(Handshake.ClientHello.__spec.cipher_suites, [
+            // TODO: allow more
+            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CCM_8,
+            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA
+        ]);
+        hello.compression_methods = new Vector_1.Vector(Handshake.ClientHello.__spec.compression_methods, [ConnectionState_1.CompressionMethod.null]);
+        hello.extensions = new Vector_1.Vector(Handshake.ClientHello.__spec.extensions);
+        this.sendFlight([hello], [
+            Handshake.HandshakeType.server_hello,
+            Handshake.HandshakeType.hello_verify_request
+        ]);
     };
     /**
      * Processes a received handshake message
@@ -70,16 +96,17 @@ var ClientHandshakeHandler = (function () {
             if (!isComplete)
                 return;
             var lastMsg = this.completeMessages[Math.max.apply(Math, completeMsgIndizes)];
-            if (this.expectedFlight != null) {
+            if (this.expectedResponses != null) {
                 // if we expect a flight and this is the one, call the handler
-                if (this.expectedFlight.indexOf(lastMsg.msg_type) > -1) {
-                    this.expectedFlight = null;
+                if (this.expectedResponses.indexOf(lastMsg.msg_type) > -1) {
+                    this.expectedResponses = null;
                     // and remember the seq number
                     this.lastProcessedSeqNum = lastMsg.message_seq;
                     // call the handler and clear the buffer
                     var messages = completeMsgIndizes.map(function (i) { return _this.completeMessages[i]; });
                     this.completeMessages = {};
                     this.handle[lastMsg.msg_type](messages);
+                    // TODO: clear a retransmission timer
                 }
             }
             else {
@@ -109,6 +136,25 @@ var ClientHandshakeHandler = (function () {
      * reacts to a ChangeCipherSpec message
      */
     ClientHandshakeHandler.prototype.changeCipherSpec = function () {
+    };
+    ClientHandshakeHandler.prototype.sendFlight = function (flight, expectedResponses) {
+        var _this = this;
+        // TODO: buffer the flight for retransmission
+        this.expectedResponses = expectedResponses;
+        flight.forEach(function (handshake) { return _this.sendHandshakeMessage(handshake); });
+    };
+    /**
+     * Fragments a handshake message, serializes the fragements into single messages and sends them over the record layer
+     * @param handshake - The handshake message to be sent
+     */
+    ClientHandshakeHandler.prototype.sendHandshakeMessage = function (handshake) {
+        var messages = handshake
+            .fragmentMessage()
+            .map(function (fragment) { return ({
+            type: ContentType_1.ContentType.handshake,
+            data: fragment.serialize()
+        }); });
+        this.recordLayer.sendAll(messages);
     };
     return ClientHandshakeHandler;
 }());

@@ -5,14 +5,15 @@ export declare enum ExtensionType {
     signature_algorithms = 13,
 }
 export declare namespace ExtensionType {
-    const __spec: TypeSpecs.Enum;
+    const spec: TypeSpecs.Enum;
 }
-export default class Extension extends TLSStruct {
+export declare class Extension extends TLSStruct {
     extension_type: ExtensionType;
     extension_data: Buffer;
     static readonly __spec: {
         extension_type: TypeSpecs.Enum;
         extension_data: TypeSpecs.Vector;
     };
+    static readonly spec: TypeSpecs.Struct;
     constructor(extension_type: ExtensionType, extension_data: Buffer);
 }

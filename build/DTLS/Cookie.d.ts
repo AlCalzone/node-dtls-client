@@ -1,9 +1,6 @@
 import * as TypeSpecs from "../TLS/TypeSpecs";
-import { TLSStruct } from "../TLS/TLSStruct";
-export declare class Cookie extends TLSStruct {
-    value: any[];
-    static readonly __spec: {
-        value: TypeSpecs.Vector;
-    };
-    constructor(value?: any[]);
+import { Vector } from "../TLS/Vector";
+export declare namespace Cookie {
+    const spec: TypeSpecs.Vector;
+    function create(items?: number[]): Vector<number>;
 }

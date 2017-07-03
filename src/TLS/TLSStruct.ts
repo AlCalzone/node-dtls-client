@@ -12,7 +12,7 @@ export type PropertyDefinition = { name: string, type: TypeSpecs.All };
  */
 export class TLSStruct {
 
-	constructor(spec: TypeSpecs.StructSpec/*, initial?*/) {
+	constructor(spec: TypeSpecs.StructSpec, initial?) {
 		// Eigenschaften aus Spec kopieren
 		this.__spec__ = spec;
 		for (let [key, value] of entries(spec)) {
@@ -21,10 +21,10 @@ export class TLSStruct {
 				type: value
 			});
 
-			/*if (initial != undefined && initial.hasOwnProperty(key)) {
+			if (initial != undefined && initial.hasOwnProperty(key)) {
 				// sonst evtl. die Eigenschaft initialisieren
 				this[key] = initial[key];
-			}*/
+			}
 		}
 	}
 

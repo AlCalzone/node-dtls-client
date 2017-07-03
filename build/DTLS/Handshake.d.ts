@@ -1,11 +1,12 @@
 /// <reference types="node" />
 import * as TypeSpecs from "../TLS/TypeSpecs";
 import { TLSStruct } from "../TLS/TLSStruct";
-import { SessionID } from "../TLS/SessionID";
-import { Cookie } from "./Cookie";
+import { Random } from "../TLS/Random";
 import { CipherSuite } from "../TLS/CipherSuite";
 import { CompressionMethod } from "../TLS/ConnectionState";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
+import { Extension } from "../TLS/Extension";
+import { Vector } from "../TLS/Vector";
 export declare enum HandshakeType {
     hello_request = 0,
     client_hello = 1,
@@ -21,7 +22,7 @@ export declare enum HandshakeType {
 }
 export declare abstract class Handshake extends TLSStruct {
     msg_type: HandshakeType;
-    constructor(msg_type: HandshakeType, bodySpec: TypeSpecs.StructSpec);
+    constructor(msg_type: HandshakeType, bodySpec: TypeSpecs.StructSpec, initial?: any);
     message_seq: number;
     /**
      * Fragments this packet into a series of packets according to the configured MTU
@@ -63,6 +64,12 @@ export declare class FragmentedHandshake extends TLSStruct {
      */
     private static enforceSingleMessage(fragments);
     /**
+     * In the given array of fragments, find all that belong to the reference fragment
+     * @param fragments - Array of fragments to be searched
+     * @param reference - The reference fragment whose siblings should be found
+     */
+    static findAllFragments(fragments: FragmentedHandshake[], reference: FragmentedHandshake): FragmentedHandshake[];
+    /**
      * Checks if the provided handshake fragments form a complete message
      */
     static isComplete(fragments: FragmentedHandshake[]): boolean;
@@ -80,39 +87,44 @@ export declare class ClientHello extends Handshake {
     static readonly __spec: {
         client_version: TypeSpecs.Struct;
         random: TypeSpecs.Struct;
-        session_id: TypeSpecs.Struct;
-        cookie: TypeSpecs.Struct;
+        session_id: TypeSpecs.Vector;
+        cookie: TypeSpecs.Vector;
+        cipher_suites: TypeSpecs.Vector;
+        compression_methods: TypeSpecs.Vector;
+        extensions: TypeSpecs.Vector;
     };
-    static readonly __bodySpecWithExtensions: any;
     client_version: ProtocolVersion;
-    session_id: SessionID;
-    cookie: Cookie;
-    extensions: any;
+    random: Random;
+    session_id: Vector<number>;
+    cookie: Vector<number>;
+    cipher_suites: Vector<CipherSuite>;
+    compression_methods: Vector<CompressionMethod>;
+    extensions: Vector<Extension>;
     constructor();
 }
 export declare class ServerHello extends Handshake {
     static readonly __spec: {
         server_version: TypeSpecs.Struct;
         random: TypeSpecs.Struct;
-        session_id: TypeSpecs.Struct;
+        session_id: TypeSpecs.Vector;
         cipher_suite: TypeSpecs.Struct;
         compression_method: TypeSpecs.Enum;
+        extensions: TypeSpecs.Vector;
     };
-    static readonly __bodySpecWithExtensions: any;
     server_version: ProtocolVersion;
-    session_id: SessionID;
+    session_id: Vector<number>;
     cipher_suite: CipherSuite;
     compression_method: CompressionMethod;
-    extensions: any;
+    extensions: Vector<Extension>;
     constructor();
 }
 export declare class HelloVerifyRequest extends Handshake {
     static readonly __spec: {
         server_version: TypeSpecs.Struct;
-        cookie: TypeSpecs.Struct;
+        cookie: TypeSpecs.Vector;
     };
     server_version: ProtocolVersion;
-    cookie: Cookie;
+    cookie: Vector<number>;
     constructor();
 }
 export declare class ServerHelloDone extends Handshake {

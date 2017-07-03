@@ -20,7 +20,7 @@ export enum CompressionMethod {
 	null = 0
 }
 export namespace CompressionMethod {
-	export const __spec = TypeSpecs.define.Enum("uint8", CompressionMethod);
+	export const spec = TypeSpecs.define.Enum("uint8", CompressionMethod);
 }
 
 export type ConnectionEnd =
