@@ -24,11 +24,10 @@ export declare class ClientHandshakeHandler {
     private lastProcessedSeqNum;
     /** The seq number of the last sent message */
     private lastSentSeqNum;
-    /** The collected handshake messages waiting for processing */
     private incompleteMessages;
     private completeMessages;
-    /** The list of functions waiting for new *complete* messages */
-    private listeners;
+    /** The currently expected flight, designated by the type of its last message */
+    private expectedFlight;
     /**
      * Processes a received handshake message
      */
@@ -42,9 +41,7 @@ export declare class ClientHandshakeHandler {
      */
     changeCipherSpec(): void;
     /**
-     * waits until a specific combination of messages arrives
-     * @param finalMessage - the type of the final message to be expected
-     * @param callback - the function to be called when the messages arrive
+     * handles server messages
      */
-    private waitForFlight(finalMessage, callback);
+    private handle;
 }

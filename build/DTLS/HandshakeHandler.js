@@ -16,7 +16,16 @@ var ClientHandshakeHandler = (function () {
     function ClientHandshakeHandler(recordLayer, finishedCallback) {
         this.recordLayer = recordLayer;
         this.finishedCallback = finishedCallback;
+        /**
+         * handles server messages
+         */
+        this.handle = (_a = {},
+            /** Handles a HelloVerifyRequest message */
+            _a[Handshake.HandshakeType.hello_verify_request] = function (messages) {
+            },
+            _a);
         this.renegotiate();
+        var _a;
     }
     Object.defineProperty(ClientHandshakeHandler.prototype, "state", {
         get: function () {
@@ -35,26 +44,48 @@ var ClientHandshakeHandler = (function () {
         this.lastSentSeqNum = -1;
         this.incompleteMessages = [];
         this.completeMessages = {};
-        this.listeners = [];
+        this.expectedFlight = [];
     };
     /**
      * Processes a received handshake message
      */
     ClientHandshakeHandler.prototype.processMessage = function (msg) {
-        var callListeners;
+        var _this = this;
+        var checkFlight;
         if (msg.isFragmented()) {
             // remember incomplete messages and try to assemble them afterwards
             this.incompleteMessages.push(msg);
-            callListeners = this.tryAssembleFragments(msg);
+            checkFlight = this.tryAssembleFragments(msg);
         }
         else {
             // the message is already complete, we only need to parse it
             this.completeMessages[msg.message_seq] = Handshake.Handshake.parse(msg);
-            callListeners = true;
+            checkFlight = true;
         }
-        // call all listeners
-        if (callListeners) {
-            this.listeners.forEach(function (fn) { return fn(); });
+        // check if the flight is the current one, and complete
+        if (checkFlight) {
+            var completeMsgIndizes = Object.keys(this.completeMessages).map(function (k) { return +k; });
+            // a flight is complete if it forms a non-interrupted sequence of seq-nums
+            var isComplete = [this.lastProcessedSeqNum].concat(completeMsgIndizes).every(function (val, i, arr) { return (i === 0) || (val === arr[i - 1] + 1); });
+            if (!isComplete)
+                return;
+            var lastMsg = this.completeMessages[Math.max.apply(Math, completeMsgIndizes)];
+            if (this.expectedFlight != null) {
+                // if we expect a flight and this is the one, call the handler
+                if (this.expectedFlight.indexOf(lastMsg.msg_type) > -1) {
+                    this.expectedFlight = null;
+                    // and remember the seq number
+                    this.lastProcessedSeqNum = lastMsg.message_seq;
+                    // call the handler and clear the buffer
+                    var messages = completeMsgIndizes.map(function (i) { return _this.completeMessages[i]; });
+                    this.completeMessages = {};
+                    this.handle[lastMsg.msg_type](messages);
+                }
+            }
+            else {
+                // if we don't expect a flight, maybe do something depending on the type of the message
+                // TODO: react to server sending us rehandshake invites
+            }
         }
     };
     /**
@@ -78,15 +109,6 @@ var ClientHandshakeHandler = (function () {
      * reacts to a ChangeCipherSpec message
      */
     ClientHandshakeHandler.prototype.changeCipherSpec = function () {
-    };
-    /**
-     * waits until a specific combination of messages arrives
-     * @param finalMessage - the type of the final message to be expected
-     * @param callback - the function to be called when the messages arrive
-     */
-    ClientHandshakeHandler.prototype.waitForFlight = function (finalMessage, callback) {
-        // TODO: add listener
-        // TODO: remove listener when successful or timeout
     };
     return ClientHandshakeHandler;
 }());

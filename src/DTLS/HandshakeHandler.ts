@@ -14,11 +14,11 @@ export enum HandshakeStates {
 	finished
 }
 
-interface flightComponent {
-	type: Handshake.HandshakeType;
-	required: boolean;
-}
-type waitForFlightCallback = (flight: Handshake.Handshake[]) => void;
+//interface flightComponent {
+//	type: Handshake.HandshakeType;
+//	required: boolean;
+//}
+type FlightHandler = (flight: Handshake.Handshake[]) => void;
 
 export class ClientHandshakeHandler {
 
@@ -41,36 +41,59 @@ export class ClientHandshakeHandler {
 		this.lastSentSeqNum = -1;
 		this.incompleteMessages = [];
 		this.completeMessages = {};
-		this.listeners = [];
+		this.expectedFlight = [];
 	}
 
 	/** The last message seq number that has been processed already */
 	private lastProcessedSeqNum: number;
 	/** The seq number of the last sent message */
 	private lastSentSeqNum: number;
-	/** The collected handshake messages waiting for processing */
+	/* The collected handshake messages waiting for processing */
 	private incompleteMessages: Handshake.FragmentedHandshake[];
 	private completeMessages: { [index: number]: Handshake.Handshake };
-	/** The list of functions waiting for new *complete* messages */
-	private listeners: Function[];
+	/** The currently expected flight, designated by the type of its last message */
+	private expectedFlight: Handshake.HandshakeType[];
+
 
 	/**
 	 * Processes a received handshake message
 	 */
 	public processMessage(msg: Handshake.FragmentedHandshake) {
-		let callListeners: boolean;
+		let checkFlight: boolean;
 		if (msg.isFragmented()) {
 			// remember incomplete messages and try to assemble them afterwards
 			this.incompleteMessages.push(msg);
-			callListeners = this.tryAssembleFragments(msg);
+			checkFlight = this.tryAssembleFragments(msg);
 		} else {
 			// the message is already complete, we only need to parse it
 			this.completeMessages[msg.message_seq] = Handshake.Handshake.parse(msg);
-			callListeners = true;
+			checkFlight = true;
 		}
-		// call all listeners
-		if (callListeners) {
-			this.listeners.forEach(fn => fn());
+		// check if the flight is the current one, and complete
+		if (checkFlight) {
+			const completeMsgIndizes = Object.keys(this.completeMessages).map(k => +k);
+			// a flight is complete if it forms a non-interrupted sequence of seq-nums
+			const isComplete = [this.lastProcessedSeqNum].concat(completeMsgIndizes).every(
+				(val, i, arr) => (i === 0) || (val === arr[i - 1] + 1)
+				);
+			if (!isComplete) return;
+
+			const lastMsg = this.completeMessages[Math.max(...completeMsgIndizes)];
+			if (this.expectedFlight != null) {
+				// if we expect a flight and this is the one, call the handler
+				if (this.expectedFlight.indexOf(lastMsg.msg_type) > -1) {
+					this.expectedFlight = null;
+					// and remember the seq number
+					this.lastProcessedSeqNum = lastMsg.message_seq;
+					// call the handler and clear the buffer
+					const messages = completeMsgIndizes.map(i => this.completeMessages[i]);
+					this.completeMessages = {};
+					this.handle[lastMsg.msg_type](messages);
+				}
+			} else {
+				// if we don't expect a flight, maybe do something depending on the type of the message
+				// TODO: react to server sending us rehandshake invites
+			}
 		}
 	}
 	/**
@@ -103,16 +126,18 @@ export class ClientHandshakeHandler {
 
 	}
 
-	/** 
-	 * waits until a specific combination of messages arrives
-	 * @param finalMessage - the type of the final message to be expected
-	 * @param callback - the function to be called when the messages arrive
+	/**
+	 * handles server messages
 	 */
-	private waitForFlight(finalMessage: Handshake.HandshakeType, callback: waitForFlightCallback) {
-		// TODO: add listener
-		// TODO: remove listener when successful or timeout
-	}
-	
+	private handle: { [type: number]: FlightHandler } = {
+
+		/** Handles a HelloVerifyRequest message */
+		[Handshake.HandshakeType.hello_verify_request]: (messages) => {
+
+		},
+
+	};
+		
 
 }
 
