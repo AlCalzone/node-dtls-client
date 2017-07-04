@@ -128,6 +128,10 @@ export class FragmentedHandshake extends TLSStruct {
 		super(FragmentedHandshake.__spec);
 	}
 	
+	static createEmpty(): FragmentedHandshake {
+		return new FragmentedHandshake(null, null, null, null, null);
+	}
+	
 	/**
 	 * Checks if this message is actually fragmented, i.e. total_length > fragment_length
 	 */
@@ -285,6 +289,7 @@ export class ServerHello extends Handshake {
 	}
 
 	public server_version: ProtocolVersion;
+	public random: Random;
 	public session_id: Vector<number>;
 	public cipher_suite: CipherSuite;
 	public compression_method: CompressionMethod;

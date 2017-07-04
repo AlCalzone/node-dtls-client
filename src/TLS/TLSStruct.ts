@@ -73,7 +73,7 @@ export class TLSStruct {
 	 * @param offset - Der Index, ab dem gelesen werden soll
 	 */
 	static from(spec: TypeSpecs.Struct, buf: Buffer, offset?: number): DeserializationResult<TLSStruct> {
-		const ret = new spec.structType(spec.spec) as TLSStruct;
+		const ret = spec.structType.createEmpty() as TLSStruct;
 		return { result: ret, readBytes: ret.deserialize(buf, offset) };
 	}
 

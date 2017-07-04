@@ -21,6 +21,9 @@ export class ServerKeyExchange extends TLSStruct {
 	constructor(public algorithm: KeyExchangeAlgorithm) {
 		super(ServerKeyExchange.__specs[algorithm]);
 	}
+
+	// createEmpty doesn't make sense here
+	
 }
 
 
@@ -37,4 +40,7 @@ export class ClientKeyExchange extends TLSStruct {
 	constructor(public algorithm: KeyExchangeAlgorithm) {
 		super(ClientKeyExchange.__specs[algorithm]);
 	}
+
+	// createEmpty doesn't make sense here
+	
 }

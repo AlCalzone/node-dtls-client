@@ -1,17 +1,6 @@
 ﻿import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
 
-export class Alert extends TLSStruct {
-
-	static readonly __spec = {
-		level: TypeSpecs.define.Enum("uint8", AlertLevel),
-		description: TypeSpecs.define.Enum("uint8", AlertDescription)
-	}
-	
-	constructor(public level: AlertLevel, public description: AlertDescription) {
-		super(Alert.__spec);
-	}
-}
 
 export enum AlertLevel {
 	warning = 1,
@@ -44,4 +33,21 @@ export enum AlertDescription {
 	user_canceled = 90,
 	no_renegotiation = 100,
 	unsupported_extension = 110, 
+}
+
+export class Alert extends TLSStruct {
+
+	static readonly __spec = {
+		level: TypeSpecs.define.Enum("uint8", AlertLevel),
+		description: TypeSpecs.define.Enum("uint8", AlertDescription)
+	}
+	
+	constructor(public level: AlertLevel, public description: AlertDescription) {
+		super(Alert.__spec);
+	}
+
+	static createEmpty(): Alert {
+		return new Alert(0, 0);
+	}
+
 }

@@ -19,4 +19,8 @@ export class ProtocolVersion extends TLSStruct {
 		super(ProtocolVersion.__spec);
 	}
 
+	static createEmpty(): ProtocolVersion {
+		return new ProtocolVersion();
+	}	
+
 } 

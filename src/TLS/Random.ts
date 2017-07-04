@@ -32,4 +32,8 @@ export class Random extends TLSStruct {
 		);
 	}
 
+	static createEmpty(): Random {
+		return new Random(null, null);
+	}	
+
 }

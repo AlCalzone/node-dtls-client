@@ -9,7 +9,7 @@ import { DTLSCompressed } from "./DTLSCompressed";
 import { DTLSCiphertext } from "./DTLSCiphertext";
 import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
 
-interface Epoch {
+export interface Epoch {
 	index: number;
 	connectionState: ConnectionState;
 	writeSequenceNumber: number;
@@ -32,12 +32,12 @@ export class RecordLayer {
 	 * @param callback - The function to be called after sending the message.
 	 */
 	public send(msg: Message, callback?: dtls.SendCallback) {
-		const epoch = this.epochs[this.writeEpoch];
+		const epoch = this.epochs[this.writeEpochNr];
 
 		let packet: DTLSPlaintext | DTLSCompressed | DTLSCiphertext = new DTLSPlaintext(
 			msg.type,
 			new ProtocolVersion(~1, ~2), // 2's complement of 1.2
-			this._writeEpoch,
+			this._writeEpochNr,
 			++epoch.writeSequenceNumber, // sequence number increased by 1
 			msg.data
 		);
@@ -77,7 +77,7 @@ export class RecordLayer {
 		let packets: (DTLSCiphertext | DTLSCompressed | DTLSPlaintext)[] = [];
 		while (offset < buf.length) {
 			try {
-				let packet = TLSStruct.from(DTLSCiphertext.spec, buf, offset);
+				let packet = DTLSCiphertext.from(DTLSCiphertext.spec, buf, offset);
 				packets.push(packet.result as DTLSCiphertext);
 				offset += packet.readBytes;
 			} catch (e) {
@@ -94,7 +94,7 @@ export class RecordLayer {
 					// discard packets from an unknown epoch
 					// this will keep packets from the upcoming one
 					return false;
-				} else if (p.epoch < this.readEpoch) {
+				} else if (p.epoch < this.readEpochNr) {
 					// discard old packets
 					return false;
 				} 
@@ -138,31 +138,38 @@ export class RecordLayer {
 	 */
 	private epochs: Epoch[] = [];
 	//private connectionStates: ConnectionState[/* epoch */] = [];
+	private _readEpochNr: number = 0;
+	public get readEpochNr(): number { return this._readEpochNr; }
 	/**
 	 * The current epoch used for reading data
 	 */
-	private _readEpoch: number = 0;
-	public get readEpoch(): number { return this._readEpoch; }
+	public get currentReadEpoch(): Epoch { return this.epochs[this._readEpochNr]; }
+	public get nextReadEpoch(): Epoch { return this.epochs[this._readEpochNr+1]; }
 	
+	private _writeEpochNr: number = 0;
+	public get writeEpochNr(): number { return this._writeEpochNr; }
 	/**
 	 * The current epoch used for writing data
 	 */
-	private _writeEpoch: number = 0;
-	public get writeEpoch(): number { return this._writeEpoch; }
+	public get currentWriteEpoch(): Epoch { return this.epochs[this._writeEpochNr]; }
+	public get nextWriteEpoch(): Epoch { return this.epochs[this._writeEpochNr+1]; }
 
-	/**
-	 * The epoch that will be used next
-	 */
-	public get nextEpoch(): number {
-		return Math.max(this.readEpoch, this.writeEpoch) + 1;
+	public get nextEpochNr(): number {
+		return Math.max(this.readEpochNr, this.writeEpochNr) + 1;
 	};
+	/**
+	 * The next read and write epoch that will be used. 
+	 * Be careful as this might point to the wrong epoch between ChangeCipherSpec messages
+	 */
+	public get nextEpoch(): Epoch { return this.epochs[this.nextEpochNr]; }
+
 	/**
 	 * Ensure there's a next epoch to switch to
 	 */
 	private ensureNextEpoch() {
 		// makes sure a pending state exists
-		if (!this.epochs[this.nextEpoch]) {
-			this.epochs[this.nextEpoch] = this.createEpoch(this.nextEpoch);
+		if (!this.epochs[this.nextEpochNr]) {
+			this.epochs[this.nextEpochNr] = this.createEpoch(this.nextEpochNr);
 		}
 	}
 	private createEpoch(index: number): Epoch {
@@ -175,11 +182,11 @@ export class RecordLayer {
 	}
 
 	public advanceReadEpoch(): void {
-		this._readEpoch++;
+		this._readEpochNr++;
 		this.ensureNextEpoch();
 	}
 	public advanceWriteEpoch(): void {
-		this._writeEpoch++;
+		this._writeEpochNr++;
 		this.ensureNextEpoch();
 	}
 

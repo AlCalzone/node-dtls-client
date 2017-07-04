@@ -4,6 +4,7 @@ import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
 import { DTLSCompressed } from "./DTLSCompressed";
 import { CipherDelegate, DecipherDelegate, MacDelegate } from "../TLS/CipherSuite";
+import { ISerializableConstructor, ISerializable } from "../TLS/Serializable";
 
 export class DTLSCiphertext extends TLSStruct {
 
@@ -27,6 +28,9 @@ export class DTLSCiphertext extends TLSStruct {
 		super(DTLSCiphertext.__spec);
 	}
 
+	static createEmpty(): DTLSCiphertext {
+		return new DTLSCiphertext(null, null, null, null, null);
+	}
 
 	/**
 	 * Encrypts the given compressed packet

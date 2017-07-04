@@ -34,4 +34,9 @@ export default class SignatureAndHashAlgorithm extends TLSStruct {
 	constructor(public hash: HashAlgorithm, public signature: SignatureAlgorithm) {
 		super(SignatureAndHashAlgorithm.__spec);
 	}
+
+	static createEmpty(): SignatureAndHashAlgorithm {
+		return new SignatureAndHashAlgorithm(null, null);
+	}	
+
 }

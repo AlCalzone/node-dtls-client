@@ -172,6 +172,10 @@ export class CipherSuite extends TLSStruct {
 		super(CipherSuite.__spec);
 	}
 
+	static createEmpty(): CipherSuite {
+		return new CipherSuite(null, null, null, null, null);
+	}
+
 	private _cipher: GenericCipherDelegate;
 	public get Cipher(): GenericCipherDelegate {
 		if (this._cipher == undefined)

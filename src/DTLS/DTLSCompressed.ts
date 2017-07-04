@@ -27,6 +27,10 @@ export class DTLSCompressed extends TLSStruct {
 		super(DTLSCompressed.__spec);
 	}
 
+	static createEmpty(): DTLSCompressed {
+		return new DTLSCompressed(null, null, null, null, null);
+	}
+
 	/**
 	 * Compresses the given plaintext packet
 	 * @param packet - The plaintext packet to be compressed
@@ -93,6 +97,10 @@ export class MACHeader extends TLSStruct {
 		public fragment_length: number
 	) {
 		super(MACHeader.__spec);
+	}
+
+	static createEmpty(): MACHeader {
+		return new MACHeader(null, null, null, null, null);
 	}
 
 }

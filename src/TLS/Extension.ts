@@ -20,4 +20,9 @@ export class Extension extends TLSStruct {
 	constructor(public extension_type: ExtensionType, public extension_data: Buffer) {
 		super(Extension.__spec);
 	}
+
+	static createEmpty(): Extension {
+		return new Extension(null, null);
+	}
+	
 }

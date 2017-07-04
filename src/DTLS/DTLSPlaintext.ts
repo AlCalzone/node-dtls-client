@@ -25,6 +25,8 @@ export class DTLSPlaintext extends TLSStruct {
 		super(DTLSPlaintext.__spec);
 	}
 
-	// get length() { return this.fragment.length; }
+	static createEmpty(): DTLSPlaintext {
+		return new DTLSPlaintext(null, null, null, null, null);
+	}
 
 }

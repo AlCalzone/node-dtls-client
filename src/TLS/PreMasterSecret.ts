@@ -15,4 +15,8 @@ export class PreMasterSecret extends TLSStruct {
 		super(PreMasterSecret.__spec);
 	}
 
+	static createEmpty(): PreMasterSecret {
+		return new PreMasterSecret(null, null);
+	}
+
 }

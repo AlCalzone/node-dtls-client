@@ -32,7 +32,7 @@ export interface StructSpec {
 }
 export interface Struct {
 	type: "struct";
-	spec: StructSpec;
+	//spec: StructSpec;
 	structType: ISerializableConstructor;
 }
 
@@ -61,7 +61,8 @@ export const define = {
 	Number: (size: Numbers): Number => ({ type: "number", size }),
 	Struct: (structType: any): Struct => ({
 		type: "struct",
-		spec: (structType as any as IStruct).__spec, // require this property, we don't want to repeat us that much
+		// we shouldn't need this, each struct knows its own spec
+		//spec: (structType as any as IStruct).__spec, // require this property, we don't want to repeat us that much
 		structType: (structType as ISerializableConstructor)
 	}),
 	Vector: (itemSpec: Complex, minLength = 0, maxLength = minLength, optional = false): Vector => ({
