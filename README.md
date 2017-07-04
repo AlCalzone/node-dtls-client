@@ -12,26 +12,20 @@ Although great care has been taken to properly implement the required encryption
 - [x] data types and conversion to/from buffers
 - [x] HMAC, PRF and key computation
 - [x] cipher suite definitions
-- [ ] record protocol implementation
+- [x] record protocol implementation
   - [x] compression (no actual algorithms implemented)
   - [x] encryption and verification:
 	  - [x] block ciphers
 	  - [ ] stream ciphers (optional)
 	  - [ ] AEAD ciphers (optional)
   - [x] replay protection
-  - [ ] managing connection states (partially done)
-- [ ] handshake protocol implementation
-  - [x] extend TLSStruct:
-    - [x] support optional vectors 
-    - [x] support non-primitive vector items
+- [x] handshake protocol implementation (usable with some exceptions)
   - [x] fragmentation and re-assembly
-  - [ ] change cipher spec protocol implementation
-  - [ ] handle message flow, including retransmission
-  - [ ] message definitions (~70%)
+  - [x] change cipher spec
+  - [x] handle message flow (retransmission still TODO)
+  - [x] message definitions (all neccessary ones for TRADFRI)
 - [ ] alert protocol implementation (optional for now)
 - [ ] testing
   - [x] implement testing framework with code coverage
-  - [ ] tests
-    - [x] /src/lib
-    - [ ] /src/TLS (~5% done)
-    - [ ] /src/DTLS
+  - [ ] component tests 
+  - [ ] manual tests with Tradfri Gateway
