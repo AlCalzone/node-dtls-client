@@ -51,11 +51,12 @@ var dtls;
             _this._isClosed = false;
             // setup the connection
             _this.udp = dgram
-                .createSocket(options, _this.udp_onMessage)
-                .on("listening", _this.udp_onListening)
-                .on("message", _this.udp_onMessage)
-                .on("close", _this.udp_onClose)
-                .on("error", _this.udp_onError);
+                .createSocket(options, _this.udp_onMessage.bind(_this))
+                .on("listening", _this.udp_onListening.bind(_this))
+                .on("message", _this.udp_onMessage.bind(_this))
+                .on("close", _this.udp_onClose.bind(_this))
+                .on("error", _this.udp_onError.bind(_this));
+            _this.udp.bind();
             return _this;
         }
         /**
@@ -95,9 +96,7 @@ var dtls;
         Socket.prototype.udp_onMessage = function (msg, rinfo) {
             // decode the messages
             var messages = this.recordLayer.receive(msg);
-            // TODO: only for handshake messages, if they are received out of sequence,
-            // buffer them up and serve them with the next batch of messages
-            // also implement retransmission.
+            // TODO: implement retransmission.
             for (var _i = 0, messages_1 = messages; _i < messages_1.length; _i++) {
                 var msg_1 = messages_1[_i];
                 switch (msg_1.type) {

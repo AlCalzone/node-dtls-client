@@ -39,7 +39,7 @@ export declare class FragmentedHandshake extends TLSStruct {
     total_length: number;
     message_seq: number;
     fragment_offset: number;
-    fragment: Buffer;
+    fragment: Vector<number>;
     static readonly __spec: {
         msg_type: TypeSpecs.Enum;
         total_length: Readonly<TypeSpecs.Number>;
@@ -52,7 +52,7 @@ export declare class FragmentedHandshake extends TLSStruct {
      * The amount of data consumed by a handshake message header (without the actual fragment)
      */
     static readonly headerLength: number;
-    constructor(msg_type: HandshakeType, total_length: number, message_seq: number, fragment_offset: number, fragment: Buffer);
+    constructor(msg_type: HandshakeType, total_length: number, message_seq: number, fragment_offset: number, fragment: Vector<number>);
     static createEmpty(): FragmentedHandshake;
     /**
      * Checks if this message is actually fragmented, i.e. total_length > fragment_length

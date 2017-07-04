@@ -39,7 +39,7 @@ function createMAC(algorithm) {
         return MAC(mac_key, data);
     });
     // append length information
-    ret.length = MAC.length;
+    ret.keyAndHashLength = MAC.keyAndHashLenth;
     return ret;
 }
 exports.createMAC = createMAC;
@@ -56,8 +56,8 @@ function createNullDecipher() {
     return ret;
 }
 function createNullMAC() {
-    var ret = (function (data) { return Buffer.from(data); });
-    ret.length = 0;
+    var ret = (function (data, _1, _2) { return Buffer.from(data); });
+    ret.keyAndHashLength = 0;
     return ret;
 }
 var CipherSuite = (function (_super) {

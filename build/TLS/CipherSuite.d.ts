@@ -89,7 +89,7 @@ export interface GenericMacDelegate {
     /**
      * The key and hash output length of this hash function
      */
-    length: number;
+    keyAndHashLength: number;
 }
 export interface KeyMaterial {
     client_write_MAC_key: Buffer;

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var TypeSpecs = require("./TypeSpecs");
 var object_polyfill_1 = require("../lib/object-polyfill");
 var PRF_1 = require("./PRF");
+var CipherSuites_1 = require("../DTLS/CipherSuites");
 var CompressionMethod;
 (function (CompressionMethod) {
     CompressionMethod[CompressionMethod["null"] = 0] = "null";
@@ -15,6 +16,13 @@ var client_random_length = 32;
 var server_random_length = 32;
 var ConnectionState = (function () {
     function ConnectionState(values) {
+        this.entity = "client";
+        this.cipherSuite = CipherSuites_1.CipherSuites.TLS_NULL_WITH_NULL_NULL;
+        //record_iv_length: number;
+        //mac_algorithm: HashAlgorithm;
+        //mac_length: number;
+        //mac_key_length: number;
+        this.compression_algorithm = CompressionMethod.null;
         if (values) {
             for (var _i = 0, _a = object_polyfill_1.entries(values); _i < _a.length; _i++) {
                 var _b = _a[_i], key = _b[0], value = _b[1];
@@ -74,7 +82,7 @@ var ConnectionState = (function () {
      * Berechnet die Schlüsselkomponenten
      */
     ConnectionState.prototype.computeKeyMaterial = function () {
-        var keyBlock = PRF_1.PRF[this.cipherSuite.prfAlgorithm](this.master_secret, "key expansion", Buffer.concat([this.server_random, this.client_random]), 2 * (this.cipherSuite.MAC.length + this.cipherSuite.Cipher.keyLength + this.fixed_iv_length));
+        var keyBlock = PRF_1.PRF[this.cipherSuite.prfAlgorithm](this.master_secret, "key expansion", Buffer.concat([this.server_random, this.client_random]), 2 * (this.cipherSuite.MAC.keyAndHashLength + this.cipherSuite.Cipher.keyLength + this.fixed_iv_length));
         var offset = 0;
         function read(length) {
             var ret = keyBlock.slice(offset, offset + length);
@@ -82,8 +90,8 @@ var ConnectionState = (function () {
             return ret;
         }
         this.key_material = {
-            client_write_MAC_key: read(this.cipherSuite.MAC.length),
-            server_write_MAC_key: read(this.cipherSuite.MAC.length),
+            client_write_MAC_key: read(this.cipherSuite.MAC.keyAndHashLength),
+            server_write_MAC_key: read(this.cipherSuite.MAC.keyAndHashLength),
             client_write_key: read(this.cipherSuite.Cipher.keyLength),
             server_write_key: read(this.cipherSuite.Cipher.keyLength),
             client_write_IV: read(this.fixed_iv_length),

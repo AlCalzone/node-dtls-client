@@ -18,6 +18,7 @@ export interface Epoch {
 
 export class RecordLayer {
 
+	// TODO: specify connection end
 	constructor(private udpSocket: dgram.Socket, private options: dtls.Options) {
 		// initialize with NULL cipherspec
 		// current state

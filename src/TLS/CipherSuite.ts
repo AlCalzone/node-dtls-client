@@ -51,7 +51,7 @@ export function createMAC(
 		return MAC(mac_key, data);
 	}) as GenericMacDelegate;
 	// append length information
-	ret.length = MAC.length;
+	ret.keyAndHashLength = MAC.keyAndHashLenth;
 	return ret;
 }
 
@@ -128,7 +128,7 @@ export interface GenericMacDelegate {
 	/**
 	 * The key and hash output length of this hash function
 	 */
-	length: number;
+	keyAndHashLength: number;
 }
 
 export interface KeyMaterial {
@@ -154,8 +154,8 @@ function createNullDecipher(): GenericDecipherDelegate {
 	return ret;
 }
 function createNullMAC(): GenericMacDelegate {
-	const ret = ((data) => Buffer.from(data)) as GenericMacDelegate;
-	ret.length = 0;
+	const ret = ((data, _1, _2) => Buffer.from(data)) as GenericMacDelegate;
+	ret.keyAndHashLength = 0;
 	return ret;
 }
 

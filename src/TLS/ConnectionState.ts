@@ -15,6 +15,7 @@ import {
 	GenericMacDelegate, MacDelegate,
 	KeyExchangeAlgorithm
 } from "./CipherSuite";
+import { CipherSuites } from "../DTLS/CipherSuites";
 
 export enum CompressionMethod {
 	null = 0
@@ -41,8 +42,8 @@ export class ConnectionState {
 		}
 	}
 
-	entity: ConnectionEnd;
-	cipherSuite: CipherSuite;
+	entity: ConnectionEnd = "client";
+	cipherSuite: CipherSuite = CipherSuites.TLS_NULL_WITH_NULL_NULL;
 	//prf_algorithm: HashAlgorithm;
 	//bulk_cipher_algorithm: BulkCipherAlgorithm;
 	//cipher_type: CipherType;
@@ -53,7 +54,7 @@ export class ConnectionState {
 	//mac_algorithm: HashAlgorithm;
 	//mac_length: number;
 	//mac_key_length: number;
-	compression_algorithm: CompressionMethod;
+	compression_algorithm: CompressionMethod = CompressionMethod.null;
 	master_secret: Buffer /*48*/;
 	client_random: Buffer /*32*/;
 	server_random: Buffer /*32*/;
@@ -113,7 +114,7 @@ export class ConnectionState {
 			this.master_secret,
 			"key expansion",
 			Buffer.concat([this.server_random, this.client_random]),
-			2 * (this.cipherSuite.MAC.length + this.cipherSuite.Cipher.keyLength + this.fixed_iv_length)
+			2 * (this.cipherSuite.MAC.keyAndHashLength + this.cipherSuite.Cipher.keyLength + this.fixed_iv_length)
 		);
 
 		let offset = 0;
@@ -124,8 +125,8 @@ export class ConnectionState {
 		}
 		
 		this.key_material = {
-			client_write_MAC_key: read(this.cipherSuite.MAC.length),
-			server_write_MAC_key: read(this.cipherSuite.MAC.length),
+			client_write_MAC_key: read(this.cipherSuite.MAC.keyAndHashLength),
+			server_write_MAC_key: read(this.cipherSuite.MAC.keyAndHashLength),
 			client_write_key: read(this.cipherSuite.Cipher.keyLength),
 			server_write_key: read(this.cipherSuite.Cipher.keyLength),
 			client_write_IV: read(this.fixed_iv_length),

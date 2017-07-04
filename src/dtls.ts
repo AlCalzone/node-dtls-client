@@ -37,12 +37,13 @@ export module dtls {
 			super();
 			// setup the connection
 			this.udp = dgram
-				.createSocket(options, this.udp_onMessage)
-				.on("listening", this.udp_onListening)
-				.on("message", this.udp_onMessage)
-				.on("close", this.udp_onClose)
-				.on("error", this.udp_onError)
+				.createSocket(options, this.udp_onMessage.bind(this))
+				.on("listening", this.udp_onListening.bind(this))
+				.on("message", this.udp_onMessage.bind(this))
+				.on("close", this.udp_onClose.bind(this))
+				.on("error", this.udp_onError.bind(this))
 				;
+			this.udp.bind();
 		}
 
 		private recordLayer: RecordLayer;
@@ -98,9 +99,7 @@ export module dtls {
 			// decode the messages
 			const messages = this.recordLayer.receive(msg);
 
-			// TODO: only for handshake messages, if they are received out of sequence,
-			// buffer them up and serve them with the next batch of messages
-			// also implement retransmission.
+			// TODO: implement retransmission.
 			for (let msg of messages) {
 				switch (msg.type) {
 					case ContentType.handshake:
@@ -142,11 +141,11 @@ export module dtls {
 
 	export interface Options {
 		type: "udp4" | "udp6";
-		reuseAddr: boolean;
+		reuseAddr?: boolean;
 		address: string;
 		port: number;
 		psk: { [identity: string]: string };
-		keyContext: any; // TODO: DTLS-security options
+		keyContext?: any; // TODO: DTLS-security options
 	}
 
 	export type ListeningEventHandler = () => void;

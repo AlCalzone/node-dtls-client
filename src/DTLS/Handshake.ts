@@ -60,7 +60,7 @@ export abstract class Handshake extends TLSStruct {
 				wholeMessage.length,
 				this.message_seq,
 				start,
-				fragment
+				Vector.createFromBuffer(fragment)
 			));
 			// step forward by the actual fragment length
 			start += fragment.length;
@@ -87,7 +87,7 @@ export abstract class Handshake extends TLSStruct {
 			// parse the body object into a new Handshake instance
 			const ret = TLSStruct.from(
 				spec,
-				assembled.fragment
+				Buffer.from(assembled.fragment.items)
 				).result as Handshake;
 			ret.message_seq = assembled.message_seq;
 			return ret;
@@ -119,7 +119,7 @@ export class FragmentedHandshake extends TLSStruct {
 		public total_length: number,
 		public message_seq: number,
 		public fragment_offset: number,
-		public fragment: Buffer
+		public fragment: Vector<number>
 	) {
 		super(FragmentedHandshake.__spec);
 	}
@@ -132,7 +132,7 @@ export class FragmentedHandshake extends TLSStruct {
 	 * Checks if this message is actually fragmented, i.e. total_length > fragment_length
 	 */
 	isFragmented(): boolean {
-		return (this.fragment_offset !== 0) || (this.total_length > this.fragment.length);
+		return (this.fragment_offset !== 0) || (this.total_length > this.fragment.items.length);
 	}
 	
 	/**
@@ -185,7 +185,7 @@ export class FragmentedHandshake extends TLSStruct {
 		const totalLength = fragments[0].total_length;
 		const ranges = fragments
 			// map to fragment range (start and end index)
-			.map(f => ({start: f.fragment_offset, end: f.fragment_offset + f.fragment.length-1}))
+			.map(f => ({start: f.fragment_offset, end: f.fragment_offset + f.fragment.items.length-1}))
 			// order the fragments by fragment offset
 			.sort((a,b) => a.start - b.start)
 			;
@@ -221,7 +221,7 @@ export class FragmentedHandshake extends TLSStruct {
 		// combine into a single buffer
 		const combined = Buffer.allocUnsafe(messages[0].total_length);
 		for (let msg of messages) {
-			msg.fragment.copy(combined, msg.fragment_offset);
+			Buffer.from(msg.fragment.items).copy(combined, msg.fragment_offset);
 		}
 		
 		// and return the complete message
@@ -230,7 +230,7 @@ export class FragmentedHandshake extends TLSStruct {
 			messages[0].total_length,
 			messages[0].message_seq,
 			0,
-			combined
+			Vector.createFromBuffer(combined)
 		);
 	}
 	

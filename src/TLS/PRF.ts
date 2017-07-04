@@ -11,7 +11,7 @@ export interface HMACDelegate {
 	/**
 	 * The key and hash output length of this hash function
 	 */
-	length: number
+	keyAndHashLenth: number
 };
 
 function HMAC_factory(algorithm: HashAlgorithm, length: number): HMACDelegate {
@@ -23,7 +23,7 @@ function HMAC_factory(algorithm: HashAlgorithm, length: number): HMACDelegate {
 	}) as HMACDelegate;
 
 	// add length information
-	ret.length = length;
+	ret.keyAndHashLenth = length;
 
 	return ret
 }
@@ -48,7 +48,7 @@ export interface HashDelegate {
 	/**
 	 * The hash output length of this hash function
 	 */
-	length: number
+	hashLength: number
 };
 
 function Hash_factory(algorithm: HashAlgorithm, length: number): HashDelegate {
@@ -60,7 +60,7 @@ function Hash_factory(algorithm: HashAlgorithm, length: number): HashDelegate {
 	}) as HashDelegate;
 
 	// add length information
-	ret.length = length;
+	ret.hashLength = length;
 
 	return ret;
 }

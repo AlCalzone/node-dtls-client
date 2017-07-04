@@ -7,6 +7,7 @@ var DTLSCompressed_1 = require("./DTLSCompressed");
 var DTLSCiphertext_1 = require("./DTLSCiphertext");
 var AntiReplayWindow_1 = require("../TLS/AntiReplayWindow");
 var RecordLayer = (function () {
+    // TODO: specify connection end
     function RecordLayer(udpSocket, options) {
         this.udpSocket = udpSocket;
         this.options = options;

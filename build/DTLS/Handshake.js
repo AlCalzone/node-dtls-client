@@ -19,6 +19,7 @@ var CipherSuite_1 = require("../TLS/CipherSuite");
 var ConnectionState_1 = require("../TLS/ConnectionState");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var Extension_1 = require("../TLS/Extension");
+var Vector_1 = require("../TLS/Vector");
 var RecordLayer_1 = require("./RecordLayer");
 var HandshakeType;
 (function (HandshakeType) {
@@ -58,7 +59,7 @@ var Handshake = (function (_super) {
             // slice and dice
             var fragment = wholeMessage.slice(start, start + fragmentLength);
             //create the message
-            fragments.push(new FragmentedHandshake(this.msg_type, wholeMessage.length, this.message_seq, start, fragment));
+            fragments.push(new FragmentedHandshake(this.msg_type, wholeMessage.length, this.message_seq, start, Vector_1.Vector.createFromBuffer(fragment)));
             // step forward by the actual fragment length
             start += fragment.length;
         }
@@ -79,7 +80,7 @@ var Handshake = (function (_super) {
             // turn it into the correct type
             var spec = TypeSpecs.define.Struct(__spec);
             // parse the body object into a new Handshake instance
-            var ret = TLSStruct_1.TLSStruct.from(spec, assembled.fragment).result;
+            var ret = TLSStruct_1.TLSStruct.from(spec, Buffer.from(assembled.fragment.items)).result;
             ret.message_seq = assembled.message_seq;
             return ret;
         }
@@ -108,7 +109,7 @@ var FragmentedHandshake = (function (_super) {
      * Checks if this message is actually fragmented, i.e. total_length > fragment_length
      */
     FragmentedHandshake.prototype.isFragmented = function () {
-        return (this.fragment_offset !== 0) || (this.total_length > this.fragment.length);
+        return (this.fragment_offset !== 0) || (this.total_length > this.fragment.items.length);
     };
     /**
      * Enforces an array of fragments to belong to a single message
@@ -155,7 +156,7 @@ var FragmentedHandshake = (function (_super) {
         var firstSeqNum = fragments[0].message_seq;
         var totalLength = fragments[0].total_length;
         var ranges = fragments
-            .map(function (f) { return ({ start: f.fragment_offset, end: f.fragment_offset + f.fragment.length - 1 }); })
+            .map(function (f) { return ({ start: f.fragment_offset, end: f.fragment_offset + f.fragment.items.length - 1 }); })
             .sort(function (a, b) { return a.start - b.start; });
         // check if the fragments have no holes
         var noHoles = ranges.every(function (val, i, arr) {
@@ -193,10 +194,10 @@ var FragmentedHandshake = (function (_super) {
         var combined = Buffer.allocUnsafe(messages[0].total_length);
         for (var _i = 0, messages_1 = messages; _i < messages_1.length; _i++) {
             var msg = messages_1[_i];
-            msg.fragment.copy(combined, msg.fragment_offset);
+            Buffer.from(msg.fragment.items).copy(combined, msg.fragment_offset);
         }
         // and return the complete message
-        return new FragmentedHandshake(messages[0].msg_type, messages[0].total_length, messages[0].message_seq, 0, combined);
+        return new FragmentedHandshake(messages[0].msg_type, messages[0].total_length, messages[0].message_seq, 0, Vector_1.Vector.createFromBuffer(combined));
     };
     return FragmentedHandshake;
 }(TLSStruct_1.TLSStruct));
