@@ -258,7 +258,7 @@ export class ClientHello extends Handshake {
 		random: TypeSpecs.define.Struct(Random),
 		session_id: SessionID.spec,
 		cookie: Cookie.spec,
-		cipher_suites: TypeSpecs.define.Vector(CipherSuite.spec, 2, 2 ** 16 - 2),
+		cipher_suites: TypeSpecs.define.Vector(CipherSuite.__spec.id, 2, 2 ** 16 - 2),
 		compression_methods: TypeSpecs.define.Vector(CompressionMethod.spec, 1, 2 ** 8 - 1),
 		extensions: TypeSpecs.define.Vector(Extension.spec, 0, 2 ** 16 - 1, true),
 	}
@@ -267,7 +267,7 @@ export class ClientHello extends Handshake {
 	public random: Random;
 	public session_id: Vector<number>;
 	public cookie: Vector<number>;
-	public cipher_suites: Vector<CipherSuite>;
+	public cipher_suites: Vector<number>;
 	public compression_methods: Vector<CompressionMethod>;
 	public extensions: Vector<Extension>;
 
@@ -283,7 +283,7 @@ export class ServerHello extends Handshake {
 		server_version: TypeSpecs.define.Struct(ProtocolVersion),
 		random: TypeSpecs.define.Struct(Random),
 		session_id: SessionID.spec,
-		cipher_suite: TypeSpecs.define.Struct(CipherSuite),
+		cipher_suite: CipherSuite.__spec.id,//TypeSpecs.define.Struct(CipherSuite),
 		compression_method: CompressionMethod.spec,
 		extensions: TypeSpecs.define.Vector(Extension.spec, 0, 2 ** 16 - 1, true),
 	}
@@ -291,7 +291,7 @@ export class ServerHello extends Handshake {
 	public server_version: ProtocolVersion;
 	public random: Random;
 	public session_id: Vector<number>;
-	public cipher_suite: CipherSuite;
+	public cipher_suite: number;
 	public compression_method: CompressionMethod;
 	public extensions: Vector<Extension>;
 

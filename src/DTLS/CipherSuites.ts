@@ -1,11 +1,11 @@
 ﻿import { CipherSuite, HashAlgorithm, CipherType, AEADAlgorithm } from "../TLS/CipherSuite";
 
-export interface ICipherSuites {
-	[name: string] : CipherSuite
-}
+/*export interface ICipherSuites {
+	[string|number] : CipherSuite;
+}*/
 
 // block sizes etc. see https://tools.ietf.org/html/rfc5246 page 83
-export const CipherSuites : ICipherSuites = {
+export const CipherSuites = {
 	TLS_NULL_WITH_NULL_NULL:				new CipherSuite(0x0000, null,		null,		"sha256",	"stream"),        
 	TLS_RSA_WITH_NULL_MD5:					new CipherSuite(0x0001, "rsa",		"md5",		"sha256",	"stream"),        
 	TLS_RSA_WITH_NULL_SHA:					new CipherSuite(0x0002, "rsa",		"sha1",		"sha256",	"stream"),       
@@ -64,4 +64,12 @@ export const CipherSuites : ICipherSuites = {
 	TLS_PSK_DHE_WITH_AES_256_CCM_8:			new CipherSuite(0xC0AB, "dhe_psk",	null,	"sha256",	"aead",		AEADAlgorithm.AES_256_CCM_8),
 	                                                                                              
 	// TRADFRI wants TLS_PSK_WITH_AES_128_CCM_8 or TLS_PSK_WITH_AES_128_CBC_SHA
+}
+
+// define index accessors
+for (let key of Object.keys(CipherSuites)) {
+	let cs = CipherSuites[key];
+	if (!CipherSuites.hasOwnProperty(cs.id)) {
+		CipherSuites[cs.id] = cs;
+	}
 }

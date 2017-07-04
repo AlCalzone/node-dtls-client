@@ -55,20 +55,24 @@ export class ClientHandshakeHandler {
 		this.incompleteMessages = [];
 		this.completeMessages = {};
 		this.expectedResponses = [];
+		this.cscReceived = false;
+		this.serverFinishedPending = false;
 
+		// ==============================
 		// start by sending a ClientHello
 		const hello = new Handshake.ClientHello();
-		hello.message_seq = ++this.lastSentSeqNum;
 		hello.client_version = new ProtocolVersion(~1, ~2);
 		hello.random = Random.createNew();
+		// remember this for crypto stuff
+		this.recordLayer.nextEpoch.connectionState.client_random = hello.random.serialize();
 		hello.session_id = SessionID.createNew();
 		hello.cookie = Cookie.createNew();
-		hello.cipher_suites = new Vector<CipherSuite>(
+		hello.cipher_suites = new Vector<number>(
 			[
 				// TODO: allow more
 				CipherSuites.TLS_PSK_WITH_AES_128_CCM_8,
 				CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA
-			]
+			].map(cs => cs.id)
 		);
 		hello.compression_methods = new Vector<CompressionMethod>(
 			[CompressionMethod.null]
@@ -77,7 +81,7 @@ export class ClientHandshakeHandler {
 		this.sendFlight(
 			[hello],
 			[
-				Handshake.HandshakeType.server_hello,
+				Handshake.HandshakeType.server_hello_done,
 				Handshake.HandshakeType.hello_verify_request
 			]
 		);
@@ -87,11 +91,18 @@ export class ClientHandshakeHandler {
 	private lastProcessedSeqNum: number;
 	/** The seq number of the last sent message */
 	private lastSentSeqNum: number;
+	/** The previously sent flight */
+	private lastFlight: Handshake.Handshake[];
 	/* The collected handshake messages waiting for processing */
 	private incompleteMessages: Handshake.FragmentedHandshake[];
 	private completeMessages: { [index: number]: Handshake.Handshake };
 	/** The currently expected flight, designated by the type of its last message */
 	private expectedResponses: Handshake.HandshakeType[];
+
+	// special cases for reordering of "Finished" flights
+	// TODO: add these special cases to general handling functions
+	private cscReceived: boolean;
+	private serverFinishedPending: boolean;
 
 
 	/**
@@ -163,17 +174,38 @@ export class ClientHandshakeHandler {
 	 * reacts to a ChangeCipherSpec message
 	 */
 	public changeCipherSpec() {
-
-	}
-
-	private sendFlight(flight: Handshake.Handshake[], expectedResponses: Handshake.HandshakeType[]) {
-		// TODO: buffer the flight for retransmission
-		this.expectedResponses = expectedResponses;
-		flight.forEach(handshake => this.sendHandshakeMessage(handshake));
+		// advance the read epoch, so we understand the next messages received
+		this.recordLayer.advanceReadEpoch();
+		// TODO: how do we handle retransmission here?
+		// TODO: how do we handle reordering (i.e. Finished received before ChangeCipherSpec)?
 	}
 
 	/**
-	 * Fragments a handshake message, serializes the fragements into single messages and sends them over the record layer
+	 * Sends the given flight of messages and remembers it for potential retransmission
+	 * @param flight The flight to be sent.
+	 * @param expectedResponses The types of possible responses we are expecting.
+	 * @param retransmit If the flight is retransmitted, i.e. no sequence numbers are increased
+	 */
+	private sendFlight(flight: Handshake.Handshake[], expectedResponses: Handshake.HandshakeType[], retransmit = false) {
+		this.lastFlight = flight;
+		this.expectedResponses = expectedResponses;
+		flight.forEach(handshake => {
+			if (handshake.msg_type === Handshake.HandshakeType.finished) {
+				// before finished messages, ALWAYS send a ChangeCipherSpec
+				this.sendChangeCipherSpecMessage();
+				// TODO: how do we handle retransmission here?
+			}
+
+			if (!retransmit) {
+				handshake.message_seq = ++this.lastSentSeqNum;
+			}
+			this.sendHandshakeMessage(handshake)
+		});
+	}
+
+	/**
+	 * Fragments a handshake message, serializes the fragements into single messages and sends them over the record layer.
+	 * Don't call this directly, rather use *sendFlight*
 	 * @param handshake - The handshake message to be sent
 	 */
 	private sendHandshakeMessage(handshake: Handshake.Handshake) {
@@ -186,6 +218,18 @@ export class ClientHandshakeHandler {
 			;
 		this.recordLayer.sendAll(messages);
 	}
+	/**
+	 * Sends a ChangeCipherSpec message
+	 */
+	private sendChangeCipherSpecMessage() {
+		const message = {
+			type: ContentType.change_cipher_spec,
+			data: (ChangeCipherSpec.createEmpty()).serialize()
+		};
+		this.recordLayer.send(message);
+		// advance the write epoch, so we use the new params for sending the next messages
+		this.recordLayer.advanceWriteEpoch();
+	}
 
 	/**
 	 * handles server messages
@@ -193,8 +237,40 @@ export class ClientHandshakeHandler {
 	private handle: { [type: number]: FlightHandler } = {
 
 		/** Handles a HelloVerifyRequest message */
-		[Handshake.HandshakeType.hello_verify_request]: (messages) => {
+		[Handshake.HandshakeType.hello_verify_request]: (messages: Handshake.Handshake[]) => {
+			// this flight should only contain a single message, 
+			// but to be sure extract the last one
+			const hvr = messages[messages.length-1] as Handshake.HelloVerifyRequest;
+			// add the cookie to the client hello and send it again
+			const hello = this.lastFlight[0] as Handshake.ClientHello;
+			hello.cookie = hvr.cookie;
+			// TODO: do something with session id?
+			this.sendFlight(
+				[hello],
+				[Handshake.HandshakeType.server_hello_done]
+			);
+		},
 
+		/** Handles a ServerHelloDone flight */
+		[Handshake.HandshakeType.server_hello_done]: (messages: Handshake.Handshake[]) => {
+			for (let msg of messages) {
+				switch (msg.msg_type) {
+					case Handshake.HandshakeType.server_hello:
+						const hello = msg as Handshake.ServerHello;
+						// remember the random value
+						this.recordLayer.nextEpoch.connectionState.server_random = hello.random.serialize();
+						// set the cipher suite and compression method to be used
+						this.recordLayer.nextEpoch.connectionState.cipherSuite = CipherSuites[hello.cipher_suite];
+						this.recordLayer.nextEpoch.connectionState.compression_algorithm = hello.compression_method;
+						// TODO: parse/support extensions?
+						// TODO: remember the session id?
+						break;
+					// TODO: support more messages (look up PSK spec)
+					case Handshake.HandshakeType.server_hello_done:
+						// its our turn
+						// TODO: what to send? client_key_exchange?
+				}
+			}
 		},
 
 	};
