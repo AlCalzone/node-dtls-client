@@ -6,8 +6,8 @@ export namespace Cookie {
 
 	export const spec = TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 8 - 1);
 
-	export function create(items: number[] = []) {
-		return new Vector<number>(spec, items);
+	export function createNew(items: number[] = []) {
+		return new Vector<number>(items);
 	}
 
 }

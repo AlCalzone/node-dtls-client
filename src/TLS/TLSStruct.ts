@@ -95,8 +95,10 @@ export class TLSStruct {
 						const bitSize = TypeSpecs.getPrimitiveSize(type) as BitSizes;
 						return numberToBuffer(propValue, bitSize);
 					case "vector":
+						// we know propValue is a Vector<T> but we don't know or care about T
+						return (propValue as any).serialize(type);
 					case "struct":
-						return (propValue as ISerializable).serialize(); // we know this must be an ISerializable
+						return (propValue as TLSStruct).serialize(); 
 				}
 			});
 		return Buffer.concat(ret);

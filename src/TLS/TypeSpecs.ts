@@ -45,6 +45,11 @@ export interface Vector {
 	maxLength: number;
 	optional: boolean;
 }
+export namespace Vector {
+	export function isVariableLength(spec: Vector): boolean {
+		return spec.maxLength !== spec.minLength;
+	}
+}
 
 var test: Struct;
 

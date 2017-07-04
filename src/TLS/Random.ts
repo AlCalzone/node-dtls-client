@@ -28,10 +28,7 @@ export class Random extends TLSStruct {
 	static createNew(): Random {
 		return new Random(
 			Math.floor(Date.now() / 1000),
-			new Vector<number>(
-				Random.__spec.random_bytes,
-				getRandomArray(Random.__spec.random_bytes.maxLength)
-				)
+			new Vector<number>(getRandomArray(Random.__spec.random_bytes.maxLength))
 		);
 	}
 

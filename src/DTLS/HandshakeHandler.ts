@@ -61,10 +61,9 @@ export class ClientHandshakeHandler {
 		hello.message_seq = ++this.lastSentSeqNum;
 		hello.client_version = new ProtocolVersion(~1, ~2);
 		hello.random = Random.createNew();
-		hello.session_id = SessionID.create();
-		hello.cookie = Cookie.create();
+		hello.session_id = SessionID.createNew();
+		hello.cookie = Cookie.createNew();
 		hello.cipher_suites = new Vector<CipherSuite>(
-			Handshake.ClientHello.__spec.cipher_suites,
 			[
 				// TODO: allow more
 				CipherSuites.TLS_PSK_WITH_AES_128_CCM_8,
@@ -72,12 +71,9 @@ export class ClientHandshakeHandler {
 			]
 		);
 		hello.compression_methods = new Vector<CompressionMethod>(
-			Handshake.ClientHello.__spec.compression_methods,
 			[CompressionMethod.null]
 		);
-		hello.extensions = new Vector<Extension>(
-			Handshake.ClientHello.__spec.extensions
-		);
+		hello.extensions = new Vector<Extension>();
 		this.sendFlight(
 			[hello],
 			[
