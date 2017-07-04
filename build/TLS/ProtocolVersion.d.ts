@@ -13,4 +13,5 @@ export declare class ProtocolVersion extends TLSStruct {
      * @param minor - Nebenversionsnummer
      */
     constructor(major?: number, minor?: number);
+    static createEmpty(): ProtocolVersion;
 }

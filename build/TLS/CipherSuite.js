@@ -62,7 +62,8 @@ function createNullMAC() {
 }
 var CipherSuite = (function (_super) {
     __extends(CipherSuite, _super);
-    function CipherSuite(id, keyExchange, macAlgorithm, prfAlgorithm, cipherType, algorithm) {
+    function CipherSuite(id, keyExchange, macAlgorithm, prfAlgorithm, cipherType, algorithm, verify_data_length) {
+        if (verify_data_length === void 0) { verify_data_length = 12; }
         var _this = _super.call(this, CipherSuite.__spec) || this;
         _this.id = id;
         _this.keyExchange = keyExchange;
@@ -70,8 +71,12 @@ var CipherSuite = (function (_super) {
         _this.prfAlgorithm = prfAlgorithm;
         _this.cipherType = cipherType;
         _this.algorithm = algorithm;
+        _this.verify_data_length = verify_data_length;
         return _this;
     }
+    CipherSuite.createEmpty = function () {
+        return new CipherSuite(null, null, null, null, null);
+    };
     Object.defineProperty(CipherSuite.prototype, "Cipher", {
         get: function () {
             if (this._cipher == undefined)

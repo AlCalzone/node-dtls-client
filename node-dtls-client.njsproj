@@ -82,9 +82,6 @@
       <SubType>Code</SubType>
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\TLS\PRF.ts" />
-    <TypeScriptCompile Include="src\TLS\KeyExchange.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
     <TypeScriptCompile Include="src\TLS\PreMasterSecret.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>

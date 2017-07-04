@@ -96,10 +96,6 @@ export abstract class Handshake extends TLSStruct {
 		}
 	}
 	
-	// Implementation details:
-	// message_seq starts at 0 for both client and server during the handshake. 
-	// Each new (not retransmitted) message increases the value by 1.
-
 }
 
 export class FragmentedHandshake extends TLSStruct {
@@ -143,7 +139,7 @@ export class FragmentedHandshake extends TLSStruct {
 	 * Enforces an array of fragments to belong to a single message
 	 * @throws Error
 	 */
-	// TODO: error Documentation ^^ ?
+	// TODO: error Documentation
 	private static enforceSingleMessage(fragments: FragmentedHandshake[]): void {
 		// check if we are looking at a single message, i.e. compare type, seq_num and length
 		const singleMessage = fragments.every((val, i, arr) => {
@@ -151,6 +147,7 @@ export class FragmentedHandshake extends TLSStruct {
 				return val.msg_type === arr[0].msg_type &&
 					val.message_seq === arr[0].message_seq &&
 					val.total_length === arr[0].total_length
+					;
 			}
 			return true;
 		});
@@ -170,8 +167,9 @@ export class FragmentedHandshake extends TLSStruct {
 		// return all fragments with matching msg_type, message_seq and total length
 		return fragments.filter(f => {
 			return f.msg_type === reference.msg_type &&
-					f.message_seq === reference.message_seq &&
-					f.total_length === reference.total_length;
+				f.message_seq === reference.message_seq &&
+				f.total_length === reference.total_length
+				;
 		});
 	}
 	
@@ -249,6 +247,9 @@ export class HelloRequest extends Handshake {
 		super(HandshakeType.hello_request, HelloRequest.__spec);
 	}
 
+	static createEmpty(): HelloRequest {
+		return new HelloRequest();
+	}
 }
 
 export class ClientHello extends Handshake {
@@ -263,18 +264,22 @@ export class ClientHello extends Handshake {
 		extensions: TypeSpecs.define.Vector(Extension.spec, 0, 2 ** 16 - 1, true),
 	}
 
-	public client_version: ProtocolVersion;
-	public random: Random;
-	public session_id: Vector<number>;
-	public cookie: Vector<number>;
-	public cipher_suites: Vector<number>;
-	public compression_methods: Vector<CompressionMethod>;
-	public extensions: Vector<Extension>;
 
-	constructor() {
+	constructor(
+		public client_version: ProtocolVersion,
+		public random: Random,
+		public session_id: Vector<number>,
+		public cookie: Vector<number>,
+		public cipher_suites: Vector<number>,
+		public compression_methods: Vector<CompressionMethod>,
+		public extensions: Vector<Extension>
+	) {
 		super(HandshakeType.client_hello, ClientHello.__spec);
 	}
 
+	static createEmpty(): ClientHello {
+		return new ClientHello(null, null, null, null, null, null, null);
+	}
 }
 
 export class ServerHello extends Handshake {
@@ -288,17 +293,20 @@ export class ServerHello extends Handshake {
 		extensions: TypeSpecs.define.Vector(Extension.spec, 0, 2 ** 16 - 1, true),
 	}
 
-	public server_version: ProtocolVersion;
-	public random: Random;
-	public session_id: Vector<number>;
-	public cipher_suite: number;
-	public compression_method: CompressionMethod;
-	public extensions: Vector<Extension>;
-
-	constructor() {
+	constructor(
+		public server_version: ProtocolVersion,
+		public random: Random,
+		public session_id: Vector<number>,
+		public cipher_suite: number,
+		public compression_method: CompressionMethod,
+		public extensions: Vector<Extension>
+	) {
 		super(HandshakeType.server_hello, ServerHello.__spec);
 	}
 
+	static createEmpty(): ServerHello {
+		return new ServerHello(null, null, null, null, null, null);
+	}
 }
 
 export class HelloVerifyRequest extends Handshake {
@@ -308,14 +316,108 @@ export class HelloVerifyRequest extends Handshake {
 		cookie: Cookie.spec
 	}
 
-	public server_version: ProtocolVersion;
-	public cookie: Vector<number>;
-
-	constructor() {
+	constructor(
+		public server_version: ProtocolVersion,
+		public cookie: Vector<number>
+	) {
 		super(HandshakeType.hello_verify_request, HelloVerifyRequest.__spec);
 	}
 
+	static createEmpty(): HelloVerifyRequest {
+		return new HelloVerifyRequest(null, null);
+	}
 }
+
+
+export class ServerKeyExchange extends Handshake {
+
+	static readonly __spec = {
+		raw_data: TypeSpecs.buffer
+	}
+
+	//static readonly __specs: {
+	//	[algorithm in KeyExchangeAlgorithm]?: TypeSpecs.StructSpec
+	//} = {
+	//	psk: {
+	//		psk_identity_hint: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1)
+	//	}
+	//}
+
+	public raw_data: Buffer;
+
+	constructor() {
+		super(HandshakeType.server_key_exchange, ServerKeyExchange.__spec);
+	}
+
+	static createEmpty(): ServerKeyExchange {
+		return new ServerKeyExchange();
+	}
+}
+
+export class ServerKeyExchange_PSK extends TLSStruct {
+
+	static readonly __spec = {
+		psk_identity_hint: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1)
+	};
+	static readonly spec = TypeSpecs.define.Struct(ServerKeyExchange_PSK);
+
+	constructor(
+		public psk_identity_hint: Vector<number>
+	) {
+		super(ServerKeyExchange_PSK.__spec);
+	}
+
+	static createEmpty(): ServerKeyExchange_PSK {
+		return new ServerKeyExchange_PSK(null);
+	}
+
+}
+
+
+export class ClientKeyExchange extends Handshake {
+
+	//static readonly __specs: {
+	//	[algorithm in KeyExchangeAlgorithm]?: TypeSpecs.StructSpec
+	//} = {
+	//	psk: {
+	//		psk_identity: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1)
+	//	}
+	//}
+
+	static readonly __spec = {
+		raw_data: TypeSpecs.buffer
+	}
+
+	public raw_data: Buffer;
+
+	constructor() {
+		super(HandshakeType.client_key_exchange, ClientKeyExchange.__spec);
+	}
+
+	static createEmpty(): ClientKeyExchange {
+		return new ClientKeyExchange();
+	}
+}
+
+export class ClientKeyExchange_PSK extends TLSStruct {
+
+	static readonly __spec = {
+		psk_identity: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1)
+	};
+	static readonly spec = TypeSpecs.define.Struct(ClientKeyExchange_PSK);
+
+	constructor(
+		public psk_identity: Vector<number>
+	) {
+		super(ClientKeyExchange_PSK.__spec);
+	}
+
+	static createEmpty(): ClientKeyExchange_PSK {
+		return new ClientKeyExchange_PSK(null);
+	}
+
+}
+
 
 export class ServerHelloDone extends Handshake {
 
@@ -325,21 +427,27 @@ export class ServerHelloDone extends Handshake {
 		super(HandshakeType.server_hello_done, ServerHelloDone.__spec);
 	}
 
+	static createEmpty(): ServerHelloDone {
+		return new ServerHelloDone();
+	}
 }
 
 
 export class Finished extends Handshake {
 
 	static readonly __spec = {
-		verify_data: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2**16) // TODO: wirkliche Länge "verify_data_length" herausfinden
+		verify_data: TypeSpecs.buffer
 	}
 
-	public verify_data: Buffer;
-
-	constructor() {
+	constructor(
+		public verify_data: Buffer
+	) {
 		super(HandshakeType.finished, Finished.__spec);
 	}
 
+	static createEmpty(): Finished {
+		return new Finished(null);
+	}
 }
 
 // define handshake messages for lookup

@@ -39,6 +39,42 @@ export const HMAC: {
 };
 
 
+export interface HashDelegate {
+	/**
+	 * Generates a Hash hash from the given data.
+	 * @param data - The data to be hashed
+	 */
+	(data: Buffer): Buffer,
+	/**
+	 * The hash output length of this hash function
+	 */
+	length: number
+};
+
+function Hash_factory(algorithm: HashAlgorithm, length: number): HashDelegate {
+
+	const ret = ((data: Buffer) => {
+		const hash = crypto.createHash(algorithm);
+		hash.update(data);
+		return hash.digest();
+	}) as HashDelegate;
+
+	// add length information
+	ret.length = length;
+
+	return ret;
+}
+
+const Hash: {
+	[algorithm in HashAlgorithm]: HashDelegate
+} = {
+	"md5": Hash_factory("md5", 16),
+	"sha1": Hash_factory("sha1", 20),
+	"sha256": Hash_factory("sha256", 32),
+	"sha384": Hash_factory("sha384", 48),
+	"sha512": Hash_factory("sha512", 64),
+};
+
 /**
  * Data expansion function: Turns a secret into an arbitrary quantity of output using a hash function and a seed.
  * @param algorithm - The algorithm to be used for hashing
@@ -77,7 +113,21 @@ function P(algorithm: HashAlgorithm, secret: Buffer, seed: Buffer, length: numbe
 
 
 
-export type PRFDelegate = (secret: Buffer, label: string, seed: Buffer, length?: number) => Buffer;
+export interface PRFDelegate {
+	/**
+	 * (D)TLS v1.2 pseudorandom function. Earlier versions are not supported.
+	 * @param secret - The secret to be hashed
+	 * @param label - used together with seed to generate a hash from secret. Denotes the usage of this hash.
+	 * @param seed - used together with label to generate a hash from secret
+	 * @param length - the desired length of the output
+	 */
+	(secret: Buffer, label: string, seed: Buffer, length?: number): Buffer,
+
+	/**
+	 * The underlying hash function
+	 */
+	hashFunction: HashDelegate
+}
 
 export const PRF: {
 	[algorithm in HashAlgorithm]: PRFDelegate
@@ -90,19 +140,16 @@ export const PRF: {
 };
 
 function PRF_factory(algorithm: HashAlgorithm): PRFDelegate {
-	/**
-	 * (D)TLS v1.2 pseudorandom function. Earlier versions are not supported.
-	 * @param secret - The secret to be hashed
-	 * @param label - used together with seed to generate a hash from secret. Denotes the usage of this hash.
-	 * @param seed - used together with label to generate a hash from secret
-	 * @param length - the desired length of the output
-	 */
-	return (secret: Buffer, label: string, seed: Buffer, length: number = 32) => {
+
+	const ret = ((secret: Buffer, label: string, seed: Buffer, length: number = 32) => {
 		return P(
 			algorithm,
 			secret,
 			Buffer.concat([Buffer.from(label, 'ascii'), seed]),
 			length
 		)
-	}
+	}) as PRFDelegate;
+	ret.hashFunction = Hash[algorithm];
+	return ret;
 }
+

@@ -12,9 +12,9 @@ import {
 	CipherSuite,
 	GenericCipherDelegate, CipherDelegate,
 	GenericDecipherDelegate, DecipherDelegate,
-	GenericMacDelegate, MacDelegate
+	GenericMacDelegate, MacDelegate,
+	KeyExchangeAlgorithm
 } from "./CipherSuite";
-import { KeyExchangeAlgorithm } from "./KeyExchange";
 
 export enum CompressionMethod {
 	null = 0
@@ -100,12 +100,15 @@ export class ConnectionState {
 			Buffer.concat([this.client_random, this.server_random]),
 			master_secret_length
 		);
+
+		// now we can compute the key material
+		this.computeKeyMaterial();
 	}
 
 	/**
 	 * Berechnet die Schlüsselkomponenten
 	 */
-	computeKeyMaterial(): void {
+	private computeKeyMaterial(): void {
 		const keyBlock = PRF[this.cipherSuite.prfAlgorithm](
 			this.master_secret,
 			"key expansion",

@@ -11,7 +11,7 @@ export interface ISerializable {
     serialize(): Buffer;
 }
 export interface ISerializableConstructor {
-    new (spec: TypeSpecs.StructSpec, initial?: any): ISerializable;
+    createEmpty(): ISerializable;
     /**
      * Constructs an object of the given type from the given buffer.
      */

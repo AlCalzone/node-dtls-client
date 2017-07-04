@@ -13,4 +13,5 @@ export declare class Random extends TLSStruct {
      * Creates a new Random structure and initializes it.
      */
     static createNew(): Random;
+    static createEmpty(): Random;
 }

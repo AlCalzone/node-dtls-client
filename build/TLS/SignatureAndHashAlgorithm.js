@@ -43,6 +43,9 @@ var SignatureAndHashAlgorithm = (function (_super) {
         _this.signature = signature;
         return _this;
     }
+    SignatureAndHashAlgorithm.createEmpty = function () {
+        return new SignatureAndHashAlgorithm(null, null);
+    };
     return SignatureAndHashAlgorithm;
 }(TLSStruct_1.TLSStruct));
 SignatureAndHashAlgorithm.__spec = {

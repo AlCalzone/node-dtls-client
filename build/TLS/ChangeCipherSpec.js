@@ -12,19 +12,6 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
-var ChangeCipherSpec = (function (_super) {
-    __extends(ChangeCipherSpec, _super);
-    function ChangeCipherSpec(type) {
-        var _this = _super.call(this, ChangeCipherSpec.__spec) || this;
-        _this.type = type;
-        return _this;
-    }
-    return ChangeCipherSpec;
-}(TLSStruct_1.TLSStruct));
-ChangeCipherSpec.__spec = {
-    type: TypeSpecs.define.Enum("uint8", ChangeCipherSpec)
-};
-exports.ChangeCipherSpec = ChangeCipherSpec;
 var ChangeCipherSpecTypes;
 (function (ChangeCipherSpecTypes) {
     ChangeCipherSpecTypes[ChangeCipherSpecTypes["change_cipher_spec"] = 1] = "change_cipher_spec";
@@ -33,4 +20,20 @@ var ChangeCipherSpecTypes;
 (function (ChangeCipherSpecTypes) {
     ChangeCipherSpecTypes.__spec = TypeSpecs.define.Enum("uint8", ChangeCipherSpecTypes);
 })(ChangeCipherSpecTypes = exports.ChangeCipherSpecTypes || (exports.ChangeCipherSpecTypes = {}));
+var ChangeCipherSpec = (function (_super) {
+    __extends(ChangeCipherSpec, _super);
+    function ChangeCipherSpec(type) {
+        var _this = _super.call(this, ChangeCipherSpec.__spec) || this;
+        _this.type = type;
+        return _this;
+    }
+    ChangeCipherSpec.createEmpty = function () {
+        return new ChangeCipherSpec(ChangeCipherSpecTypes.change_cipher_spec);
+    };
+    return ChangeCipherSpec;
+}(TLSStruct_1.TLSStruct));
+ChangeCipherSpec.__spec = {
+    type: TypeSpecs.define.Enum("uint8", ChangeCipherSpec)
+};
+exports.ChangeCipherSpec = ChangeCipherSpec;
 //# sourceMappingURL=ChangeCipherSpec.js.map

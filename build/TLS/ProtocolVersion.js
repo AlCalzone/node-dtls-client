@@ -28,6 +28,9 @@ var ProtocolVersion = (function (_super) {
         _this.minor = minor;
         return _this;
     }
+    ProtocolVersion.createEmpty = function () {
+        return new ProtocolVersion();
+    };
     return ProtocolVersion;
 }(TLSStruct_1.TLSStruct));
 ProtocolVersion.__spec = {

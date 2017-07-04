@@ -101,6 +101,9 @@ var FragmentedHandshake = (function (_super) {
         _this.fragment = fragment;
         return _this;
     }
+    FragmentedHandshake.createEmpty = function () {
+        return new FragmentedHandshake(null, null, null, null, null);
+    };
     /**
      * Checks if this message is actually fragmented, i.e. total_length > fragment_length
      */
@@ -111,7 +114,7 @@ var FragmentedHandshake = (function (_super) {
      * Enforces an array of fragments to belong to a single message
      * @throws Error
      */
-    // TODO: error Documentation ^^ ?
+    // TODO: error Documentation
     FragmentedHandshake.enforceSingleMessage = function (fragments) {
         // check if we are looking at a single message, i.e. compare type, seq_num and length
         var singleMessage = fragments.every(function (val, i, arr) {
@@ -217,15 +220,29 @@ var HelloRequest = (function (_super) {
     function HelloRequest() {
         return _super.call(this, HandshakeType.hello_request, HelloRequest.__spec) || this;
     }
+    HelloRequest.createEmpty = function () {
+        return new HelloRequest();
+    };
     return HelloRequest;
 }(Handshake));
 HelloRequest.__spec = {};
 exports.HelloRequest = HelloRequest;
 var ClientHello = (function (_super) {
     __extends(ClientHello, _super);
-    function ClientHello() {
-        return _super.call(this, HandshakeType.client_hello, ClientHello.__spec) || this;
+    function ClientHello(client_version, random, session_id, cookie, cipher_suites, compression_methods, extensions) {
+        var _this = _super.call(this, HandshakeType.client_hello, ClientHello.__spec) || this;
+        _this.client_version = client_version;
+        _this.random = random;
+        _this.session_id = session_id;
+        _this.cookie = cookie;
+        _this.cipher_suites = cipher_suites;
+        _this.compression_methods = compression_methods;
+        _this.extensions = extensions;
+        return _this;
     }
+    ClientHello.createEmpty = function () {
+        return new ClientHello(null, null, null, null, null, null, null);
+    };
     return ClientHello;
 }(Handshake));
 ClientHello.__spec = {
@@ -233,32 +250,48 @@ ClientHello.__spec = {
     random: TypeSpecs.define.Struct(Random_1.Random),
     session_id: SessionID_1.SessionID.spec,
     cookie: Cookie_1.Cookie.spec,
-    cipher_suites: TypeSpecs.define.Vector(CipherSuite_1.CipherSuite.spec, 2, Math.pow(2, 16) - 2),
+    cipher_suites: TypeSpecs.define.Vector(CipherSuite_1.CipherSuite.__spec.id, 2, Math.pow(2, 16) - 2),
     compression_methods: TypeSpecs.define.Vector(ConnectionState_1.CompressionMethod.spec, 1, Math.pow(2, 8) - 1),
     extensions: TypeSpecs.define.Vector(Extension_1.Extension.spec, 0, Math.pow(2, 16) - 1, true),
 };
 exports.ClientHello = ClientHello;
 var ServerHello = (function (_super) {
     __extends(ServerHello, _super);
-    function ServerHello() {
-        return _super.call(this, HandshakeType.server_hello, ServerHello.__spec) || this;
+    function ServerHello(server_version, random, session_id, cipher_suite, compression_method, extensions) {
+        var _this = _super.call(this, HandshakeType.server_hello, ServerHello.__spec) || this;
+        _this.server_version = server_version;
+        _this.random = random;
+        _this.session_id = session_id;
+        _this.cipher_suite = cipher_suite;
+        _this.compression_method = compression_method;
+        _this.extensions = extensions;
+        return _this;
     }
+    ServerHello.createEmpty = function () {
+        return new ServerHello(null, null, null, null, null, null);
+    };
     return ServerHello;
 }(Handshake));
 ServerHello.__spec = {
     server_version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
     random: TypeSpecs.define.Struct(Random_1.Random),
     session_id: SessionID_1.SessionID.spec,
-    cipher_suite: TypeSpecs.define.Struct(CipherSuite_1.CipherSuite),
+    cipher_suite: CipherSuite_1.CipherSuite.__spec.id,
     compression_method: ConnectionState_1.CompressionMethod.spec,
     extensions: TypeSpecs.define.Vector(Extension_1.Extension.spec, 0, Math.pow(2, 16) - 1, true),
 };
 exports.ServerHello = ServerHello;
 var HelloVerifyRequest = (function (_super) {
     __extends(HelloVerifyRequest, _super);
-    function HelloVerifyRequest() {
-        return _super.call(this, HandshakeType.hello_verify_request, HelloVerifyRequest.__spec) || this;
+    function HelloVerifyRequest(server_version, cookie) {
+        var _this = _super.call(this, HandshakeType.hello_verify_request, HelloVerifyRequest.__spec) || this;
+        _this.server_version = server_version;
+        _this.cookie = cookie;
+        return _this;
     }
+    HelloVerifyRequest.createEmpty = function () {
+        return new HelloVerifyRequest(null, null);
+    };
     return HelloVerifyRequest;
 }(Handshake));
 HelloVerifyRequest.__spec = {
@@ -266,24 +299,101 @@ HelloVerifyRequest.__spec = {
     cookie: Cookie_1.Cookie.spec
 };
 exports.HelloVerifyRequest = HelloVerifyRequest;
+var ServerKeyExchange = (function (_super) {
+    __extends(ServerKeyExchange, _super);
+    function ServerKeyExchange() {
+        return _super.call(this, HandshakeType.server_key_exchange, ServerKeyExchange.__spec) || this;
+    }
+    ServerKeyExchange.createEmpty = function () {
+        return new ServerKeyExchange();
+    };
+    return ServerKeyExchange;
+}(Handshake));
+ServerKeyExchange.__spec = {
+    raw_data: TypeSpecs.buffer
+};
+exports.ServerKeyExchange = ServerKeyExchange;
+var ServerKeyExchange_PSK = (function (_super) {
+    __extends(ServerKeyExchange_PSK, _super);
+    function ServerKeyExchange_PSK(psk_identity_hint) {
+        var _this = _super.call(this, ServerKeyExchange_PSK.__spec) || this;
+        _this.psk_identity_hint = psk_identity_hint;
+        return _this;
+    }
+    ServerKeyExchange_PSK.createEmpty = function () {
+        return new ServerKeyExchange_PSK(null);
+    };
+    return ServerKeyExchange_PSK;
+}(TLSStruct_1.TLSStruct));
+ServerKeyExchange_PSK.__spec = {
+    psk_identity_hint: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 16) - 1)
+};
+ServerKeyExchange_PSK.spec = TypeSpecs.define.Struct(ServerKeyExchange_PSK);
+exports.ServerKeyExchange_PSK = ServerKeyExchange_PSK;
+var ClientKeyExchange = (function (_super) {
+    __extends(ClientKeyExchange, _super);
+    function ClientKeyExchange() {
+        return _super.call(this, HandshakeType.client_key_exchange, ClientKeyExchange.__spec) || this;
+    }
+    ClientKeyExchange.createEmpty = function () {
+        return new ClientKeyExchange();
+    };
+    return ClientKeyExchange;
+}(Handshake));
+//static readonly __specs: {
+//	[algorithm in KeyExchangeAlgorithm]?: TypeSpecs.StructSpec
+//} = {
+//	psk: {
+//		psk_identity: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1)
+//	}
+//}
+ClientKeyExchange.__spec = {
+    raw_data: TypeSpecs.buffer
+};
+exports.ClientKeyExchange = ClientKeyExchange;
+var ClientKeyExchange_PSK = (function (_super) {
+    __extends(ClientKeyExchange_PSK, _super);
+    function ClientKeyExchange_PSK(psk_identity) {
+        var _this = _super.call(this, ClientKeyExchange_PSK.__spec) || this;
+        _this.psk_identity = psk_identity;
+        return _this;
+    }
+    ClientKeyExchange_PSK.createEmpty = function () {
+        return new ClientKeyExchange_PSK(null);
+    };
+    return ClientKeyExchange_PSK;
+}(TLSStruct_1.TLSStruct));
+ClientKeyExchange_PSK.__spec = {
+    psk_identity: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 16) - 1)
+};
+ClientKeyExchange_PSK.spec = TypeSpecs.define.Struct(ClientKeyExchange_PSK);
+exports.ClientKeyExchange_PSK = ClientKeyExchange_PSK;
 var ServerHelloDone = (function (_super) {
     __extends(ServerHelloDone, _super);
     function ServerHelloDone() {
         return _super.call(this, HandshakeType.server_hello_done, ServerHelloDone.__spec) || this;
     }
+    ServerHelloDone.createEmpty = function () {
+        return new ServerHelloDone();
+    };
     return ServerHelloDone;
 }(Handshake));
 ServerHelloDone.__spec = {};
 exports.ServerHelloDone = ServerHelloDone;
 var Finished = (function (_super) {
     __extends(Finished, _super);
-    function Finished() {
-        return _super.call(this, HandshakeType.finished, Finished.__spec) || this;
+    function Finished(verify_data) {
+        var _this = _super.call(this, HandshakeType.finished, Finished.__spec) || this;
+        _this.verify_data = verify_data;
+        return _this;
     }
+    Finished.createEmpty = function () {
+        return new Finished(null);
+    };
     return Finished;
 }(Handshake));
 Finished.__spec = {
-    verify_data: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 16)) // TODO: wirkliche Länge "verify_data_length" herausfinden
+    verify_data: TypeSpecs.buffer
 };
 exports.Finished = Finished;
 // define handshake messages for lookup

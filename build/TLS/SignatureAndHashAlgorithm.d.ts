@@ -29,4 +29,5 @@ export default class SignatureAndHashAlgorithm extends TLSStruct {
         signature: TypeSpecs.Enum;
     };
     constructor(hash: HashAlgorithm, signature: SignatureAlgorithm);
+    static createEmpty(): SignatureAndHashAlgorithm;
 }

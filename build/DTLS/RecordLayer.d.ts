@@ -1,7 +1,15 @@
 /// <reference types="node" />
 import * as dgram from "dgram";
 import { dtls } from "../dtls";
+import { ConnectionState } from "../TLS/ConnectionState";
 import { Message } from "../TLS/Message";
+import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
+export interface Epoch {
+    index: number;
+    connectionState: ConnectionState;
+    writeSequenceNumber: number;
+    antiReplayWindow: AntiReplayWindow;
+}
 export declare class RecordLayer {
     private udpSocket;
     private options;
@@ -26,20 +34,26 @@ export declare class RecordLayer {
      * All known connection epochs
      */
     private epochs;
+    private _readEpochNr;
+    readonly readEpochNr: number;
     /**
      * The current epoch used for reading data
      */
-    private _readEpoch;
-    readonly readEpoch: number;
+    readonly currentReadEpoch: Epoch;
+    readonly nextReadEpoch: Epoch;
+    private _writeEpochNr;
+    readonly writeEpochNr: number;
     /**
      * The current epoch used for writing data
      */
-    private _writeEpoch;
-    readonly writeEpoch: number;
+    readonly currentWriteEpoch: Epoch;
+    readonly nextWriteEpoch: Epoch;
+    readonly nextEpochNr: number;
     /**
-     * The epoch that will be used next
+     * The next read and write epoch that will be used.
+     * Be careful as this might point to the wrong epoch between ChangeCipherSpec messages
      */
-    readonly nextEpoch: number;
+    readonly nextEpoch: Epoch;
     /**
      * Ensure there's a next epoch to switch to
      */

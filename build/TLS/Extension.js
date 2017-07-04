@@ -28,6 +28,9 @@ var Extension = (function (_super) {
         _this.extension_data = extension_data;
         return _this;
     }
+    Extension.createEmpty = function () {
+        return new Extension(null, null);
+    };
     return Extension;
 }(TLSStruct_1.TLSStruct));
 Extension.__spec = {

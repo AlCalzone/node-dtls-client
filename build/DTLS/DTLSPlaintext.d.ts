@@ -18,4 +18,5 @@ export declare class DTLSPlaintext extends TLSStruct {
     };
     static readonly spec: TypeSpecs.Struct;
     constructor(type: ContentType, version: ProtocolVersion, epoch: number, sequence_number: number, fragment: Buffer);
+    static createEmpty(): DTLSPlaintext;
 }

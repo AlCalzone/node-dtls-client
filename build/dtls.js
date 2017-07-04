@@ -82,7 +82,7 @@ var dtls;
             // initialize record layer
             this.recordLayer = new RecordLayer_1.RecordLayer(this.udp, this.options);
             // also start handshake
-            this.handshakeHandler = new HandshakeHandler_1.ClientHandshakeHandler(this.recordLayer, function () {
+            this.handshakeHandler = new HandshakeHandler_1.ClientHandshakeHandler(this.recordLayer, this.options, function () {
                 // when done, emit "connected" event
                 _this.emit("connected");
                 // also emit all buffered messages

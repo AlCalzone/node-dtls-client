@@ -37,6 +37,9 @@ export declare module dtls {
         reuseAddr: boolean;
         address: string;
         port: number;
+        psk: {
+            [identity: string]: string;
+        };
         keyContext: any;
     }
     type ListeningEventHandler = () => void;

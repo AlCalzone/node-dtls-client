@@ -51,9 +51,12 @@ export namespace Vector {
 	}
 }
 
-var test: Struct;
+/** Unparsed raw data */
+export interface Buffer {
+	type: "buffer"
+}
 
-export type All = Complex | Vector;
+export type All = Complex | Vector | Buffer;
 
 // Shortcuts:
 export const define = {
@@ -71,6 +74,7 @@ export const define = {
 		minLength, maxLength,
 		optional
 	}),
+	Buffer: (): Buffer => ({type: "buffer"})
 };
 export const uint8 = Object.freeze(define.Number("uint8"));
 export const uint16 = Object.freeze(define.Number("uint16"));
@@ -78,3 +82,4 @@ export const uint24 = Object.freeze(define.Number("uint24"));
 export const uint32 = Object.freeze(define.Number("uint32"));
 export const uint48 = Object.freeze(define.Number("uint48"));
 export const uint64 = Object.freeze(define.Number("uint64"));
+export const buffer = Object.freeze(define.Buffer());

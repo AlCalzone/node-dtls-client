@@ -1,14 +1,5 @@
 import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
-export declare class Alert extends TLSStruct {
-    level: AlertLevel;
-    description: AlertDescription;
-    static readonly __spec: {
-        level: TypeSpecs.Enum;
-        description: TypeSpecs.Enum;
-    };
-    constructor(level: AlertLevel, description: AlertDescription);
-}
 export declare enum AlertLevel {
     warning = 1,
     fatal = 2,
@@ -39,4 +30,14 @@ export declare enum AlertDescription {
     user_canceled = 90,
     no_renegotiation = 100,
     unsupported_extension = 110,
+}
+export declare class Alert extends TLSStruct {
+    level: AlertLevel;
+    description: AlertDescription;
+    static readonly __spec: {
+        level: TypeSpecs.Enum;
+        description: TypeSpecs.Enum;
+    };
+    constructor(level: AlertLevel, description: AlertDescription);
+    static createEmpty(): Alert;
 }

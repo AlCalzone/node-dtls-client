@@ -2,8 +2,9 @@
 import { ISerializable, ISerializableConstructor, DeserializationResult } from "./Serializable";
 import { TLSStruct } from "./TLSStruct";
 import { fitToWholeBytes } from "../lib/util";
-import { BitSizes, numberToBuffer, bufferToNumber } from "../lib/BitConverter";
+import { BitSizes, numberToBuffer, bufferToNumber, bufferToByteArray } from "../lib/BitConverter";
 
+// TODO: support raw buffers in Vector<number>
 export class Vector<T extends number | ISerializable> {
 
 	// TODO: this has to be possible without the spec param
@@ -84,6 +85,10 @@ export class Vector<T extends number | ISerializable> {
 		} else {
 			return { result: ret, readBytes: ret.deserialize(spec, buf, offset) };
 		}
+	}
+
+	static createFromBuffer(buf: Buffer) {
+		return new Vector<number>(bufferToByteArray(buf));
 	}
 
 	/*static isVariableLength(spec: TypeSpecs.Vector): boolean {

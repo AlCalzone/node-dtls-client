@@ -37,5 +37,5 @@ export declare class ConnectionState {
     /**
      * Berechnet die Schlüsselkomponenten
      */
-    computeKeyMaterial(): void;
+    private computeKeyMaterial();
 }

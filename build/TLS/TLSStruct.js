@@ -48,6 +48,12 @@ var TLSStruct = (function () {
                 case "struct":
                     result = type.structType.from(type, buf, offset + delta);
                     break;
+                case "buffer":
+                    // copy the remaining bytes
+                    var ret = Buffer.allocUnsafe(buf.length - (offset + delta));
+                    buf.copy(ret, 0, offset + delta);
+                    result = { result: ret, readBytes: ret.length };
+                    break;
             }
             // Wert merken und im Array voranschreiten
             this[propName] = result.result;
@@ -62,7 +68,7 @@ var TLSStruct = (function () {
      * @param offset - Der Index, ab dem gelesen werden soll
      */
     TLSStruct.from = function (spec, buf, offset) {
-        var ret = new spec.structType(spec.spec);
+        var ret = spec.structType.createEmpty();
         return { result: ret, readBytes: ret.deserialize(buf, offset) };
     };
     /**
@@ -80,8 +86,12 @@ var TLSStruct = (function () {
                     var bitSize = TypeSpecs.getPrimitiveSize(type);
                     return BitConverter_1.numberToBuffer(propValue, bitSize);
                 case "vector":
+                    // we know propValue is a Vector<T> but we don't know or care about T
+                    return propValue.serialize(type);
                 case "struct":
-                    return propValue.serialize(); // we know this must be an ISerializable
+                    return propValue.serialize();
+                case "buffer":
+                    return propValue;
             }
         });
         return Buffer.concat(ret);

@@ -30,7 +30,10 @@ var Random = (function (_super) {
      * Creates a new Random structure and initializes it.
      */
     Random.createNew = function () {
-        return new Random(Math.floor(Date.now() / 1000), new Vector_1.Vector(Random.__spec.random_bytes, getRandomArray(Random.__spec.random_bytes.maxLength)));
+        return new Random(Math.floor(Date.now() / 1000), new Vector_1.Vector(getRandomArray(Random.__spec.random_bytes.maxLength)));
+    };
+    Random.createEmpty = function () {
+        return new Random(null, null);
     };
     return Random;
 }(TLSStruct_1.TLSStruct));

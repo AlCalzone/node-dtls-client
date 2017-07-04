@@ -12,21 +12,6 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
-var Alert = (function (_super) {
-    __extends(Alert, _super);
-    function Alert(level, description) {
-        var _this = _super.call(this, Alert.__spec) || this;
-        _this.level = level;
-        _this.description = description;
-        return _this;
-    }
-    return Alert;
-}(TLSStruct_1.TLSStruct));
-Alert.__spec = {
-    level: TypeSpecs.define.Enum("uint8", AlertLevel),
-    description: TypeSpecs.define.Enum("uint8", AlertDescription)
-};
-exports.Alert = Alert;
 var AlertLevel;
 (function (AlertLevel) {
     AlertLevel[AlertLevel["warning"] = 1] = "warning";
@@ -60,4 +45,22 @@ var AlertDescription;
     AlertDescription[AlertDescription["no_renegotiation"] = 100] = "no_renegotiation";
     AlertDescription[AlertDescription["unsupported_extension"] = 110] = "unsupported_extension";
 })(AlertDescription = exports.AlertDescription || (exports.AlertDescription = {}));
+var Alert = (function (_super) {
+    __extends(Alert, _super);
+    function Alert(level, description) {
+        var _this = _super.call(this, Alert.__spec) || this;
+        _this.level = level;
+        _this.description = description;
+        return _this;
+    }
+    Alert.createEmpty = function () {
+        return new Alert(0, 0);
+    };
+    return Alert;
+}(TLSStruct_1.TLSStruct));
+Alert.__spec = {
+    level: TypeSpecs.define.Enum("uint8", AlertLevel),
+    description: TypeSpecs.define.Enum("uint8", AlertDescription)
+};
+exports.Alert = Alert;
 //# sourceMappingURL=Alert.js.map

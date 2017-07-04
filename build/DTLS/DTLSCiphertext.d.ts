@@ -20,6 +20,7 @@ export declare class DTLSCiphertext extends TLSStruct {
     };
     static readonly spec: TypeSpecs.Struct;
     constructor(type: ContentType, version: ProtocolVersion, epoch: number, sequence_number: number, fragment: Buffer);
+    static createEmpty(): DTLSCiphertext;
     /**
      * Encrypts the given compressed packet
      * @param packet - The packet to be encrypted

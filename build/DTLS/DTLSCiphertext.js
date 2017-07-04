@@ -28,6 +28,9 @@ var DTLSCiphertext = (function (_super) {
         _this.fragment = fragment; // <XXX>Ciphertext
         return _this;
     }
+    DTLSCiphertext.createEmpty = function () {
+        return new DTLSCiphertext(null, null, null, null, null);
+    };
     /**
      * Encrypts the given compressed packet
      * @param packet - The packet to be encrypted

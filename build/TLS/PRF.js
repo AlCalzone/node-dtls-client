@@ -19,6 +19,24 @@ exports.HMAC = {
     "sha384": HMAC_factory("sha384", 48),
     "sha512": HMAC_factory("sha512", 64),
 };
+;
+function Hash_factory(algorithm, length) {
+    var ret = (function (data) {
+        var hash = crypto.createHash(algorithm);
+        hash.update(data);
+        return hash.digest();
+    });
+    // add length information
+    ret.length = length;
+    return ret;
+}
+var Hash = {
+    "md5": Hash_factory("md5", 16),
+    "sha1": Hash_factory("sha1", 20),
+    "sha256": Hash_factory("sha256", 32),
+    "sha384": Hash_factory("sha384", 48),
+    "sha512": Hash_factory("sha512", 64),
+};
 /**
  * Data expansion function: Turns a secret into an arbitrary quantity of output using a hash function and a seed.
  * @param algorithm - The algorithm to be used for hashing
@@ -57,16 +75,11 @@ exports.PRF = {
     "sha512": PRF_factory("sha512"),
 };
 function PRF_factory(algorithm) {
-    /**
-     * (D)TLS v1.2 pseudorandom function. Earlier versions are not supported.
-     * @param secret - The secret to be hashed
-     * @param label - used together with seed to generate a hash from secret. Denotes the usage of this hash.
-     * @param seed - used together with label to generate a hash from secret
-     * @param length - the desired length of the output
-     */
-    return function (secret, label, seed, length) {
+    var ret = (function (secret, label, seed, length) {
         if (length === void 0) { length = 32; }
         return P(algorithm, secret, Buffer.concat([Buffer.from(label, 'ascii'), seed]), length);
-    };
+    });
+    ret.hashFunction = Hash[algorithm];
+    return ret;
 }
 //# sourceMappingURL=PRF.js.map

@@ -26,6 +26,9 @@ var DTLSPlaintext = (function (_super) {
         _this.fragment = fragment;
         return _this;
     }
+    DTLSPlaintext.createEmpty = function () {
+        return new DTLSPlaintext(null, null, null, null, null);
+    };
     return DTLSPlaintext;
 }(TLSStruct_1.TLSStruct));
 DTLSPlaintext.__spec = {

@@ -29,6 +29,18 @@ export function bufferToNumber(buf: Buffer, size: BitSizes, offset = 0) {
 	return ret;
 }
 
+export function bufferToByteArray(buf: Buffer, offset = 0) : number[] {
+	return Array.prototype.slice.apply(buf, [offset]);
+}
+
+export function buffersEqual(buf1: Buffer, buf2: Buffer): boolean {
+	if (buf1.length !== buf2.length) return false;
+	for (let i = 0; i < buf1.length; i++) {
+		if (buf1[i] !== buf2[i]) return false;
+	}
+	return true;
+}
+
 ///**
 // * Liest eine Zahl der angegebenen Länge (bits) aus dem Byte-Array (arr) ab Position (offset)
 // * @param bits - Die Anzahl an Bits, die verwendet werden, um die Zahl zu repräsentieren

@@ -2,7 +2,6 @@
 import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
 import { ConnectionState, ConnectionEnd } from "./ConnectionState";
-import { KeyExchangeAlgorithm } from "./KeyExchange";
 import * as BlockCipher from "./BlockCipher";
 import { HMAC } from "./PRF";
 import { extend } from "../lib/object-polyfill";
@@ -27,6 +26,12 @@ export enum AEADAlgorithm {
 	AES_256_CCM_8     = 19,
 }
 	
+export type KeyExchangeAlgorithm =
+	"dhe_dss" | "dhe_rsa" |
+	// forbidden: dh_anon, 
+	"rsa" | "dh_dss" | "dh_rsa" |
+	"psk" | "dhe_psk" | "rsa_psk"// Server/Client|KeyExchange: see https://tools.ietf.org/html/rfc4279#page-4
+	;
 
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.
@@ -167,7 +172,8 @@ export class CipherSuite extends TLSStruct {
 		public readonly macAlgorithm: HashAlgorithm,
 		public readonly prfAlgorithm: HashAlgorithm,
 		public readonly cipherType: CipherType,
-		public readonly algorithm?: (BlockCipher.BlockCipherAlgorithm | AEADAlgorithm)
+		public readonly algorithm?: (BlockCipher.BlockCipherAlgorithm | AEADAlgorithm),
+		public readonly verify_data_length: number = 12
 	) {
 		super(CipherSuite.__spec);
 	}

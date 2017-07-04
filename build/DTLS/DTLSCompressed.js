@@ -27,6 +27,9 @@ var DTLSCompressed = (function (_super) {
         _this.fragment = fragment;
         return _this;
     }
+    DTLSCompressed.createEmpty = function () {
+        return new DTLSCompressed(null, null, null, null, null);
+    };
     /**
      * Compresses the given plaintext packet
      * @param packet - The plaintext packet to be compressed
@@ -72,6 +75,9 @@ var MACHeader = (function (_super) {
         _this.fragment_length = fragment_length;
         return _this;
     }
+    MACHeader.createEmpty = function () {
+        return new MACHeader(null, null, null, null, null);
+    };
     return MACHeader;
 }(TLSStruct_1.TLSStruct));
 MACHeader.__spec = {

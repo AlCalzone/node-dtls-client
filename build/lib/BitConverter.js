@@ -29,6 +29,21 @@ function bufferToNumber(buf, size, offset) {
     return ret;
 }
 exports.bufferToNumber = bufferToNumber;
+function bufferToByteArray(buf, offset) {
+    if (offset === void 0) { offset = 0; }
+    return Array.prototype.slice.apply(buf, [offset]);
+}
+exports.bufferToByteArray = bufferToByteArray;
+function buffersEqual(buf1, buf2) {
+    if (buf1.length !== buf2.length)
+        return false;
+    for (var i = 0; i < buf1.length; i++) {
+        if (buf1[i] !== buf2[i])
+            return false;
+    }
+    return true;
+}
+exports.buffersEqual = buffersEqual;
 ///**
 // * Liest eine Zahl der angegebenen Länge (bits) aus dem Byte-Array (arr) ab Position (offset)
 // * @param bits - Die Anzahl an Bits, die verwendet werden, um die Zahl zu repräsentieren

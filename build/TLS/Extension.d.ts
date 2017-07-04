@@ -16,4 +16,5 @@ export declare class Extension extends TLSStruct {
     };
     static readonly spec: TypeSpecs.Struct;
     constructor(extension_type: ExtensionType, extension_data: Buffer);
+    static createEmpty(): Extension;
 }

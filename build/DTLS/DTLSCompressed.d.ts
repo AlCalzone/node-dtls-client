@@ -19,6 +19,7 @@ export declare class DTLSCompressed extends TLSStruct {
     };
     static readonly spec: TypeSpecs.Struct;
     constructor(type: ContentType, version: ProtocolVersion, epoch: number, sequence_number: number, fragment: Buffer);
+    static createEmpty(): DTLSCompressed;
     /**
      * Compresses the given plaintext packet
      * @param packet - The plaintext packet to be compressed
@@ -51,4 +52,5 @@ export declare class MACHeader extends TLSStruct {
         fragment_length: Readonly<TypeSpecs.Number>;
     };
     constructor(epoch: number, sequence_number: number, type: ContentType, version: ProtocolVersion, fragment_length: number);
+    static createEmpty(): MACHeader;
 }

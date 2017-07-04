@@ -67,6 +67,8 @@ var ConnectionState = (function () {
      */
     ConnectionState.prototype.computeMasterSecret = function (preMasterSecret) {
         this.master_secret = PRF_1.PRF[this.cipherSuite.prfAlgorithm](preMasterSecret.serialize(), "master secret", Buffer.concat([this.client_random, this.server_random]), master_secret_length);
+        // now we can compute the key material
+        this.computeKeyMaterial();
     };
     /**
      * Berechnet die Schlüsselkomponenten

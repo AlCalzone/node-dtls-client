@@ -83,7 +83,7 @@ export module dtls {
 			// initialize record layer
 			this.recordLayer = new RecordLayer(this.udp, this.options);
 			// also start handshake
-			this.handshakeHandler = new ClientHandshakeHandler(this.recordLayer, () => {
+			this.handshakeHandler = new ClientHandshakeHandler(this.recordLayer, this.options, () => {
 				// when done, emit "connected" event
 				this.emit("connected");
 				// also emit all buffered messages
@@ -145,6 +145,7 @@ export module dtls {
 		reuseAddr: boolean;
 		address: string;
 		port: number;
+		psk: { [identity: string]: string };
 		keyContext: any; // TODO: DTLS-security options
 	}
 

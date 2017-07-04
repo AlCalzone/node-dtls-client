@@ -1,4 +1,5 @@
-﻿import { ConnectionEnd } from "../TLS/ConnectionState";
+﻿import { dtls } from "../dtls";
+import { ConnectionEnd } from "../TLS/ConnectionState";
 import { RecordLayer } from "./RecordLayer";
 import * as Handshake from "./Handshake";
 import { CipherSuite } from "../TLS/CipherSuite";
@@ -13,6 +14,9 @@ import { Cookie } from "../DTLS/Cookie";
 import { Vector } from "../TLS/Vector";
 import { CompressionMethod } from "../TLS/ConnectionState";
 import { Extension } from "../TLS/Extension";
+import { bufferToByteArray, buffersEqual } from "../lib/BitConverter";
+import { PRF } from "../TLS/PRF";
+import { PreMasterSecret } from "../TLS/PreMasterSecret";
 
 
 /**
@@ -35,7 +39,7 @@ type FlightHandler = (flight: Handshake.Handshake[]) => void;
 
 export class ClientHandshakeHandler {
 
-	constructor(private recordLayer: RecordLayer, private finishedCallback: Function) {
+	constructor(private recordLayer: RecordLayer, private options: dtls.Options, private finishedCallback: Function) {
 		this.renegotiate();
 	}
 
@@ -55,12 +59,13 @@ export class ClientHandshakeHandler {
 		this.incompleteMessages = [];
 		this.completeMessages = {};
 		this.expectedResponses = [];
-		this.cscReceived = false;
-		this.serverFinishedPending = false;
+		this.allHandshakeData = null;
+		//this.cscReceived = false;
+		//this.serverFinishedPending = false;
 
 		// ==============================
 		// start by sending a ClientHello
-		const hello = new Handshake.ClientHello();
+		const hello = Handshake.ClientHello.createEmpty();
 		hello.client_version = new ProtocolVersion(~1, ~2);
 		hello.random = Random.createNew();
 		// remember this for crypto stuff
@@ -98,11 +103,13 @@ export class ClientHandshakeHandler {
 	private completeMessages: { [index: number]: Handshake.Handshake };
 	/** The currently expected flight, designated by the type of its last message */
 	private expectedResponses: Handshake.HandshakeType[];
+	/** All handshake data sent so far, buffered for the Finished -> verify_data */
+	private allHandshakeData: Buffer;
 
 	// special cases for reordering of "Finished" flights
 	// TODO: add these special cases to general handling functions
-	private cscReceived: boolean;
-	private serverFinishedPending: boolean;
+	//private cscReceived: boolean;
+	//private serverFinishedPending: boolean;
 
 
 	/**
@@ -138,6 +145,7 @@ export class ClientHandshakeHandler {
 					// call the handler and clear the buffer
 					const messages = completeMsgIndizes.map(i => this.completeMessages[i]);
 					this.completeMessages = {};
+					this.bufferHandshakeData(...messages);
 					this.handle[lastMsg.msg_type](messages);
 					// TODO: clear a retransmission timer
 				}
@@ -199,7 +207,7 @@ export class ClientHandshakeHandler {
 			if (!retransmit) {
 				handshake.message_seq = ++this.lastSentSeqNum;
 			}
-			this.sendHandshakeMessage(handshake)
+			this.sendHandshakeMessage(handshake, retransmit)
 		});
 	}
 
@@ -208,7 +216,8 @@ export class ClientHandshakeHandler {
 	 * Don't call this directly, rather use *sendFlight*
 	 * @param handshake - The handshake message to be sent
 	 */
-	private sendHandshakeMessage(handshake: Handshake.Handshake) {
+	private sendHandshakeMessage(handshake: Handshake.Handshake, retransmit) {
+		// fragment the messages to send them over the record layer
 		const messages = handshake
 			.fragmentMessage()
 			.map(fragment => ({
@@ -217,7 +226,43 @@ export class ClientHandshakeHandler {
 			}))
 			;
 		this.recordLayer.sendAll(messages);
+
+		// if this is not a retransmit, also remember the raw data for verification purposes
+		if (!retransmit) {
+			this.bufferHandshakeData(handshake);
+		}
 	}
+
+	/**
+	 * remembers the raw data of handshake messages for verification purposes
+	 * @param messages - the messages to be remembered
+	 */
+	private bufferHandshakeData(...messages: Handshake.Handshake[]) {
+		// remember data up to now
+		const buffers = [];
+		if (this.allHandshakeData != null)
+			buffers.push(this.allHandshakeData);
+		// stript out hello requests
+		messages = messages.filter(m => m.msg_type !== Handshake.HandshakeType.hello_request);
+		// and add the raw data
+		buffers.push(messages.map(m => m.serialize()));
+		this.allHandshakeData = Buffer.concat(buffers);
+	}
+
+	/**
+	 * computes the verify data for a Finished message
+	 * @param handshakeMessages - the concatenated messages received so far
+	 */
+	private computeVerifyData(handshakeMessages: Buffer, source: "server"|"client"): Buffer {
+		const connState = this.recordLayer.nextEpoch.connectionState;
+
+		const PRF_fn = PRF[connState.cipherSuite.prfAlgorithm];
+		const handshakeHash = PRF_fn.hashFunction(handshakeMessages);
+		// and use it to compute the verify data
+		const verify_data = PRF_fn(connState.master_secret, `${source} finished`, handshakeHash, connState.cipherSuite.verify_data_length);
+		return verify_data;
+	}
+
 	/**
 	 * Sends a ChangeCipherSpec message
 	 */
@@ -265,11 +310,78 @@ export class ClientHandshakeHandler {
 						// TODO: parse/support extensions?
 						// TODO: remember the session id?
 						break;
-					// TODO: support more messages (look up PSK spec)
+					// TODO: support more messages (certificates etc.)
+					case Handshake.HandshakeType.server_key_exchange:
+						const keyExchange = msg as Handshake.ServerKeyExchange;
+						// parse the content depending on the key exchange algorithm
+						switch (this.recordLayer.nextEpoch.connectionState.cipherSuite.keyExchange) {
+							case "psk":
+								const keyExchange_PSK = Handshake.ServerKeyExchange_PSK.from(Handshake.ServerKeyExchange_PSK.spec, keyExchange.raw_data).result
+								// TODO: do something with the identity hint
+								break;
+							// TODO: support other algorithms
+						}
+						break;
 					case Handshake.HandshakeType.server_hello_done:
-						// its our turn
-						// TODO: what to send? client_key_exchange?
+						// its our turn, build flight depending on the key exchange algorithm
+						const connState = this.recordLayer.nextEpoch.connectionState;
+
+						// TODO: support multiple identities
+						const psk_identity = Object.keys(this.options.psk)[0];
+						let preMasterSecret: PreMasterSecret;
+
+						const flight: Handshake.Handshake[] = [];
+						switch (connState.cipherSuite.keyExchange) {
+							case "psk":
+								// for PSK, build the key exchange message
+								const keyExchange = Handshake.ClientKeyExchange.createEmpty();
+								const keyExchange_PSK = new Handshake.ClientKeyExchange_PSK(
+									Vector.createFromBuffer(Buffer.from(psk_identity, "ascii"))
+								);
+								keyExchange.raw_data = keyExchange_PSK.serialize();
+								// and add it to the flight
+								flight.push(keyExchange);
+
+								// now we have everything, construct the pre master secret
+								const psk = Vector.createFromBuffer(Buffer.from(this.options.psk[psk_identity], "ascii"));
+								preMasterSecret = new PreMasterSecret(null, psk);
+								break;
+						}
+
+						// we now have everything to compute the master secret
+						connState.computeMasterSecret(preMasterSecret);
+
+						// now we can send the finished message
+
+						// therefore concat the previous messages in this flight with all other data so far
+						// to calculate verify_data
+						const handshake_messages = Buffer.concat(
+							[this.allHandshakeData].concat(flight.map(f => f.serialize()))
+						);
+
+						// now build the finished message and add it to the flight
+						const finished = new Handshake.Finished(this.computeVerifyData(handshake_messages, "client"));
+						flight.push(finished);
+
+						// send the complete flight
+						this.sendFlight(flight, [Handshake.HandshakeType.finished]);
+						break;
 				}
+			}
+		},
+
+		/** Handles a Finished flight */
+		[Handshake.HandshakeType.finished]: (messages: Handshake.Handshake[]) => {
+			// this flight should only contain a single message, 
+			// but to be sure extract the last one
+			const finished = messages[messages.length - 1] as Handshake.Finished;
+			// compute the expected verify data
+			const expectedVerifyData = this.computeVerifyData(this.allHandshakeData, "server");
+			if (buffersEqual(finished.verify_data, expectedVerifyData)) {
+				// all good!
+				this.finishedCallback();
+			} else {
+				// TODO: raise error, cancel connection
 			}
 		},
 

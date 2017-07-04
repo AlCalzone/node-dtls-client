@@ -57,6 +57,12 @@ export class TLSStruct {
 				case "struct":
 					result = type.structType.from(type, buf, offset + delta);
 					break;
+				case "buffer":
+					// copy the remaining bytes
+					let ret = Buffer.allocUnsafe(buf.length - (offset + delta));
+					buf.copy(ret, 0, offset + delta);
+					result = { result: ret, readBytes: ret.length };
+					break;
 			}
 
 			// Wert merken und im Array voranschreiten
@@ -99,6 +105,8 @@ export class TLSStruct {
 						return (propValue as any).serialize(type);
 					case "struct":
 						return (propValue as TLSStruct).serialize(); 
+					case "buffer":
+						return (propValue as Buffer);
 				}
 			});
 		return Buffer.concat(ret);

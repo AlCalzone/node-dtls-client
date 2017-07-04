@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var ConnectionState_1 = require("../TLS/ConnectionState");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
-var TLSStruct_1 = require("../TLS/TLSStruct");
 var DTLSPlaintext_1 = require("./DTLSPlaintext");
 var DTLSCompressed_1 = require("./DTLSCompressed");
 var DTLSCiphertext_1 = require("./DTLSCiphertext");
@@ -16,14 +15,8 @@ var RecordLayer = (function () {
          */
         this.epochs = [];
         //private connectionStates: ConnectionState[/* epoch */] = [];
-        /**
-         * The current epoch used for reading data
-         */
-        this._readEpoch = 0;
-        /**
-         * The current epoch used for writing data
-         */
-        this._writeEpoch = 0;
+        this._readEpochNr = 0;
+        this._writeEpochNr = 0;
         // initialize with NULL cipherspec
         // current state
         this.epochs[0] = this.createEpoch(0);
@@ -36,9 +29,9 @@ var RecordLayer = (function () {
      * @param callback - The function to be called after sending the message.
      */
     RecordLayer.prototype.send = function (msg, callback) {
-        var epoch = this.epochs[this.writeEpoch];
+        var epoch = this.epochs[this.writeEpochNr];
         var packet = new DTLSPlaintext_1.DTLSPlaintext(msg.type, new ProtocolVersion_1.ProtocolVersion(~1, ~2), // 2's complement of 1.2
-        this._writeEpoch, ++epoch.writeSequenceNumber, // sequence number increased by 1
+        this._writeEpochNr, ++epoch.writeSequenceNumber, // sequence number increased by 1
         msg.data);
         // compress packet
         var compressor = function (identity) { return identity; }; // TODO: implement compression algorithms
@@ -70,7 +63,7 @@ var RecordLayer = (function () {
         var packets = [];
         while (offset < buf.length) {
             try {
-                var packet = TLSStruct_1.TLSStruct.from(DTLSCiphertext_1.DTLSCiphertext.spec, buf, offset);
+                var packet = DTLSCiphertext_1.DTLSCiphertext.from(DTLSCiphertext_1.DTLSCiphertext.spec, buf, offset);
                 packets.push(packet.result);
                 offset += packet.readBytes;
             }
@@ -88,7 +81,7 @@ var RecordLayer = (function () {
                 // this will keep packets from the upcoming one
                 return false;
             }
-            else if (p.epoch < _this.readEpoch) {
+            else if (p.epoch < _this.readEpochNr) {
                 // discard old packets
                 return false;
             }
@@ -120,34 +113,66 @@ var RecordLayer = (function () {
             data: p.fragment
         }); });
     };
-    Object.defineProperty(RecordLayer.prototype, "readEpoch", {
-        get: function () { return this._readEpoch; },
+    Object.defineProperty(RecordLayer.prototype, "readEpochNr", {
+        get: function () { return this._readEpochNr; },
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(RecordLayer.prototype, "writeEpoch", {
-        get: function () { return this._writeEpoch; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(RecordLayer.prototype, "nextEpoch", {
+    Object.defineProperty(RecordLayer.prototype, "currentReadEpoch", {
         /**
-         * The epoch that will be used next
+         * The current epoch used for reading data
          */
+        get: function () { return this.epochs[this._readEpochNr]; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(RecordLayer.prototype, "nextReadEpoch", {
+        get: function () { return this.epochs[this._readEpochNr + 1]; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(RecordLayer.prototype, "writeEpochNr", {
+        get: function () { return this._writeEpochNr; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(RecordLayer.prototype, "currentWriteEpoch", {
+        /**
+         * The current epoch used for writing data
+         */
+        get: function () { return this.epochs[this._writeEpochNr]; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(RecordLayer.prototype, "nextWriteEpoch", {
+        get: function () { return this.epochs[this._writeEpochNr + 1]; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(RecordLayer.prototype, "nextEpochNr", {
         get: function () {
-            return Math.max(this.readEpoch, this.writeEpoch) + 1;
+            return Math.max(this.readEpochNr, this.writeEpochNr) + 1;
         },
         enumerable: true,
         configurable: true
     });
     ;
+    Object.defineProperty(RecordLayer.prototype, "nextEpoch", {
+        /**
+         * The next read and write epoch that will be used.
+         * Be careful as this might point to the wrong epoch between ChangeCipherSpec messages
+         */
+        get: function () { return this.epochs[this.nextEpochNr]; },
+        enumerable: true,
+        configurable: true
+    });
     /**
      * Ensure there's a next epoch to switch to
      */
     RecordLayer.prototype.ensureNextEpoch = function () {
         // makes sure a pending state exists
-        if (!this.epochs[this.nextEpoch]) {
-            this.epochs[this.nextEpoch] = this.createEpoch(this.nextEpoch);
+        if (!this.epochs[this.nextEpochNr]) {
+            this.epochs[this.nextEpochNr] = this.createEpoch(this.nextEpochNr);
         }
     };
     RecordLayer.prototype.createEpoch = function (index) {
@@ -159,11 +184,11 @@ var RecordLayer = (function () {
         };
     };
     RecordLayer.prototype.advanceReadEpoch = function () {
-        this._readEpoch++;
+        this._readEpochNr++;
         this.ensureNextEpoch();
     };
     RecordLayer.prototype.advanceWriteEpoch = function () {
-        this._writeEpoch++;
+        this._writeEpochNr++;
         this.ensureNextEpoch();
     };
     Object.defineProperty(RecordLayer, "MAX_PAYLOAD_SIZE", {
