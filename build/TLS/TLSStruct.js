@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var object_polyfill_1 = require("../lib/object-polyfill");
 var BitConverter_1 = require("../lib/BitConverter");
 var TypeSpecs = require("./TypeSpecs");
+var util = require("../lib/util");
 var Vector_1 = require("./Vector");
 /**
  * Basisklasse für TLS-Objekte
@@ -49,10 +50,27 @@ var TLSStruct = (function () {
                     result = type.structType.from(type, buf, offset + delta);
                     break;
                 case "buffer":
-                    // copy the remaining bytes
-                    var ret = Buffer.allocUnsafe(buf.length - (offset + delta));
-                    buf.copy(ret, 0, offset + delta);
-                    result = { result: ret, readBytes: ret.length };
+                    if (type.maxLength === Number.POSITIVE_INFINITY) {
+                        // unbound Buffer, copy the remaining bytes
+                        var ret = Buffer.allocUnsafe(buf.length - (offset + delta));
+                        buf.copy(ret, 0, offset + delta);
+                        result = { result: ret, readBytes: ret.length };
+                    }
+                    else {
+                        // normal Buffer (essentially Vector<uint8>)
+                        var length_1 = type.maxLength;
+                        var lengthBytes = 0;
+                        // for variable length Buffers, read the actual length first
+                        if (TypeSpecs.Buffer.isVariableLength(type)) {
+                            var lengthBits = (8 * util.fitToWholeBytes(type.maxLength));
+                            length_1 = BitConverter_1.bufferToNumber(buf, lengthBits, offset);
+                            lengthBytes += lengthBits / 8;
+                        }
+                        // copy the data into the new buffer
+                        var ret = Buffer.allocUnsafe(length_1);
+                        buf.copy(ret, 0, offset + delta + lengthBytes, offset + delta + lengthBytes + length_1);
+                        result = { result: ret, readBytes: lengthBytes + length_1 };
+                    }
                     break;
             }
             // Wert merken und im Array voranschreiten
@@ -91,7 +109,17 @@ var TLSStruct = (function () {
                 case "struct":
                     return propValue.serialize();
                 case "buffer":
-                    return propValue;
+                    // just return a copy of the buffer
+                    var ret_1 = Buffer.from(propValue);
+                    // for variable length buffers prepend the length
+                    if (TypeSpecs.Buffer.isVariableLength(type)) {
+                        var lengthBits = (8 * util.fitToWholeBytes(type.maxLength));
+                        ret_1 = Buffer.concat([
+                            BitConverter_1.numberToBuffer(ret_1.length, lengthBits),
+                            ret_1
+                        ]);
+                    }
+                    return ret_1;
             }
         });
         return Buffer.concat(ret);

@@ -11,6 +11,13 @@ var Vector;
     }
     Vector.isVariableLength = isVariableLength;
 })(Vector = exports.Vector || (exports.Vector = {}));
+var Buffer;
+(function (Buffer) {
+    function isVariableLength(spec) {
+        return spec.maxLength !== spec.minLength;
+    }
+    Buffer.isVariableLength = isVariableLength;
+})(Buffer = exports.Buffer || (exports.Buffer = {}));
 // Shortcuts:
 exports.define = {
     Enum: function (size, enumType) { return ({ type: "enum", size: size, enumType: enumType }); },
@@ -32,7 +39,14 @@ exports.define = {
             optional: optional
         });
     },
-    Buffer: function () { return ({ type: "buffer" }); }
+    Buffer: function (minLength, maxLength) {
+        if (minLength === void 0) { minLength = 0; }
+        if (maxLength === void 0) { maxLength = Number.POSITIVE_INFINITY; }
+        return ({
+            type: "buffer",
+            minLength: minLength, maxLength: maxLength
+        });
+    }
 };
 exports.uint8 = Object.freeze(exports.define.Number("uint8"));
 exports.uint16 = Object.freeze(exports.define.Number("uint16"));
@@ -40,5 +54,5 @@ exports.uint24 = Object.freeze(exports.define.Number("uint24"));
 exports.uint32 = Object.freeze(exports.define.Number("uint32"));
 exports.uint48 = Object.freeze(exports.define.Number("uint48"));
 exports.uint64 = Object.freeze(exports.define.Number("uint64"));
-exports.buffer = Object.freeze(exports.define.Buffer());
+//export const buffer = Object.freeze(define.Buffer()); 
 //# sourceMappingURL=TypeSpecs.js.map

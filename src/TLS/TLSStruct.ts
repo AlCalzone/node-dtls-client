@@ -58,10 +58,26 @@ export class TLSStruct {
 					result = type.structType.from(type, buf, offset + delta);
 					break;
 				case "buffer":
-					// copy the remaining bytes
-					let ret = Buffer.allocUnsafe(buf.length - (offset + delta));
-					buf.copy(ret, 0, offset + delta);
-					result = { result: ret, readBytes: ret.length };
+					if (type.maxLength === Number.POSITIVE_INFINITY) {
+						// unbound Buffer, copy the remaining bytes
+						let ret = Buffer.allocUnsafe(buf.length - (offset + delta));
+						buf.copy(ret, 0, offset + delta);
+						result = { result: ret, readBytes: ret.length };
+					} else {
+						// normal Buffer (essentially Vector<uint8>)
+						let length = type.maxLength;
+						let lengthBytes = 0;
+						// for variable length Buffers, read the actual length first
+						if (TypeSpecs.Buffer.isVariableLength(type)) {
+							const lengthBits = (8 * util.fitToWholeBytes(type.maxLength)) as BitSizes;
+							length = bufferToNumber(buf, lengthBits, offset);
+							lengthBytes += lengthBits / 8;
+						}
+						// copy the data into the new buffer
+						let ret = Buffer.allocUnsafe(length);
+						buf.copy(ret, 0, offset + delta + lengthBytes, offset + delta + lengthBytes + length);
+						result = { result: ret, readBytes: lengthBytes + length };
+					}
 					break;
 			}
 
@@ -106,7 +122,17 @@ export class TLSStruct {
 					case "struct":
 						return (propValue as TLSStruct).serialize(); 
 					case "buffer":
-						return (propValue as Buffer);
+						// just return a copy of the buffer
+						let ret = Buffer.from(propValue as Buffer);
+						// for variable length buffers prepend the length
+						if (TypeSpecs.Buffer.isVariableLength(type)) {
+							const lengthBits = (8 * util.fitToWholeBytes(type.maxLength)) as BitSizes;
+							ret = Buffer.concat([
+								numberToBuffer(ret.length, lengthBits),
+								ret
+							]);
+						}
+						return ret;
 				}
 			});
 		return Buffer.concat(ret);

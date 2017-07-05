@@ -35,6 +35,11 @@ export declare namespace Vector {
 /** Unparsed raw data */
 export interface Buffer {
     type: "buffer";
+    minLength: number;
+    maxLength: number;
+}
+export declare namespace Buffer {
+    function isVariableLength(spec: Buffer): boolean;
 }
 export declare type All = Complex | Vector | Buffer;
 export declare const define: {
@@ -42,7 +47,7 @@ export declare const define: {
     Number: (size: Numbers) => Number;
     Struct: (structType: any) => Struct;
     Vector: (itemSpec: Complex, minLength?: number, maxLength?: number, optional?: boolean) => Vector;
-    Buffer: () => Buffer;
+    Buffer: (minLength?: number, maxLength?: number) => Buffer;
 };
 export declare const uint8: Readonly<Number>;
 export declare const uint16: Readonly<Number>;
@@ -50,4 +55,3 @@ export declare const uint24: Readonly<Number>;
 export declare const uint32: Readonly<Number>;
 export declare const uint48: Readonly<Number>;
 export declare const uint64: Readonly<Number>;
-export declare const buffer: Readonly<Buffer>;

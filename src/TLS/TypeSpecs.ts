@@ -53,7 +53,14 @@ export namespace Vector {
 
 /** Unparsed raw data */
 export interface Buffer {
-	type: "buffer"
+	type: "buffer";
+	minLength: number;
+	maxLength: number;
+}
+export namespace Buffer {
+	export function isVariableLength(spec: Buffer): boolean {
+		return spec.maxLength !== spec.minLength;
+	}
 }
 
 export type All = Complex | Vector | Buffer;
@@ -74,7 +81,10 @@ export const define = {
 		minLength, maxLength,
 		optional
 	}),
-	Buffer: (): Buffer => ({type: "buffer"})
+	Buffer: (minLength = 0, maxLength = Number.POSITIVE_INFINITY): Buffer => ({
+		type: "buffer",
+		minLength, maxLength
+	})
 };
 export const uint8 = Object.freeze(define.Number("uint8"));
 export const uint16 = Object.freeze(define.Number("uint16"));
@@ -82,4 +92,4 @@ export const uint24 = Object.freeze(define.Number("uint24"));
 export const uint32 = Object.freeze(define.Number("uint32"));
 export const uint48 = Object.freeze(define.Number("uint48"));
 export const uint64 = Object.freeze(define.Number("uint64"));
-export const buffer = Object.freeze(define.Buffer());
+//export const buffer = Object.freeze(define.Buffer());
