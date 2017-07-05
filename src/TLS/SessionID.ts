@@ -4,10 +4,10 @@ import { Vector } from "../TLS/Vector";
 
 export namespace SessionID {
 
-	export const spec = TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 32);
+	export const spec = TypeSpecs.define.Buffer(0, 32);
 
-	export function createNew(items: number[] = []) {
-		return new Vector<number>(items);
-	}
+	//export function createNew(data: Buffer) {
+	//	return new Vector<number>(items);
+	//}
 
 }

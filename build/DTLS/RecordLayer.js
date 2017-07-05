@@ -37,8 +37,10 @@ var RecordLayer = (function () {
         // compress packet
         var compressor = function (identity) { return identity; }; // TODO: implement compression algorithms
         packet = DTLSCompressed_1.DTLSCompressed.compress(packet, compressor);
-        // encrypt packet
-        packet = DTLSCiphertext_1.DTLSCiphertext.encrypt(packet, epoch.connectionState.Cipher, epoch.connectionState.OutgoingMac);
+        if (epoch.connectionState.cipherSuite.cipherType != null) {
+            // encrypt packet
+            packet = DTLSCiphertext_1.DTLSCiphertext.encrypt(packet, epoch.connectionState.Cipher, epoch.connectionState.OutgoingMac);
+        }
         // get send buffer
         var buf = packet.serialize();
         // TODO: check if the buffer satisfies the configured MTU
@@ -181,7 +183,7 @@ var RecordLayer = (function () {
             index: index,
             connectionState: new ConnectionState_1.ConnectionState(),
             antiReplayWindow: new AntiReplayWindow_1.AntiReplayWindow(),
-            writeSequenceNumber: 0,
+            writeSequenceNumber: -1,
         };
     };
     RecordLayer.prototype.advanceReadEpoch = function () {

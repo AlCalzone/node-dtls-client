@@ -12,7 +12,7 @@ export declare class Extension extends TLSStruct {
     extension_data: Buffer;
     static readonly __spec: {
         extension_type: TypeSpecs.Enum;
-        extension_data: TypeSpecs.Vector;
+        extension_data: TypeSpecs.Buffer;
     };
     static readonly spec: TypeSpecs.Struct;
     constructor(extension_type: ExtensionType, extension_data: Buffer);

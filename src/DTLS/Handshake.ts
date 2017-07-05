@@ -60,7 +60,7 @@ export abstract class Handshake extends TLSStruct {
 				wholeMessage.length,
 				this.message_seq,
 				start,
-				Vector.createFromBuffer(fragment)
+				fragment
 			));
 			// step forward by the actual fragment length
 			start += fragment.length;
@@ -87,7 +87,7 @@ export abstract class Handshake extends TLSStruct {
 			// parse the body object into a new Handshake instance
 			const ret = TLSStruct.from(
 				spec,
-				Buffer.from(assembled.fragment.items)
+				assembled.fragment
 				).result as Handshake;
 			ret.message_seq = assembled.message_seq;
 			return ret;
@@ -106,7 +106,7 @@ export class FragmentedHandshake extends TLSStruct {
 		message_seq: TypeSpecs.uint16,
 		fragment_offset: TypeSpecs.uint24,
 		// uint24 fragment_length is implied in the variable size vector
-		fragment: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2**24-1)
+		fragment: TypeSpecs.define.Buffer(0, 2**24-1)
 	}
 	static readonly spec = TypeSpecs.define.Struct(FragmentedHandshake.__spec);
 	/**
@@ -119,7 +119,7 @@ export class FragmentedHandshake extends TLSStruct {
 		public total_length: number,
 		public message_seq: number,
 		public fragment_offset: number,
-		public fragment: Vector<number>
+		public fragment: Buffer
 	) {
 		super(FragmentedHandshake.__spec);
 	}
@@ -132,7 +132,7 @@ export class FragmentedHandshake extends TLSStruct {
 	 * Checks if this message is actually fragmented, i.e. total_length > fragment_length
 	 */
 	isFragmented(): boolean {
-		return (this.fragment_offset !== 0) || (this.total_length > this.fragment.items.length);
+		return (this.fragment_offset !== 0) || (this.total_length > this.fragment.length);
 	}
 	
 	/**
@@ -185,7 +185,7 @@ export class FragmentedHandshake extends TLSStruct {
 		const totalLength = fragments[0].total_length;
 		const ranges = fragments
 			// map to fragment range (start and end index)
-			.map(f => ({start: f.fragment_offset, end: f.fragment_offset + f.fragment.items.length-1}))
+			.map(f => ({start: f.fragment_offset, end: f.fragment_offset + f.fragment.length-1}))
 			// order the fragments by fragment offset
 			.sort((a,b) => a.start - b.start)
 			;
@@ -221,7 +221,7 @@ export class FragmentedHandshake extends TLSStruct {
 		// combine into a single buffer
 		const combined = Buffer.allocUnsafe(messages[0].total_length);
 		for (let msg of messages) {
-			Buffer.from(msg.fragment.items).copy(combined, msg.fragment_offset);
+			msg.fragment.copy(combined, msg.fragment_offset);
 		}
 		
 		// and return the complete message
@@ -230,7 +230,7 @@ export class FragmentedHandshake extends TLSStruct {
 			messages[0].total_length,
 			messages[0].message_seq,
 			0,
-			Vector.createFromBuffer(combined)
+			combined
 		);
 	}
 	
@@ -268,8 +268,8 @@ export class ClientHello extends Handshake {
 	constructor(
 		public client_version: ProtocolVersion,
 		public random: Random,
-		public session_id: Vector<number>,
-		public cookie: Vector<number>,
+		public session_id: Buffer,
+		public cookie: Buffer,
 		public cipher_suites: Vector<number>,
 		public compression_methods: Vector<CompressionMethod>,
 		public extensions: Vector<Extension>
@@ -296,7 +296,7 @@ export class ServerHello extends Handshake {
 	constructor(
 		public server_version: ProtocolVersion,
 		public random: Random,
-		public session_id: Vector<number>,
+		public session_id: Buffer,
 		public cipher_suite: number,
 		public compression_method: CompressionMethod,
 		public extensions: Vector<Extension>
@@ -318,7 +318,7 @@ export class HelloVerifyRequest extends Handshake {
 
 	constructor(
 		public server_version: ProtocolVersion,
-		public cookie: Vector<number>
+		public cookie: Buffer
 	) {
 		super(HandshakeType.hello_verify_request, HelloVerifyRequest.__spec);
 	}
@@ -332,7 +332,7 @@ export class HelloVerifyRequest extends Handshake {
 export class ServerKeyExchange extends Handshake {
 
 	static readonly __spec = {
-		raw_data: TypeSpecs.buffer
+		raw_data: TypeSpecs.define.Buffer() // the entire fragment
 	}
 
 	//static readonly __specs: {
@@ -357,12 +357,12 @@ export class ServerKeyExchange extends Handshake {
 export class ServerKeyExchange_PSK extends TLSStruct {
 
 	static readonly __spec = {
-		psk_identity_hint: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1)
+		psk_identity_hint: TypeSpecs.define.Buffer(0, 2 ** 16 - 1)
 	};
 	static readonly spec = TypeSpecs.define.Struct(ServerKeyExchange_PSK);
 
 	constructor(
-		public psk_identity_hint: Vector<number>
+		public psk_identity_hint: Buffer
 	) {
 		super(ServerKeyExchange_PSK.__spec);
 	}
@@ -380,12 +380,12 @@ export class ClientKeyExchange extends Handshake {
 	//	[algorithm in KeyExchangeAlgorithm]?: TypeSpecs.StructSpec
 	//} = {
 	//	psk: {
-	//		psk_identity: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1)
+	//		psk_identity: TypeSpecs.define.Buffer(0, 2 ** 16 - 1)
 	//	}
 	//}
 
 	static readonly __spec = {
-		raw_data: TypeSpecs.buffer
+		raw_data: TypeSpecs.define.Buffer() // the entire fragment
 	}
 
 	public raw_data: Buffer;
@@ -402,12 +402,12 @@ export class ClientKeyExchange extends Handshake {
 export class ClientKeyExchange_PSK extends TLSStruct {
 
 	static readonly __spec = {
-		psk_identity: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1)
+		psk_identity: TypeSpecs.define.Buffer(0, 2 ** 16 - 1)
 	};
 	static readonly spec = TypeSpecs.define.Struct(ClientKeyExchange_PSK);
 
 	constructor(
-		public psk_identity: Vector<number>
+		public psk_identity: Buffer
 	) {
 		super(ClientKeyExchange_PSK.__spec);
 	}
@@ -436,7 +436,7 @@ export class ServerHelloDone extends Handshake {
 export class Finished extends Handshake {
 
 	static readonly __spec = {
-		verify_data: TypeSpecs.buffer
+		verify_data: TypeSpecs.define.Buffer() // full-length
 	}
 
 	constructor(

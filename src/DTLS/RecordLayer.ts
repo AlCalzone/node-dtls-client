@@ -47,12 +47,14 @@ export class RecordLayer {
 		const compressor = (identity) => identity; // TODO: implement compression algorithms
 		packet = DTLSCompressed.compress(packet, compressor);
 
-		// encrypt packet
-		packet = DTLSCiphertext.encrypt(
-			packet as DTLSCompressed, 
-			epoch.connectionState.Cipher, 
-			epoch.connectionState.OutgoingMac
+		if (epoch.connectionState.cipherSuite.cipherType != null) {
+			// encrypt packet
+			packet = DTLSCiphertext.encrypt(
+				packet as DTLSCompressed,
+				epoch.connectionState.Cipher,
+				epoch.connectionState.OutgoingMac
 			);
+		}
 
 		// get send buffer
 		const buf = packet.serialize();
@@ -178,7 +180,7 @@ export class RecordLayer {
 			index: index,
 			connectionState: new ConnectionState(),
 			antiReplayWindow: new AntiReplayWindow(),
-			writeSequenceNumber: 0,
+			writeSequenceNumber: -1,
 		};
 	}
 

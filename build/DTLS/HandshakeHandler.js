@@ -5,9 +5,7 @@ var CipherSuites_1 = require("../DTLS/CipherSuites");
 var ChangeCipherSpec_1 = require("../TLS/ChangeCipherSpec");
 var ContentType_1 = require("../TLS/ContentType");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
-var SessionID_1 = require("../TLS/SessionID");
 var Random_1 = require("../TLS/Random");
-var Cookie_1 = require("../DTLS/Cookie");
 var Vector_1 = require("../TLS/Vector");
 var ConnectionState_1 = require("../TLS/ConnectionState");
 var BitConverter_1 = require("../lib/BitConverter");
@@ -82,12 +80,12 @@ var ClientHandshakeHandler = (function () {
                                 case "psk":
                                     // for PSK, build the key exchange message
                                     var keyExchange_1 = Handshake.ClientKeyExchange.createEmpty();
-                                    var keyExchange_PSK = new Handshake.ClientKeyExchange_PSK(Vector_1.Vector.createFromBuffer(Buffer.from(psk_identity, "ascii")));
+                                    var keyExchange_PSK = new Handshake.ClientKeyExchange_PSK(Buffer.from(psk_identity, "ascii"));
                                     keyExchange_1.raw_data = keyExchange_PSK.serialize();
                                     // and add it to the flight
                                     flight.push(keyExchange_1);
                                     // now we have everything, construct the pre master secret
-                                    var psk = Vector_1.Vector.createFromBuffer(Buffer.from(_this.options.psk[psk_identity], "ascii"));
+                                    var psk = Buffer.from(_this.options.psk[psk_identity], "ascii");
                                     preMasterSecret = new PreMasterSecret_1.PreMasterSecret(null, psk);
                                     break;
                             }
@@ -153,12 +151,12 @@ var ClientHandshakeHandler = (function () {
         hello.random = Random_1.Random.createNew();
         // remember this for crypto stuff
         this.recordLayer.nextEpoch.connectionState.client_random = hello.random.serialize();
-        hello.session_id = SessionID_1.SessionID.createNew();
-        hello.cookie = Cookie_1.Cookie.createNew();
+        hello.session_id = Buffer.from([]);
+        hello.cookie = Buffer.from([]);
         hello.cipher_suites = new Vector_1.Vector([
             // TODO: allow more
             CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CCM_8,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA
+            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA //256
         ].map(function (cs) { return cs.id; }));
         hello.compression_methods = new Vector_1.Vector([ConnectionState_1.CompressionMethod.null]);
         hello.extensions = new Vector_1.Vector();
@@ -299,7 +297,7 @@ var ClientHandshakeHandler = (function () {
         // stript out hello requests
         messages = messages.filter(function (m) { return m.msg_type !== Handshake.HandshakeType.hello_request; });
         // and add the raw data
-        buffers.push(messages.map(function (m) { return m.serialize(); }));
+        buffers.push.apply(buffers, (messages.map(function (m) { return m.serialize(); })));
         this.allHandshakeData = Buffer.concat(buffers);
     };
     /**

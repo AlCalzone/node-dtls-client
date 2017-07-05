@@ -39,20 +39,20 @@ export declare class FragmentedHandshake extends TLSStruct {
     total_length: number;
     message_seq: number;
     fragment_offset: number;
-    fragment: Vector<number>;
+    fragment: Buffer;
     static readonly __spec: {
         msg_type: TypeSpecs.Enum;
         total_length: Readonly<TypeSpecs.Number>;
         message_seq: Readonly<TypeSpecs.Number>;
         fragment_offset: Readonly<TypeSpecs.Number>;
-        fragment: TypeSpecs.Vector;
+        fragment: TypeSpecs.Buffer;
     };
     static readonly spec: TypeSpecs.Struct;
     /**
      * The amount of data consumed by a handshake message header (without the actual fragment)
      */
     static readonly headerLength: number;
-    constructor(msg_type: HandshakeType, total_length: number, message_seq: number, fragment_offset: number, fragment: Vector<number>);
+    constructor(msg_type: HandshakeType, total_length: number, message_seq: number, fragment_offset: number, fragment: Buffer);
     static createEmpty(): FragmentedHandshake;
     /**
      * Checks if this message is actually fragmented, i.e. total_length > fragment_length
@@ -87,83 +87,83 @@ export declare class HelloRequest extends Handshake {
 export declare class ClientHello extends Handshake {
     client_version: ProtocolVersion;
     random: Random;
-    session_id: Vector<number>;
-    cookie: Vector<number>;
+    session_id: Buffer;
+    cookie: Buffer;
     cipher_suites: Vector<number>;
     compression_methods: Vector<CompressionMethod>;
     extensions: Vector<Extension>;
     static readonly __spec: {
         client_version: TypeSpecs.Struct;
         random: TypeSpecs.Struct;
-        session_id: TypeSpecs.Vector;
-        cookie: TypeSpecs.Vector;
+        session_id: TypeSpecs.Buffer;
+        cookie: TypeSpecs.Buffer;
         cipher_suites: TypeSpecs.Vector;
         compression_methods: TypeSpecs.Vector;
         extensions: TypeSpecs.Vector;
     };
-    constructor(client_version: ProtocolVersion, random: Random, session_id: Vector<number>, cookie: Vector<number>, cipher_suites: Vector<number>, compression_methods: Vector<CompressionMethod>, extensions: Vector<Extension>);
+    constructor(client_version: ProtocolVersion, random: Random, session_id: Buffer, cookie: Buffer, cipher_suites: Vector<number>, compression_methods: Vector<CompressionMethod>, extensions: Vector<Extension>);
     static createEmpty(): ClientHello;
 }
 export declare class ServerHello extends Handshake {
     server_version: ProtocolVersion;
     random: Random;
-    session_id: Vector<number>;
+    session_id: Buffer;
     cipher_suite: number;
     compression_method: CompressionMethod;
     extensions: Vector<Extension>;
     static readonly __spec: {
         server_version: TypeSpecs.Struct;
         random: TypeSpecs.Struct;
-        session_id: TypeSpecs.Vector;
+        session_id: TypeSpecs.Buffer;
         cipher_suite: Readonly<TypeSpecs.Number>;
         compression_method: TypeSpecs.Enum;
         extensions: TypeSpecs.Vector;
     };
-    constructor(server_version: ProtocolVersion, random: Random, session_id: Vector<number>, cipher_suite: number, compression_method: CompressionMethod, extensions: Vector<Extension>);
+    constructor(server_version: ProtocolVersion, random: Random, session_id: Buffer, cipher_suite: number, compression_method: CompressionMethod, extensions: Vector<Extension>);
     static createEmpty(): ServerHello;
 }
 export declare class HelloVerifyRequest extends Handshake {
     server_version: ProtocolVersion;
-    cookie: Vector<number>;
+    cookie: Buffer;
     static readonly __spec: {
         server_version: TypeSpecs.Struct;
-        cookie: TypeSpecs.Vector;
+        cookie: TypeSpecs.Buffer;
     };
-    constructor(server_version: ProtocolVersion, cookie: Vector<number>);
+    constructor(server_version: ProtocolVersion, cookie: Buffer);
     static createEmpty(): HelloVerifyRequest;
 }
 export declare class ServerKeyExchange extends Handshake {
     static readonly __spec: {
-        raw_data: Readonly<TypeSpecs.Buffer>;
+        raw_data: TypeSpecs.Buffer;
     };
     raw_data: Buffer;
     constructor();
     static createEmpty(): ServerKeyExchange;
 }
 export declare class ServerKeyExchange_PSK extends TLSStruct {
-    psk_identity_hint: Vector<number>;
+    psk_identity_hint: Buffer;
     static readonly __spec: {
-        psk_identity_hint: TypeSpecs.Vector;
+        psk_identity_hint: TypeSpecs.Buffer;
     };
     static readonly spec: TypeSpecs.Struct;
-    constructor(psk_identity_hint: Vector<number>);
+    constructor(psk_identity_hint: Buffer);
     static createEmpty(): ServerKeyExchange_PSK;
 }
 export declare class ClientKeyExchange extends Handshake {
     static readonly __spec: {
-        raw_data: Readonly<TypeSpecs.Buffer>;
+        raw_data: TypeSpecs.Buffer;
     };
     raw_data: Buffer;
     constructor();
     static createEmpty(): ClientKeyExchange;
 }
 export declare class ClientKeyExchange_PSK extends TLSStruct {
-    psk_identity: Vector<number>;
+    psk_identity: Buffer;
     static readonly __spec: {
-        psk_identity: TypeSpecs.Vector;
+        psk_identity: TypeSpecs.Buffer;
     };
     static readonly spec: TypeSpecs.Struct;
-    constructor(psk_identity: Vector<number>);
+    constructor(psk_identity: Buffer);
     static createEmpty(): ClientKeyExchange_PSK;
 }
 export declare class ServerHelloDone extends Handshake {
@@ -174,7 +174,7 @@ export declare class ServerHelloDone extends Handshake {
 export declare class Finished extends Handshake {
     verify_data: Buffer;
     static readonly __spec: {
-        verify_data: Readonly<TypeSpecs.Buffer>;
+        verify_data: TypeSpecs.Buffer;
     };
     constructor(verify_data: Buffer);
     static createEmpty(): Finished;

@@ -19,7 +19,6 @@ var CipherSuite_1 = require("../TLS/CipherSuite");
 var ConnectionState_1 = require("../TLS/ConnectionState");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var Extension_1 = require("../TLS/Extension");
-var Vector_1 = require("../TLS/Vector");
 var RecordLayer_1 = require("./RecordLayer");
 var HandshakeType;
 (function (HandshakeType) {
@@ -59,7 +58,7 @@ var Handshake = (function (_super) {
             // slice and dice
             var fragment = wholeMessage.slice(start, start + fragmentLength);
             //create the message
-            fragments.push(new FragmentedHandshake(this.msg_type, wholeMessage.length, this.message_seq, start, Vector_1.Vector.createFromBuffer(fragment)));
+            fragments.push(new FragmentedHandshake(this.msg_type, wholeMessage.length, this.message_seq, start, fragment));
             // step forward by the actual fragment length
             start += fragment.length;
         }
@@ -80,7 +79,7 @@ var Handshake = (function (_super) {
             // turn it into the correct type
             var spec = TypeSpecs.define.Struct(__spec);
             // parse the body object into a new Handshake instance
-            var ret = TLSStruct_1.TLSStruct.from(spec, Buffer.from(assembled.fragment.items)).result;
+            var ret = TLSStruct_1.TLSStruct.from(spec, assembled.fragment).result;
             ret.message_seq = assembled.message_seq;
             return ret;
         }
@@ -109,7 +108,7 @@ var FragmentedHandshake = (function (_super) {
      * Checks if this message is actually fragmented, i.e. total_length > fragment_length
      */
     FragmentedHandshake.prototype.isFragmented = function () {
-        return (this.fragment_offset !== 0) || (this.total_length > this.fragment.items.length);
+        return (this.fragment_offset !== 0) || (this.total_length > this.fragment.length);
     };
     /**
      * Enforces an array of fragments to belong to a single message
@@ -156,7 +155,7 @@ var FragmentedHandshake = (function (_super) {
         var firstSeqNum = fragments[0].message_seq;
         var totalLength = fragments[0].total_length;
         var ranges = fragments
-            .map(function (f) { return ({ start: f.fragment_offset, end: f.fragment_offset + f.fragment.items.length - 1 }); })
+            .map(function (f) { return ({ start: f.fragment_offset, end: f.fragment_offset + f.fragment.length - 1 }); })
             .sort(function (a, b) { return a.start - b.start; });
         // check if the fragments have no holes
         var noHoles = ranges.every(function (val, i, arr) {
@@ -194,10 +193,10 @@ var FragmentedHandshake = (function (_super) {
         var combined = Buffer.allocUnsafe(messages[0].total_length);
         for (var _i = 0, messages_1 = messages; _i < messages_1.length; _i++) {
             var msg = messages_1[_i];
-            Buffer.from(msg.fragment.items).copy(combined, msg.fragment_offset);
+            msg.fragment.copy(combined, msg.fragment_offset);
         }
         // and return the complete message
-        return new FragmentedHandshake(messages[0].msg_type, messages[0].total_length, messages[0].message_seq, 0, Vector_1.Vector.createFromBuffer(combined));
+        return new FragmentedHandshake(messages[0].msg_type, messages[0].total_length, messages[0].message_seq, 0, combined);
     };
     return FragmentedHandshake;
 }(TLSStruct_1.TLSStruct));
@@ -207,7 +206,7 @@ FragmentedHandshake.__spec = {
     message_seq: TypeSpecs.uint16,
     fragment_offset: TypeSpecs.uint24,
     // uint24 fragment_length is implied in the variable size vector
-    fragment: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 24) - 1)
+    fragment: TypeSpecs.define.Buffer(0, Math.pow(2, 24) - 1)
 };
 FragmentedHandshake.spec = TypeSpecs.define.Struct(FragmentedHandshake.__spec);
 /**
@@ -311,7 +310,7 @@ var ServerKeyExchange = (function (_super) {
     return ServerKeyExchange;
 }(Handshake));
 ServerKeyExchange.__spec = {
-    raw_data: TypeSpecs.buffer
+    raw_data: TypeSpecs.define.Buffer() // the entire fragment
 };
 exports.ServerKeyExchange = ServerKeyExchange;
 var ServerKeyExchange_PSK = (function (_super) {
@@ -327,7 +326,7 @@ var ServerKeyExchange_PSK = (function (_super) {
     return ServerKeyExchange_PSK;
 }(TLSStruct_1.TLSStruct));
 ServerKeyExchange_PSK.__spec = {
-    psk_identity_hint: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 16) - 1)
+    psk_identity_hint: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1)
 };
 ServerKeyExchange_PSK.spec = TypeSpecs.define.Struct(ServerKeyExchange_PSK);
 exports.ServerKeyExchange_PSK = ServerKeyExchange_PSK;
@@ -345,11 +344,11 @@ var ClientKeyExchange = (function (_super) {
 //	[algorithm in KeyExchangeAlgorithm]?: TypeSpecs.StructSpec
 //} = {
 //	psk: {
-//		psk_identity: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1)
+//		psk_identity: TypeSpecs.define.Buffer(0, 2 ** 16 - 1)
 //	}
 //}
 ClientKeyExchange.__spec = {
-    raw_data: TypeSpecs.buffer
+    raw_data: TypeSpecs.define.Buffer() // the entire fragment
 };
 exports.ClientKeyExchange = ClientKeyExchange;
 var ClientKeyExchange_PSK = (function (_super) {
@@ -365,7 +364,7 @@ var ClientKeyExchange_PSK = (function (_super) {
     return ClientKeyExchange_PSK;
 }(TLSStruct_1.TLSStruct));
 ClientKeyExchange_PSK.__spec = {
-    psk_identity: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 16) - 1)
+    psk_identity: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1)
 };
 ClientKeyExchange_PSK.spec = TypeSpecs.define.Struct(ClientKeyExchange_PSK);
 exports.ClientKeyExchange_PSK = ClientKeyExchange_PSK;
@@ -394,7 +393,7 @@ var Finished = (function (_super) {
     return Finished;
 }(Handshake));
 Finished.__spec = {
-    verify_data: TypeSpecs.buffer
+    verify_data: TypeSpecs.define.Buffer() // full-length
 };
 exports.Finished = Finished;
 // define handshake messages for lookup

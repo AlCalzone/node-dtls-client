@@ -1,13 +1,13 @@
+/// <reference types="node" />
 import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
-import { Vector } from "./Vector";
 export declare class PreMasterSecret extends TLSStruct {
-    other_secret: Vector<number>;
-    psk: Vector<number>;
+    other_secret: Buffer;
+    psk: Buffer;
     static readonly __spec: {
-        other_secret: TypeSpecs.Vector;
-        psk: TypeSpecs.Vector;
+        other_secret: TypeSpecs.Buffer;
+        psk: TypeSpecs.Buffer;
     };
-    constructor(other_secret: Vector<number>, psk: Vector<number>);
+    constructor(other_secret: Buffer, psk: Buffer);
     static createEmpty(): PreMasterSecret;
 }

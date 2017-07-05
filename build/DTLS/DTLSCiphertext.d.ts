@@ -16,7 +16,7 @@ export declare class DTLSCiphertext extends TLSStruct {
         version: TypeSpecs.Struct;
         epoch: Readonly<TypeSpecs.Number>;
         sequence_number: Readonly<TypeSpecs.Number>;
-        fragment: TypeSpecs.Vector;
+        fragment: TypeSpecs.Buffer;
     };
     static readonly spec: TypeSpecs.Struct;
     constructor(type: ContentType, version: ProtocolVersion, epoch: number, sequence_number: number, fragment: Buffer);

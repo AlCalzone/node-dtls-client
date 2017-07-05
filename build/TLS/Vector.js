@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var TypeSpecs = require("./TypeSpecs");
 var util_1 = require("../lib/util");
 var BitConverter_1 = require("../lib/BitConverter");
-// TODO: support raw buffers in Vector<number>
 var Vector = (function () {
     // TODO: this has to be possible without the spec param
     // maybe pass it when serializing?
@@ -82,9 +81,6 @@ var Vector = (function () {
         else {
             return { result: ret, readBytes: ret.deserialize(spec, buf, offset) };
         }
-    };
-    Vector.createFromBuffer = function (buf) {
-        return new Vector(BitConverter_1.bufferToByteArray(buf));
     };
     return Vector;
 }());

@@ -13,11 +13,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var crypto = require("crypto");
 var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
-var Vector_1 = require("../TLS/Vector");
-function getRandomArray(length) {
-    var random = crypto.randomBytes(length);
-    return Array.prototype.slice.apply(random);
-}
+//function getRandomArray(length: number): number[] {
+//	const random = crypto.randomBytes(length);
+//	return Array.prototype.slice.apply(random);
+//}
 var Random = (function (_super) {
     __extends(Random, _super);
     function Random(gmt_unix_time, random_bytes) {
@@ -30,7 +29,7 @@ var Random = (function (_super) {
      * Creates a new Random structure and initializes it.
      */
     Random.createNew = function () {
-        return new Random(Math.floor(Date.now() / 1000), new Vector_1.Vector(getRandomArray(Random.__spec.random_bytes.maxLength)));
+        return new Random(Math.floor(Date.now() / 1000), crypto.randomBytes(Random.__spec.random_bytes.maxLength));
     };
     Random.createEmpty = function () {
         return new Random(null, null);
@@ -39,7 +38,7 @@ var Random = (function (_super) {
 }(TLSStruct_1.TLSStruct));
 Random.__spec = {
     gmt_unix_time: TypeSpecs.uint32,
-    random_bytes: TypeSpecs.define.Vector(TypeSpecs.uint8, 28)
+    random_bytes: TypeSpecs.define.Buffer(28, 28)
 };
 exports.Random = Random;
 //# sourceMappingURL=Random.js.map

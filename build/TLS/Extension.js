@@ -35,7 +35,7 @@ var Extension = (function (_super) {
 }(TLSStruct_1.TLSStruct));
 Extension.__spec = {
     extension_type: ExtensionType.spec,
-    extension_data: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, Math.pow(2, 16) - 1)
+    extension_data: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1)
 };
 Extension.spec = TypeSpecs.define.Struct(Extension);
 exports.Extension = Extension;

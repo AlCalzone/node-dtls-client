@@ -70,13 +70,13 @@ export class ClientHandshakeHandler {
 		hello.random = Random.createNew();
 		// remember this for crypto stuff
 		this.recordLayer.nextEpoch.connectionState.client_random = hello.random.serialize();
-		hello.session_id = SessionID.createNew();
-		hello.cookie = Cookie.createNew();
+		hello.session_id = Buffer.from([]);
+		hello.cookie = Buffer.from([]);
 		hello.cipher_suites = new Vector<number>(
 			[
 				// TODO: allow more
 				CipherSuites.TLS_PSK_WITH_AES_128_CCM_8,
-				CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA
+				CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA //256
 			].map(cs => cs.id)
 		);
 		hello.compression_methods = new Vector<CompressionMethod>(
@@ -245,7 +245,7 @@ export class ClientHandshakeHandler {
 		// stript out hello requests
 		messages = messages.filter(m => m.msg_type !== Handshake.HandshakeType.hello_request);
 		// and add the raw data
-		buffers.push(messages.map(m => m.serialize()));
+		buffers.push(...(messages.map(m => m.serialize())));
 		this.allHandshakeData = Buffer.concat(buffers);
 	}
 
@@ -336,14 +336,14 @@ export class ClientHandshakeHandler {
 								// for PSK, build the key exchange message
 								const keyExchange = Handshake.ClientKeyExchange.createEmpty();
 								const keyExchange_PSK = new Handshake.ClientKeyExchange_PSK(
-									Vector.createFromBuffer(Buffer.from(psk_identity, "ascii"))
+									Buffer.from(psk_identity, "ascii")
 								);
 								keyExchange.raw_data = keyExchange_PSK.serialize();
 								// and add it to the flight
 								flight.push(keyExchange);
 
 								// now we have everything, construct the pre master secret
-								const psk = Vector.createFromBuffer(Buffer.from(this.options.psk[psk_identity], "ascii"));
+								const psk = Buffer.from(this.options.psk[psk_identity], "ascii");
 								preMasterSecret = new PreMasterSecret(null, psk);
 								break;
 						}

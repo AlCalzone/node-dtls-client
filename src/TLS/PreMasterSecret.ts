@@ -5,19 +5,19 @@ import { Vector } from "./Vector";
 export class PreMasterSecret extends TLSStruct {
 
 	static readonly __spec = {
-		other_secret: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1),
-		psk: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1)
+		other_secret: TypeSpecs.define.Buffer(0, 2 ** 16 - 1),
+		psk: TypeSpecs.define.Buffer(0, 2 ** 16 - 1)
 	}
 
 	constructor(
-		public other_secret: Vector<number>,
-		public psk: Vector<number>
+		public other_secret: Buffer,
+		public psk: Buffer
 	) {
 		super(PreMasterSecret.__spec);
 
 		if (this.other_secret == null) {
 			// create fake contents
-			this.other_secret = Vector.createFromBuffer(Buffer.alloc(this.psk.items.length, 0));
+			this.other_secret = Buffer.alloc(this.psk.length, 0);
 		}
 	}
 

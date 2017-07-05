@@ -13,7 +13,7 @@ export class Extension extends TLSStruct {
 
 	static readonly __spec = {
 		extension_type: ExtensionType.spec,
-		extension_data: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2**16 - 1)
+		extension_data: TypeSpecs.define.Buffer(0, 2**16 - 1)
 	}
 	static readonly spec = TypeSpecs.define.Struct(Extension);
 

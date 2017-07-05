@@ -4,7 +4,6 @@ import { TLSStruct } from "./TLSStruct";
 import { fitToWholeBytes } from "../lib/util";
 import { BitSizes, numberToBuffer, bufferToNumber, bufferToByteArray } from "../lib/BitConverter";
 
-// TODO: support raw buffers in Vector<number>
 export class Vector<T extends number | ISerializable> {
 
 	// TODO: this has to be possible without the spec param
@@ -87,9 +86,9 @@ export class Vector<T extends number | ISerializable> {
 		}
 	}
 
-	static createFromBuffer(buf: Buffer) {
-		return new Vector<number>(bufferToByteArray(buf));
-	}
+	//static createFromBuffer(buf: Buffer) {
+	//	return new Vector<number>(bufferToByteArray(buf));
+	//}
 
 	/*static isVariableLength(spec: TypeSpecs.Vector): boolean {
 		return spec.maxLength !== spec.minLength;
