@@ -6,7 +6,7 @@ var CipherSuite_1 = require("../TLS/CipherSuite");
 }*/
 // block sizes etc. see https://tools.ietf.org/html/rfc5246 page 83
 exports.CipherSuites = {
-    TLS_NULL_WITH_NULL_NULL: new CipherSuite_1.CipherSuite(0x0000, null, null, "sha256", "stream"),
+    TLS_NULL_WITH_NULL_NULL: new CipherSuite_1.CipherSuite(0x0000, null, null, null, null),
     TLS_RSA_WITH_NULL_MD5: new CipherSuite_1.CipherSuite(0x0001, "rsa", "md5", "sha256", "stream"),
     TLS_RSA_WITH_NULL_SHA: new CipherSuite_1.CipherSuite(0x0002, "rsa", "sha1", "sha256", "stream"),
     TLS_RSA_WITH_NULL_SHA256: new CipherSuite_1.CipherSuite(0x003B, "rsa", "sha256", "sha256", "stream"),
