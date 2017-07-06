@@ -49,6 +49,13 @@ exports.CipherSuites = {
     // TLS_PSK_WITH_RC4_128_SHA:			0x008A,
     // TLS_DHE_PSK_WITH_RC4_128_SHA:		0x008E,
     // TLS_RSA_PSK_WITH_RC4_128_SHA:		0x0092,
+    // PSK cipher suites from https://tools.ietf.org/html/rfc5487
+    TLS_PSK_WITH_AES_128_CBC_SHA256: new CipherSuite_1.CipherSuite(0x00AE, "psk", "sha256", "sha256", "block", "aes-128-cbc"),
+    TLS_PSK_WITH_AES_256_CBC_SHA384: new CipherSuite_1.CipherSuite(0x00AF, "psk", "sha384", "sha384", "block", "aes-256-cbc"),
+    TLS_DHE_PSK_WITH_AES_128_CBC_SHA256: new CipherSuite_1.CipherSuite(0x00B2, "dhe_psk", "sha256", "sha256", "block", "aes-128-cbc"),
+    TLS_DHE_PSK_WITH_AES_256_CBC_SHA384: new CipherSuite_1.CipherSuite(0x00B3, "dhe_psk", "sha384", "sha384", "block", "aes-256-cbc"),
+    TLS_RSA_PSK_WITH_AES_128_CBC_SHA256: new CipherSuite_1.CipherSuite(0x00B6, "rsa_psk", "sha256", "sha256", "block", "aes-128-cbc"),
+    TLS_RSA_PSK_WITH_AES_256_CBC_SHA384: new CipherSuite_1.CipherSuite(0x00B7, "rsa_psk", "sha384", "sha384", "block", "aes-256-cbc"),
     // PSK cipher suites from https://tools.ietf.org/html/rfc6655
     TLS_PSK_WITH_AES_128_CCM: new CipherSuite_1.CipherSuite(0xC0A4, "psk", null, "sha256", "aead", CipherSuite_1.AEADAlgorithm.AES_128_CCM),
     TLS_PSK_WITH_AES_256_CCM: new CipherSuite_1.CipherSuite(0xC0A5, "psk", null, "sha256", "aead", CipherSuite_1.AEADAlgorithm.AES_256_CCM),
