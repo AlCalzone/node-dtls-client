@@ -154,9 +154,12 @@ var ClientHandshakeHandler = (function () {
         hello.session_id = Buffer.from([]);
         hello.cookie = Buffer.from([]);
         hello.cipher_suites = new Vector_1.Vector([
-            // TODO: allow more
+            // TODO: dynamically check which ones we can support
             CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CCM_8,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA //256
+            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA,
+            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_256_CBC_SHA,
+            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA256,
+            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_256_CBC_SHA384,
         ].map(function (cs) { return cs.id; }));
         hello.compression_methods = new Vector_1.Vector([ConnectionState_1.CompressionMethod.null]);
         hello.extensions = new Vector_1.Vector();
@@ -174,6 +177,7 @@ var ClientHandshakeHandler = (function () {
      */
     ClientHandshakeHandler.prototype.processMessage = function (msg) {
         var _this = this;
+        console.log("processing message (" + msg.msg_type + ")");
         var checkFlight;
         if (msg.isFragmented()) {
             // remember incomplete messages and try to assemble them afterwards
@@ -182,14 +186,18 @@ var ClientHandshakeHandler = (function () {
         }
         else {
             // the message is already complete, we only need to parse it
+            var test_1 = msg.fragment.toString();
             this.completeMessages[msg.message_seq] = Handshake.Handshake.parse(msg);
             checkFlight = true;
         }
+        console.log("--> complete messages: " + Object.keys(this.completeMessages).join(", "));
         // check if the flight is the current one, and complete
         if (checkFlight) {
+            console.log("checking flight...");
             var completeMsgIndizes = Object.keys(this.completeMessages).map(function (k) { return +k; });
             // a flight is complete if it forms a non-interrupted sequence of seq-nums
             var isComplete = [this.lastProcessedSeqNum].concat(completeMsgIndizes).every(function (val, i, arr) { return (i === 0) || (val === arr[i - 1] + 1); });
+            console.log("--> flight complete: " + isComplete);
             if (!isComplete)
                 return;
             var lastMsg = this.completeMessages[Math.max.apply(Math, completeMsgIndizes)];
@@ -205,6 +213,8 @@ var ClientHandshakeHandler = (function () {
                     this.bufferHandshakeData.apply(this, messages);
                     this.handle[lastMsg.msg_type](messages);
                     // TODO: clear a retransmission timer
+                    console.log("--> flight handled");
+                    console.log("--> complete messages: " + Object.keys(this.completeMessages).join(", "));
                 }
             }
             else {

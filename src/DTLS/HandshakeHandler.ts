@@ -74,9 +74,12 @@ export class ClientHandshakeHandler {
 		hello.cookie = Buffer.from([]);
 		hello.cipher_suites = new Vector<number>(
 			[
-				// TODO: allow more
+				// TODO: dynamically check which ones we can support
 				CipherSuites.TLS_PSK_WITH_AES_128_CCM_8,
-				CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA //256
+				CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA,
+				CipherSuites.TLS_PSK_WITH_AES_256_CBC_SHA,
+				CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA256,
+				CipherSuites.TLS_PSK_WITH_AES_256_CBC_SHA384,
 			].map(cs => cs.id)
 		);
 		hello.compression_methods = new Vector<CompressionMethod>(
@@ -116,6 +119,7 @@ export class ClientHandshakeHandler {
 	 * Processes a received handshake message
 	 */
 	public processMessage(msg: Handshake.FragmentedHandshake) {
+		console.log(`processing message (${msg.msg_type})`);
 		let checkFlight: boolean;
 		if (msg.isFragmented()) {
 			// remember incomplete messages and try to assemble them afterwards
@@ -123,16 +127,20 @@ export class ClientHandshakeHandler {
 			checkFlight = this.tryAssembleFragments(msg);
 		} else {
 			// the message is already complete, we only need to parse it
+			const test = msg.fragment.toString();
 			this.completeMessages[msg.message_seq] = Handshake.Handshake.parse(msg);
 			checkFlight = true;
 		}
+		console.log(`--> complete messages: ${Object.keys(this.completeMessages).join(", ")}`);
 		// check if the flight is the current one, and complete
 		if (checkFlight) {
+			console.log("checking flight...");
 			const completeMsgIndizes = Object.keys(this.completeMessages).map(k => +k);
 			// a flight is complete if it forms a non-interrupted sequence of seq-nums
 			const isComplete = [this.lastProcessedSeqNum].concat(completeMsgIndizes).every(
 				(val, i, arr) => (i === 0) || (val === arr[i - 1] + 1)
 				);
+			console.log(`--> flight complete: ${isComplete}`);
 			if (!isComplete) return;
 
 			const lastMsg = this.completeMessages[Math.max(...completeMsgIndizes)];
@@ -148,6 +156,8 @@ export class ClientHandshakeHandler {
 					this.bufferHandshakeData(...messages);
 					this.handle[lastMsg.msg_type](messages);
 					// TODO: clear a retransmission timer
+					console.log("--> flight handled");
+					console.log(`--> complete messages: ${Object.keys(this.completeMessages).join(", ")}`);
 				}
 			} else {
 				// if we don't expect a flight, maybe do something depending on the type of the message
