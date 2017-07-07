@@ -23,6 +23,14 @@ export interface CipherDelegate {
      * @param plaintext - The plaintext to be encrypted
      */
     (plaintext: Buffer): Buffer;
+    /**
+     * The length of encryption keys in bytes
+     */
+    keyLength: number;
+    /**
+     * The length of IVs for each record
+     */
+    recordIvLength: number;
 }
 export interface GenericCipherDelegate {
     /**
@@ -50,6 +58,14 @@ export interface DecipherDelegate {
         err?: Error;
         result: Buffer;
     };
+    /**
+     * The length of decryption keys in bytes
+     */
+    keyLength: number;
+    /**
+     * The length of IVs for each record
+     */
+    recordIvLength: number;
 }
 export interface GenericDecipherDelegate {
     /**
@@ -77,6 +93,10 @@ export interface MacDelegate {
      * @param data - The data to be hashed
      */
     (data: Buffer): Buffer;
+    /**
+     * The key and hash output length of this hash function
+     */
+    keyAndHashLength: number;
 }
 export interface GenericMacDelegate {
     /**

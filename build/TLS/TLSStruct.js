@@ -63,7 +63,7 @@ var TLSStruct = (function () {
                         // for variable length Buffers, read the actual length first
                         if (TypeSpecs.Buffer.isVariableLength(type)) {
                             var lengthBits = (8 * util.fitToWholeBytes(type.maxLength));
-                            length_1 = BitConverter_1.bufferToNumber(buf, lengthBits, offset);
+                            length_1 = BitConverter_1.bufferToNumber(buf, lengthBits, offset + delta);
                             lengthBytes += lengthBits / 8;
                         }
                         // copy the data into the new buffer

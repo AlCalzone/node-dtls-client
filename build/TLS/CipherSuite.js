@@ -56,7 +56,7 @@ function createNullDecipher() {
     return ret;
 }
 function createNullMAC() {
-    var ret = (function (data, _1, _2) { return Buffer.from(data); });
+    var ret = (function (data, _1, _2) { return Buffer.from([]); });
     ret.keyAndHashLength = 0;
     return ret;
 }
@@ -92,11 +92,16 @@ var CipherSuite = (function (_super) {
                 return createNullCipher();
             case "block":
                 return BlockCipher.createCipher(this.algorithm);
+            default:
+                throw new Error("createCipher not implemented for " + this.cipherType + " cipher");
         }
     };
     CipherSuite.prototype.specifyCipher = function (keyMaterial, connEnd) {
         var _this = this;
-        return function (plaintext) { return _this.Cipher(plaintext, keyMaterial, connEnd); };
+        var ret = (function (plaintext) { return _this.Cipher(plaintext, keyMaterial, connEnd); });
+        ret.keyLength = this.Cipher.keyLength;
+        ret.recordIvLength = this.Cipher.recordIvLength;
+        return ret;
     };
     Object.defineProperty(CipherSuite.prototype, "Decipher", {
         get: function () {
@@ -113,11 +118,16 @@ var CipherSuite = (function (_super) {
                 return createNullDecipher();
             case "block":
                 return BlockCipher.createDecipher(this.algorithm);
+            default:
+                throw new Error("createDecipher not implemented for " + this.cipherType + " cipher");
         }
     };
     CipherSuite.prototype.specifyDecipher = function (keyMaterial, connEnd) {
         var _this = this;
-        return function (plaintext) { return _this.Decipher(plaintext, keyMaterial, connEnd); };
+        var ret = (function (plaintext) { return _this.Decipher(plaintext, keyMaterial, connEnd); });
+        ret.keyLength = this.Decipher.keyLength;
+        ret.recordIvLength = this.Decipher.recordIvLength;
+        return ret;
     };
     Object.defineProperty(CipherSuite.prototype, "MAC", {
         get: function () {
@@ -138,11 +148,15 @@ var CipherSuite = (function (_super) {
                 if (this.macAlgorithm == null)
                     return createNullMAC();
                 return createMAC(this.macAlgorithm);
+            default:
+                throw new Error("createMAC not implemented for " + this.cipherType + " cipher");
         }
     };
     CipherSuite.prototype.specifyMAC = function (keyMaterial, sourceConnEnd) {
         var _this = this;
-        return function (data) { return _this.MAC(data, keyMaterial, sourceConnEnd); };
+        var ret = (function (data) { return _this.MAC(data, keyMaterial, sourceConnEnd); });
+        ret.keyAndHashLength = this.MAC.keyAndHashLength;
+        return ret;
     };
     return CipherSuite;
 }(TLSStruct_1.TLSStruct));

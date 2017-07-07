@@ -70,7 +70,7 @@ export class TLSStruct {
 						// for variable length Buffers, read the actual length first
 						if (TypeSpecs.Buffer.isVariableLength(type)) {
 							const lengthBits = (8 * util.fitToWholeBytes(type.maxLength)) as BitSizes;
-							length = bufferToNumber(buf, lengthBits, offset);
+							length = bufferToNumber(buf, lengthBits, offset + delta);
 							lengthBytes += lengthBits / 8;
 						}
 						// copy the data into the new buffer

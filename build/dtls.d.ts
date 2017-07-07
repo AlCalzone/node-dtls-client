@@ -27,7 +27,7 @@ export declare module dtls {
         private bufferedMessages;
         private udp;
         private udp_onListening();
-        private udp_onMessage(msg, rinfo);
+        private udp_onMessage(udpMsg, rinfo);
         private _isClosed;
         private udp_onClose();
         private udp_onError(exception);

@@ -80,10 +80,10 @@ export abstract class Handshake extends TLSStruct {
 		if (HandshakeMessages[assembled.msg_type] != undefined) {
 			// find the right type for the body object
 			const msgClass = HandshakeMessages[assembled.msg_type];
-			// extract the struct spec
-			const __spec = msgClass.__spec; // we can expect this to exist
+			//// extract the struct spec
+			//const __spec = msgClass.__spec; // we can expect this to exist
 			// turn it into the correct type
-			const spec = TypeSpecs.define.Struct(__spec);
+			const spec = TypeSpecs.define.Struct(msgClass);
 			// parse the body object into a new Handshake instance
 			const ret = TLSStruct.from(
 				spec,
@@ -108,7 +108,7 @@ export class FragmentedHandshake extends TLSStruct {
 		// uint24 fragment_length is implied in the variable size vector
 		fragment: TypeSpecs.define.Buffer(0, 2**24-1)
 	}
-	static readonly spec = TypeSpecs.define.Struct(FragmentedHandshake.__spec);
+	static readonly spec = TypeSpecs.define.Struct(FragmentedHandshake);
 	/**
 	 * The amount of data consumed by a handshake message header (without the actual fragment)
 	 */

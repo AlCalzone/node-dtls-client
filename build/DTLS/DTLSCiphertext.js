@@ -66,8 +66,15 @@ var DTLSCiphertext = (function (_super) {
         }
         // split the plaintext into content and MAC
         var plaintext = decipherResult.result;
-        var content = plaintext.slice(0, -incomingMac.length);
-        var receivedMAC = plaintext.slice(-incomingMac.length);
+        var content, receivedMAC;
+        if (incomingMac.keyAndHashLength > 0) {
+            content = plaintext.slice(0, -incomingMac.keyAndHashLength);
+            receivedMAC = plaintext.slice(-incomingMac.keyAndHashLength);
+        }
+        else {
+            content = Buffer.from(plaintext);
+            receivedMAC = Buffer.from([]);
+        }
         // Create the compressed packet
         var ret = new DTLSCompressed_1.DTLSCompressed(this.type, this.version, this.epoch, this.sequence_number, content);
         // compute the expected MAC for this packet

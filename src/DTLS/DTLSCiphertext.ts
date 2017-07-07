@@ -81,8 +81,14 @@ export class DTLSCiphertext extends TLSStruct {
 
 		// split the plaintext into content and MAC
 		const plaintext = decipherResult.result;
-		const content = plaintext.slice(0, -incomingMac.length);
-		const receivedMAC = plaintext.slice(-incomingMac.length);
+		let content: Buffer, receivedMAC: Buffer;
+		if (incomingMac.keyAndHashLength > 0) {
+			content = plaintext.slice(0, -incomingMac.keyAndHashLength);
+			receivedMAC = plaintext.slice(-incomingMac.keyAndHashLength);
+		} else {
+			content = Buffer.from(plaintext);
+			receivedMAC = Buffer.from([]);
+		}
 
 		// Create the compressed packet
 		const ret = new DTLSCompressed(

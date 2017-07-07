@@ -37,7 +37,7 @@ export module dtls {
 			super();
 			// setup the connection
 			this.udp = dgram
-				.createSocket(options, this.udp_onMessage.bind(this))
+				.createSocket(options)
 				.on("listening", this.udp_onListening.bind(this))
 				.on("message", this.udp_onMessage.bind(this))
 				.on("close", this.udp_onClose.bind(this))
@@ -95,9 +95,9 @@ export module dtls {
 			});
 		}
 
-		private udp_onMessage(msg: Buffer, rinfo: dgram.RemoteInfo) {
+		private udp_onMessage(udpMsg: Buffer, rinfo: dgram.RemoteInfo) {
 			// decode the messages
-			const messages = this.recordLayer.receive(msg);
+			const messages = this.recordLayer.receive(udpMsg);
 
 			// TODO: implement retransmission.
 			for (let msg of messages) {

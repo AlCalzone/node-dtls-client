@@ -51,7 +51,7 @@ var dtls;
             _this._isClosed = false;
             // setup the connection
             _this.udp = dgram
-                .createSocket(options, _this.udp_onMessage.bind(_this))
+                .createSocket(options)
                 .on("listening", _this.udp_onListening.bind(_this))
                 .on("message", _this.udp_onMessage.bind(_this))
                 .on("close", _this.udp_onClose.bind(_this))
@@ -93,15 +93,15 @@ var dtls;
                 }
             });
         };
-        Socket.prototype.udp_onMessage = function (msg, rinfo) {
+        Socket.prototype.udp_onMessage = function (udpMsg, rinfo) {
             // decode the messages
-            var messages = this.recordLayer.receive(msg);
+            var messages = this.recordLayer.receive(udpMsg);
             // TODO: implement retransmission.
             for (var _i = 0, messages_1 = messages; _i < messages_1.length; _i++) {
-                var msg_1 = messages_1[_i];
-                switch (msg_1.type) {
+                var msg = messages_1[_i];
+                switch (msg.type) {
                     case ContentType_1.ContentType.handshake:
-                        var handshake = TLSStruct_1.TLSStruct.from(Handshake_1.FragmentedHandshake.spec, msg_1.data).result;
+                        var handshake = TLSStruct_1.TLSStruct.from(Handshake_1.FragmentedHandshake.spec, msg.data).result;
                         this.handshakeHandler.processMessage(handshake);
                         break;
                     case ContentType_1.ContentType.change_cipher_spec:
@@ -113,13 +113,13 @@ var dtls;
                     case ContentType_1.ContentType.application_data:
                         if (this.handshakeHandler.state !== HandshakeHandler_1.HandshakeStates.finished) {
                             // if we are still shaking hands, buffer the message until we're done
-                            this.bufferedMessages.push({ msg: msg_1, rinfo: rinfo });
+                            this.bufferedMessages.push({ msg: msg, rinfo: rinfo });
                         }
                         else {
                             // else emit the message
                             // TODO: extend params?
                             // TODO: do we need to emit rinfo?
-                            this.emit("message", msg_1, rinfo);
+                            this.emit("message", msg, rinfo);
                         }
                         break;
                 }

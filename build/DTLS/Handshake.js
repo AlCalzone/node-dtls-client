@@ -74,10 +74,10 @@ var Handshake = (function (_super) {
         if (exports.HandshakeMessages[assembled.msg_type] != undefined) {
             // find the right type for the body object
             var msgClass = exports.HandshakeMessages[assembled.msg_type];
-            // extract the struct spec
-            var __spec = msgClass.__spec; // we can expect this to exist
+            //// extract the struct spec
+            //const __spec = msgClass.__spec; // we can expect this to exist
             // turn it into the correct type
-            var spec = TypeSpecs.define.Struct(__spec);
+            var spec = TypeSpecs.define.Struct(msgClass);
             // parse the body object into a new Handshake instance
             var ret = TLSStruct_1.TLSStruct.from(spec, assembled.fragment).result;
             ret.message_seq = assembled.message_seq;
@@ -208,7 +208,7 @@ FragmentedHandshake.__spec = {
     // uint24 fragment_length is implied in the variable size vector
     fragment: TypeSpecs.define.Buffer(0, Math.pow(2, 24) - 1)
 };
-FragmentedHandshake.spec = TypeSpecs.define.Struct(FragmentedHandshake.__spec);
+FragmentedHandshake.spec = TypeSpecs.define.Struct(FragmentedHandshake);
 /**
  * The amount of data consumed by a handshake message header (without the actual fragment)
  */

@@ -62,6 +62,15 @@ export interface CipherDelegate {
 	 */
 	(plaintext: Buffer): Buffer;
 
+	/**
+	 * The length of encryption keys in bytes
+	 */
+	keyLength: number;
+
+	/**
+	 * The length of IVs for each record
+	 */
+	recordIvLength: number;
 }
 export interface GenericCipherDelegate {
 	/**
@@ -89,6 +98,16 @@ export interface DecipherDelegate {
 	 * @param ciphertext - The ciphertext to be decrypted
 	 */
 	(plaintext: Buffer): { err?: Error, result: Buffer };
+
+	/**
+	 * The length of decryption keys in bytes
+	 */
+	keyLength: number;
+
+	/**
+	 * The length of IVs for each record
+	 */
+	recordIvLength: number;
 }
 export interface GenericDecipherDelegate {
 	/**
@@ -116,6 +135,10 @@ export interface MacDelegate {
 	 * @param data - The data to be hashed
 	 */
 	(data: Buffer): Buffer;
+	/**
+	 * The key and hash output length of this hash function
+	 */
+	keyAndHashLength: number;
 }
 export interface GenericMacDelegate {
 	/**
@@ -154,7 +177,7 @@ function createNullDecipher(): GenericDecipherDelegate {
 	return ret;
 }
 function createNullMAC(): GenericMacDelegate {
-	const ret = ((data, _1, _2) => Buffer.from(data)) as GenericMacDelegate;
+	const ret = ((data, _1, _2) => Buffer.from([])) as GenericMacDelegate;
 	ret.keyAndHashLength = 0;
 	return ret;
 }
@@ -196,10 +219,17 @@ export class CipherSuite extends TLSStruct {
 				return BlockCipher.createCipher(
 					this.algorithm as BlockCipher.BlockCipherAlgorithm
 				);
+			default:
+				throw new Error(`createCipher not implemented for ${this.cipherType} cipher`);
 		}
 	}
 	public specifyCipher(keyMaterial: KeyMaterial, connEnd: ConnectionEnd): CipherDelegate {
-		return (plaintext: Buffer) => this.Cipher(plaintext, keyMaterial, connEnd);
+		const ret = (
+			(plaintext: Buffer) => this.Cipher(plaintext, keyMaterial, connEnd)
+		) as CipherDelegate;
+		ret.keyLength = this.Cipher.keyLength;
+		ret.recordIvLength = this.Cipher.recordIvLength;
+		return ret;
 	}
 
 	private _decipher: GenericDecipherDelegate;
@@ -216,10 +246,17 @@ export class CipherSuite extends TLSStruct {
 				return BlockCipher.createDecipher(
 					this.algorithm as BlockCipher.BlockCipherAlgorithm
 				);
+			default:
+				throw new Error(`createDecipher not implemented for ${this.cipherType} cipher`);
 		}
 	}
 	public specifyDecipher(keyMaterial: KeyMaterial, connEnd: ConnectionEnd): DecipherDelegate {
-		return (plaintext: Buffer) => this.Decipher(plaintext, keyMaterial, connEnd);
+		const ret = (
+			(plaintext: Buffer) => this.Decipher(plaintext, keyMaterial, connEnd)
+		) as DecipherDelegate;
+		ret.keyLength = this.Decipher.keyLength;
+		ret.recordIvLength = this.Decipher.recordIvLength;
+		return ret;
 	}
 
 	private _mac: GenericMacDelegate;
@@ -238,10 +275,16 @@ export class CipherSuite extends TLSStruct {
 				if (this.macAlgorithm == null)
 					return createNullMAC();
 				return createMAC(this.macAlgorithm);
+			default:
+				throw new Error(`createMAC not implemented for ${this.cipherType} cipher`);
 		}
 	}
 	public specifyMAC(keyMaterial: KeyMaterial, sourceConnEnd: ConnectionEnd): MacDelegate {
-		return (data: Buffer) => this.MAC(data, keyMaterial, sourceConnEnd);
+		const ret = (
+			(data: Buffer) => this.MAC(data, keyMaterial, sourceConnEnd)
+		) as MacDelegate;
+		ret.keyAndHashLength = this.MAC.keyAndHashLength;
+		return ret;
 	}
 
 }
