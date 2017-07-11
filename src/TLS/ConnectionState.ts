@@ -6,7 +6,7 @@ import { PRF } from "./PRF";
 import {
 	HashAlgorithm,
 	//BulkCipherAlgorithm,
-	AEADAlgorithm,
+	//AEADAlgorithm,
 	CipherType,
 	KeyMaterial,
 	CipherSuite,

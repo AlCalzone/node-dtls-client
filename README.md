@@ -16,7 +16,6 @@ Although great care has been taken to properly implement the required encryption
   - [x] compression (no actual algorithms implemented)
   - [x] encryption and verification:
 	  - [x] block ciphers
-	  - [ ] stream ciphers (optional)
 	  - [ ] *AEAD ciphers* (TODO: required for TRADFRI!)
   - [x] replay protection
 - [x] handshake protocol implementation (usable with some exceptions)

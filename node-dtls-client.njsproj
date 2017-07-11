@@ -70,6 +70,9 @@
     <TypeScriptCompile Include="src\DTLS\Cookie.ts" />
     <TypeScriptCompile Include="src\DTLS\DTLSCiphertext.ts" />
     <TypeScriptCompile Include="src\DTLS\DTLSCompressed.ts" />
+    <TypeScriptCompile Include="src\DTLS\DTLSPacket.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="src\DTLS\DTLSPlaintext.ts" />
     <TypeScriptCompile Include="src\DTLS\Handshake.ts" />
     <TypeScriptCompile Include="src\DTLS\HandshakeHandler.ts">
@@ -77,6 +80,7 @@
     </TypeScriptCompile>
     <TypeScriptCompile Include="src\DTLS\RecordLayer.ts" />
     <TypeScriptCompile Include="src\TLS\AntiReplayWindow.ts" />
+    <TypeScriptCompile Include="src\TLS\AEADCipher.ts" />
     <TypeScriptCompile Include="src\TLS\ConnectionState.ts" />
     <TypeScriptCompile Include="src\TLS\Message.ts">
       <SubType>Code</SubType>

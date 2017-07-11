@@ -3,6 +3,7 @@ import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
 import { ConnectionState, ConnectionEnd } from "./ConnectionState";
 import * as BlockCipher from "./BlockCipher";
+import * as AEADCipher from "./AEADCipher";
 import { HMAC } from "./PRF";
 import { extend } from "../lib/object-polyfill";
 
@@ -15,17 +16,6 @@ export type CipherType =
 	"stream" | "block" | "aead"
 	;
 
-export enum AEADAlgorithm {
-	// ...
-	// from https://tools.ietf.org/html/rfc5116#section-6
-	AES_128_CCM     = 3,
-	AES_256_CCM     = 4,	
-	// ...
-	// from https://tools.ietf.org/html/rfc6655#section-6
-	AES_128_CCM_8     = 18,
-	AES_256_CCM_8     = 19,
-}
-	
 export type KeyExchangeAlgorithm =
 	"dhe_dss" | "dhe_rsa" |
 	// forbidden: dh_anon, 
@@ -111,7 +101,7 @@ export interface DecipherDelegate {
 }
 export interface GenericDecipherDelegate {
 	/**
-	 * Decrypts the given plaintext buffer
+	 * Decrypts the given ciphertext buffer
 	 * @param ciphertext - The ciphertext to be decrypted
 	 * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the decryption
 	 * @param connEnd - Denotes if the current entity is the server or client
@@ -195,7 +185,7 @@ export class CipherSuite extends TLSStruct {
 		public readonly macAlgorithm: HashAlgorithm,
 		public readonly prfAlgorithm: HashAlgorithm,
 		public readonly cipherType: CipherType,
-		public readonly algorithm?: (BlockCipher.BlockCipherAlgorithm | AEADAlgorithm),
+		public readonly algorithm?: (BlockCipher.BlockCipherAlgorithm | AEADCipher.AEADCipherAlgorithm),
 		public readonly verify_data_length: number = 12
 	) {
 		super(CipherSuite.__spec);

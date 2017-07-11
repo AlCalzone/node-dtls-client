@@ -14,17 +14,6 @@ var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
 var BlockCipher = require("./BlockCipher");
 var PRF_1 = require("./PRF");
-var AEADAlgorithm;
-(function (AEADAlgorithm) {
-    // ...
-    // from https://tools.ietf.org/html/rfc5116#section-6
-    AEADAlgorithm[AEADAlgorithm["AES_128_CCM"] = 3] = "AES_128_CCM";
-    AEADAlgorithm[AEADAlgorithm["AES_256_CCM"] = 4] = "AES_256_CCM";
-    // ...
-    // from https://tools.ietf.org/html/rfc6655#section-6
-    AEADAlgorithm[AEADAlgorithm["AES_128_CCM_8"] = 18] = "AES_128_CCM_8";
-    AEADAlgorithm[AEADAlgorithm["AES_256_CCM_8"] = 19] = "AES_256_CCM_8";
-})(AEADAlgorithm = exports.AEADAlgorithm || (exports.AEADAlgorithm = {}));
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used

@@ -3,14 +3,9 @@ import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
 import { ConnectionEnd } from "./ConnectionState";
 import * as BlockCipher from "./BlockCipher";
+import * as AEADCipher from "./AEADCipher";
 export declare type HashAlgorithm = "md5" | "sha1" | "sha256" | "sha384" | "sha512";
 export declare type CipherType = "stream" | "block" | "aead";
-export declare enum AEADAlgorithm {
-    AES_128_CCM = 3,
-    AES_256_CCM = 4,
-    AES_128_CCM_8 = 18,
-    AES_256_CCM_8 = 19,
-}
 export declare type KeyExchangeAlgorithm = "dhe_dss" | "dhe_rsa" | "rsa" | "dh_dss" | "dh_rsa" | "psk" | "dhe_psk" | "rsa_psk";
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.
@@ -69,7 +64,7 @@ export interface DecipherDelegate {
 }
 export interface GenericDecipherDelegate {
     /**
-     * Decrypts the given plaintext buffer
+     * Decrypts the given ciphertext buffer
      * @param ciphertext - The ciphertext to be decrypted
      * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the decryption
      * @param connEnd - Denotes if the current entity is the server or client
@@ -125,13 +120,13 @@ export declare class CipherSuite extends TLSStruct {
     readonly macAlgorithm: HashAlgorithm;
     readonly prfAlgorithm: HashAlgorithm;
     readonly cipherType: CipherType;
-    readonly algorithm: (BlockCipher.BlockCipherAlgorithm | AEADAlgorithm);
+    readonly algorithm: (BlockCipher.BlockCipherAlgorithm | AEADCipher.AEADCipherAlgorithm);
     readonly verify_data_length: number;
     static readonly __spec: {
         id: Readonly<TypeSpecs.Number>;
     };
     static readonly spec: TypeSpecs.Struct;
-    constructor(id: number, keyExchange: KeyExchangeAlgorithm, macAlgorithm: HashAlgorithm, prfAlgorithm: HashAlgorithm, cipherType: CipherType, algorithm?: (BlockCipher.BlockCipherAlgorithm | AEADAlgorithm), verify_data_length?: number);
+    constructor(id: number, keyExchange: KeyExchangeAlgorithm, macAlgorithm: HashAlgorithm, prfAlgorithm: HashAlgorithm, cipherType: CipherType, algorithm?: (BlockCipher.BlockCipherAlgorithm | AEADCipher.AEADCipherAlgorithm), verify_data_length?: number);
     static createEmpty(): CipherSuite;
     private _cipher;
     readonly Cipher: GenericCipherDelegate;
