@@ -18,8 +18,7 @@
         "typescript": "^2.3.4"
     },
     "dependencies": {
-        "node-aes-ccm": "git+https://github.com/AlCalzone/node-aes-ccm.git",
-        "node-aes-gcm": "git+https://github.com/AlCalzone/node-aes-gcm.git"
+        "node-aes-ccm": "git+https://github.com/AlCalzone/node-aes-ccm.git"
     },
     "scripts": {
         "test": "nyc mocha --recursive --compilers ts-node/register --require source-map-support/register --full-trace src/**/*.test.ts"

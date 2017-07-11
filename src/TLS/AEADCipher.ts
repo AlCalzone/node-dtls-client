@@ -3,16 +3,12 @@ import { GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, Key
 import { ConnectionEnd } from "./ConnectionState";
 import { DTLSPacket } from "../DTLS/DTLSPacket";
 
-//export enum AEADAlgorithm {
-//	// ...
-//	// from https://tools.ietf.org/html/rfc5116#section-6
-//	AES_128_CCM = 3,
-//	AES_256_CCM = 4,
-//	// ...
-//	// from https://tools.ietf.org/html/rfc6655#section-6
-//	AES_128_CCM_8 = 18,
-//	AES_256_CCM_8 = 19,
-//}
+/* see
+https://tools.ietf.org/html/rfc5246#section-6.2.3.3
+http://lollyrock.com/articles/nodejs-encryption/
+
+*/
+
 export type AEADCipherAlgorithm =
 	"aes-128-ccm" | "aes-256-ccm" |
 	"aes-128-ccm8" | "aes-256-ccm8" |
