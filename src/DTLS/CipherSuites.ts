@@ -1,8 +1,6 @@
-﻿import { CipherSuite, HashAlgorithm, CipherType, AEADAlgorithm } from "../TLS/CipherSuite";
+﻿import { CipherSuite, HashAlgorithm, CipherType } from "../TLS/CipherSuite";
+//import { AEADAlgorithm } from "../TLS/AEADCipher";
 
-/*export interface ICipherSuites {
-	[string|number] : CipherSuite;
-}*/
 
 // block sizes etc. see https://tools.ietf.org/html/rfc5246 page 83
 export const CipherSuites = {
@@ -59,17 +57,21 @@ export const CipherSuites = {
 	TLS_DHE_PSK_WITH_AES_256_CBC_SHA384:	new CipherSuite(0x00B3, "dhe_psk",	"sha384",	"sha384",	"block",	"aes-256-cbc"),
 	TLS_RSA_PSK_WITH_AES_128_CBC_SHA256:	new CipherSuite(0x00B6, "rsa_psk",	"sha256",	"sha256",	"block",	"aes-128-cbc"),
 	TLS_RSA_PSK_WITH_AES_256_CBC_SHA384:	new CipherSuite(0x00B7, "rsa_psk",	"sha384",	"sha384",	"block",	"aes-256-cbc"),
+	// AEAD-GCM
+	TLS_PSK_WITH_AES_128_GCM_SHA256:		new CipherSuite(0x00A8, "psk",		null,		"sha256",	"aead",		"aes-128-gcm"),
+	TLS_PSK_WITH_AES_256_GCM_SHA384:		new CipherSuite(0x00A9, "psk",		null,		"sha384",	"aead",		"aes-256-gcm"),	
 		
 	// PSK cipher suites from https://tools.ietf.org/html/rfc6655
-	TLS_PSK_WITH_AES_128_CCM:				new CipherSuite(0xC0A4, "psk",		null,	"sha256",	"aead",		AEADAlgorithm.AES_128_CCM),
-	TLS_PSK_WITH_AES_256_CCM:				new CipherSuite(0xC0A5, "psk",		null,	"sha256",	"aead",		AEADAlgorithm.AES_256_CCM),	
-	TLS_DHE_PSK_WITH_AES_128_CCM:			new CipherSuite(0xC0A6, "dhe_psk",	null,	"sha256",	"aead",		AEADAlgorithm.AES_128_CCM),	
-	TLS_DHE_PSK_WITH_AES_256_CCM:			new CipherSuite(0xC0A7, "dhe_psk",	null,	"sha256",	"aead",		AEADAlgorithm.AES_256_CCM),	
-	TLS_PSK_WITH_AES_128_CCM_8:				new CipherSuite(0xC0A8, "psk",		null,	"sha256",	"aead",		AEADAlgorithm.AES_128_CCM_8),
-	TLS_PSK_WITH_AES_256_CCM_8:				new CipherSuite(0xC0A9, "psk",		null,	"sha256",	"aead",		AEADAlgorithm.AES_256_CCM_8),
-	TLS_PSK_DHE_WITH_AES_128_CCM_8:			new CipherSuite(0xC0AA, "dhe_psk",	null,	"sha256",	"aead",		AEADAlgorithm.AES_128_CCM_8),
-	TLS_PSK_DHE_WITH_AES_256_CCM_8:			new CipherSuite(0xC0AB, "dhe_psk",	null,	"sha256",	"aead",		AEADAlgorithm.AES_256_CCM_8),
-	                                                                                              
+	TLS_PSK_WITH_AES_128_CCM:				new CipherSuite(0xC0A4, "psk",		null,	"sha256",	"aead",		"aes-128-ccm"),
+	TLS_PSK_WITH_AES_256_CCM:				new CipherSuite(0xC0A5, "psk",		null,	"sha256",	"aead",		"aes-256-ccm"),	
+	TLS_DHE_PSK_WITH_AES_128_CCM:			new CipherSuite(0xC0A6, "dhe_psk",	null,	"sha256",	"aead",		"aes-128-ccm"),	
+	TLS_DHE_PSK_WITH_AES_256_CCM:			new CipherSuite(0xC0A7, "dhe_psk",	null,	"sha256",	"aead",		"aes-256-ccm"),	
+	TLS_PSK_WITH_AES_128_CCM_8:				new CipherSuite(0xC0A8, "psk",		null,	"sha256",	"aead",		"aes-128-ccm8"),
+	TLS_PSK_WITH_AES_256_CCM_8:				new CipherSuite(0xC0A9, "psk",		null,	"sha256",	"aead",		"aes-256-ccm8"),
+	TLS_PSK_DHE_WITH_AES_128_CCM_8:			new CipherSuite(0xC0AA, "dhe_psk",	null,	"sha256",	"aead",		"aes-128-ccm8"),
+	TLS_PSK_DHE_WITH_AES_256_CCM_8:			new CipherSuite(0xC0AB, "dhe_psk",	null,	"sha256",	"aead",		"aes-256-ccm8"),
+
+
 	// TRADFRI wants TLS_PSK_WITH_AES_128_CCM_8 or TLS_PSK_WITH_AES_128_CBC_SHA256
 }
 

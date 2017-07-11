@@ -44,6 +44,8 @@ export declare const CipherSuites: {
     TLS_DHE_PSK_WITH_AES_256_CBC_SHA384: CipherSuite;
     TLS_RSA_PSK_WITH_AES_128_CBC_SHA256: CipherSuite;
     TLS_RSA_PSK_WITH_AES_256_CBC_SHA384: CipherSuite;
+    TLS_PSK_WITH_AES_128_GCM_SHA256: CipherSuite;
+    TLS_PSK_WITH_AES_256_GCM_SHA384: CipherSuite;
     TLS_PSK_WITH_AES_128_CCM: CipherSuite;
     TLS_PSK_WITH_AES_256_CCM: CipherSuite;
     TLS_DHE_PSK_WITH_AES_128_CCM: CipherSuite;

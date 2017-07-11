@@ -1,9 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var CipherSuite_1 = require("../TLS/CipherSuite");
-/*export interface ICipherSuites {
-    [string|number] : CipherSuite;
-}*/
+//import { AEADAlgorithm } from "../TLS/AEADCipher";
 // block sizes etc. see https://tools.ietf.org/html/rfc5246 page 83
 exports.CipherSuites = {
     TLS_NULL_WITH_NULL_NULL: new CipherSuite_1.CipherSuite(0x0000, null, null, null, null),
@@ -56,15 +54,18 @@ exports.CipherSuites = {
     TLS_DHE_PSK_WITH_AES_256_CBC_SHA384: new CipherSuite_1.CipherSuite(0x00B3, "dhe_psk", "sha384", "sha384", "block", "aes-256-cbc"),
     TLS_RSA_PSK_WITH_AES_128_CBC_SHA256: new CipherSuite_1.CipherSuite(0x00B6, "rsa_psk", "sha256", "sha256", "block", "aes-128-cbc"),
     TLS_RSA_PSK_WITH_AES_256_CBC_SHA384: new CipherSuite_1.CipherSuite(0x00B7, "rsa_psk", "sha384", "sha384", "block", "aes-256-cbc"),
+    // AEAD-GCM
+    TLS_PSK_WITH_AES_128_GCM_SHA256: new CipherSuite_1.CipherSuite(0x00A8, "psk", null, "sha256", "aead", "aes-128-gcm"),
+    TLS_PSK_WITH_AES_256_GCM_SHA384: new CipherSuite_1.CipherSuite(0x00A9, "psk", null, "sha384", "aead", "aes-256-gcm"),
     // PSK cipher suites from https://tools.ietf.org/html/rfc6655
-    TLS_PSK_WITH_AES_128_CCM: new CipherSuite_1.CipherSuite(0xC0A4, "psk", null, "sha256", "aead", CipherSuite_1.AEADAlgorithm.AES_128_CCM),
-    TLS_PSK_WITH_AES_256_CCM: new CipherSuite_1.CipherSuite(0xC0A5, "psk", null, "sha256", "aead", CipherSuite_1.AEADAlgorithm.AES_256_CCM),
-    TLS_DHE_PSK_WITH_AES_128_CCM: new CipherSuite_1.CipherSuite(0xC0A6, "dhe_psk", null, "sha256", "aead", CipherSuite_1.AEADAlgorithm.AES_128_CCM),
-    TLS_DHE_PSK_WITH_AES_256_CCM: new CipherSuite_1.CipherSuite(0xC0A7, "dhe_psk", null, "sha256", "aead", CipherSuite_1.AEADAlgorithm.AES_256_CCM),
-    TLS_PSK_WITH_AES_128_CCM_8: new CipherSuite_1.CipherSuite(0xC0A8, "psk", null, "sha256", "aead", CipherSuite_1.AEADAlgorithm.AES_128_CCM_8),
-    TLS_PSK_WITH_AES_256_CCM_8: new CipherSuite_1.CipherSuite(0xC0A9, "psk", null, "sha256", "aead", CipherSuite_1.AEADAlgorithm.AES_256_CCM_8),
-    TLS_PSK_DHE_WITH_AES_128_CCM_8: new CipherSuite_1.CipherSuite(0xC0AA, "dhe_psk", null, "sha256", "aead", CipherSuite_1.AEADAlgorithm.AES_128_CCM_8),
-    TLS_PSK_DHE_WITH_AES_256_CCM_8: new CipherSuite_1.CipherSuite(0xC0AB, "dhe_psk", null, "sha256", "aead", CipherSuite_1.AEADAlgorithm.AES_256_CCM_8),
+    TLS_PSK_WITH_AES_128_CCM: new CipherSuite_1.CipherSuite(0xC0A4, "psk", null, "sha256", "aead", "aes-128-ccm"),
+    TLS_PSK_WITH_AES_256_CCM: new CipherSuite_1.CipherSuite(0xC0A5, "psk", null, "sha256", "aead", "aes-256-ccm"),
+    TLS_DHE_PSK_WITH_AES_128_CCM: new CipherSuite_1.CipherSuite(0xC0A6, "dhe_psk", null, "sha256", "aead", "aes-128-ccm"),
+    TLS_DHE_PSK_WITH_AES_256_CCM: new CipherSuite_1.CipherSuite(0xC0A7, "dhe_psk", null, "sha256", "aead", "aes-256-ccm"),
+    TLS_PSK_WITH_AES_128_CCM_8: new CipherSuite_1.CipherSuite(0xC0A8, "psk", null, "sha256", "aead", "aes-128-ccm8"),
+    TLS_PSK_WITH_AES_256_CCM_8: new CipherSuite_1.CipherSuite(0xC0A9, "psk", null, "sha256", "aead", "aes-256-ccm8"),
+    TLS_PSK_DHE_WITH_AES_128_CCM_8: new CipherSuite_1.CipherSuite(0xC0AA, "dhe_psk", null, "sha256", "aead", "aes-128-ccm8"),
+    TLS_PSK_DHE_WITH_AES_256_CCM_8: new CipherSuite_1.CipherSuite(0xC0AB, "dhe_psk", null, "sha256", "aead", "aes-256-ccm8"),
 };
 // define index accessors
 for (var _i = 0, _a = Object.keys(exports.CipherSuites); _i < _a.length; _i++) {
