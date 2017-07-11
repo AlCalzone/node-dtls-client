@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var crypto = require("crypto");
 var BlockCipherParameters = {
     "aes-128-cbc": { keyLength: 16, blockSize: 16 },
-    "aes-256-cbc": { keyLength: 16, blockSize: 16 },
+    "aes-256-cbc": { keyLength: 32, blockSize: 16 },
     "des-ede3-cbc": { keyLength: 24, blockSize: 16 },
 };
 /**
