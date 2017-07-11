@@ -3,7 +3,8 @@ import * as TypeSpecs from "../TLS/TypeSpecs";
 import { TLSStruct } from "../TLS/TLSStruct";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
-export declare class DTLSPlaintext extends TLSStruct {
+import { DTLSPacket } from "./DTLSPacket";
+export declare class DTLSPlaintext extends TLSStruct implements DTLSPacket {
     type: ContentType;
     version: ProtocolVersion;
     epoch: number;

@@ -5,7 +5,8 @@ import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
 import { DTLSCompressed } from "./DTLSCompressed";
 import { CipherDelegate, DecipherDelegate, MacDelegate } from "../TLS/CipherSuite";
-export declare class DTLSCiphertext extends TLSStruct {
+import { DTLSPacket } from "./DTLSPacket";
+export declare class DTLSCiphertext extends TLSStruct implements DTLSPacket {
     type: ContentType;
     version: ProtocolVersion;
     epoch: number;

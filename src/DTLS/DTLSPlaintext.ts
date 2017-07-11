@@ -2,8 +2,9 @@
 import { TLSStruct } from "../TLS/TLSStruct";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
+import { DTLSPacket } from "./DTLSPacket";
 
-export class DTLSPlaintext extends TLSStruct {
+export class DTLSPlaintext extends TLSStruct implements DTLSPacket {
 
 	static readonly __spec = {
 		type: TypeSpecs.define.Struct(ContentType),

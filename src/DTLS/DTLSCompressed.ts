@@ -3,9 +3,9 @@ import { TLSStruct } from "../TLS/TLSStruct";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
 import { DTLSPlaintext } from "./DTLSPlaintext";
+import { DTLSPacket } from "./DTLSPacket";
 
-
-export class DTLSCompressed extends TLSStruct {
+export class DTLSCompressed extends TLSStruct implements DTLSPacket {
 
 	static readonly __spec = {
 		type: ContentType.__spec,

@@ -5,8 +5,9 @@ import { ContentType } from "../TLS/ContentType";
 import { DTLSCompressed } from "./DTLSCompressed";
 import { CipherDelegate, DecipherDelegate, MacDelegate } from "../TLS/CipherSuite";
 import { ISerializableConstructor, ISerializable } from "../TLS/Serializable";
+import { DTLSPacket } from "./DTLSPacket";
 
-export class DTLSCiphertext extends TLSStruct {
+export class DTLSCiphertext extends TLSStruct implements DTLSPacket {
 
 	static readonly __spec = {
 		type: ContentType.__spec,
