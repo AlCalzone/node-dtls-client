@@ -5,9 +5,9 @@
 // block sizes etc. see https://tools.ietf.org/html/rfc5246 page 83
 export const CipherSuites = {
 	TLS_NULL_WITH_NULL_NULL:				new CipherSuite(0x0000, null,		null,		null,		null),        
-	TLS_RSA_WITH_NULL_MD5:					new CipherSuite(0x0001, "rsa",		"md5",		"sha256",	"stream"),        
-	TLS_RSA_WITH_NULL_SHA:					new CipherSuite(0x0002, "rsa",		"sha1",		"sha256",	"stream"),       
-	TLS_RSA_WITH_NULL_SHA256:				new CipherSuite(0x003B, "rsa",		"sha256",	"sha256",	"stream"),       
+	TLS_RSA_WITH_NULL_MD5:					new CipherSuite(0x0001, "rsa",		"md5",		"sha256",	null),        
+	TLS_RSA_WITH_NULL_SHA:					new CipherSuite(0x0002, "rsa",		"sha1",		"sha256",	null),       
+	TLS_RSA_WITH_NULL_SHA256:				new CipherSuite(0x003B, "rsa",		"sha256",	"sha256",	null),       
 	TLS_RSA_WITH_3DES_EDE_CBC_SHA:			new CipherSuite(0x000A, "rsa",		"sha1",		"sha256",	"block",	"des-ede3-cbc"), 
 	TLS_RSA_WITH_AES_128_CBC_SHA:			new CipherSuite(0x002F, "rsa",		"sha1",		"sha256",	"block",	"aes-128-cbc"),  
 	TLS_RSA_WITH_AES_256_CBC_SHA:			new CipherSuite(0x0035, "rsa",		"sha1",		"sha256",	"block",	"aes-256-cbc"),  

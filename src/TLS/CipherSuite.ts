@@ -13,7 +13,8 @@ export type HashAlgorithm =
 	;
 
 export type CipherType = 
-	"stream" | "block" | "aead"
+	/* forbidden "stream" | */
+	"block" | "aead"
 	;
 
 export type KeyExchangeAlgorithm =
@@ -260,7 +261,6 @@ export class CipherSuite extends TLSStruct {
 		switch (this.cipherType) {
 			case null:
 				return createNullMAC();
-			case "stream":
 			case "block":
 				if (this.macAlgorithm == null)
 					return createNullMAC();
