@@ -12,7 +12,7 @@ import {
 	CipherSuite,
 	GenericCipherDelegate, CipherDelegate,
 	GenericDecipherDelegate, DecipherDelegate,
-	GenericMacDelegate, MacDelegate,
+	GenericMacDelegate, /*MacDelegate,*/
 	KeyExchangeAlgorithm
 } from "./CipherSuite";
 import { CipherSuites } from "../DTLS/CipherSuites";
@@ -75,18 +75,18 @@ export class ConnectionState {
 			this._decipher = this.cipherSuite.specifyDecipher(this.key_material, this.entity);
 		return this._decipher;
 	}
-	private _outgoingMac: MacDelegate;
-	public get OutgoingMac(): MacDelegate {
-		if (this._outgoingMac == undefined)
-			this._outgoingMac = this.cipherSuite.specifyMAC(this.key_material, this.entity);
-		return this._outgoingMac;
-	}
-	private _incomingMac: MacDelegate;
-	public get IncomingMac(): MacDelegate {
-		if (this._incomingMac == undefined)
-			this._incomingMac = this.cipherSuite.specifyMAC(this.key_material, this.entity === "client" ? "server" : "client");
-		return this._incomingMac;
-	}
+	// private _outgoingMac: MacDelegate;
+	// public get OutgoingMac(): MacDelegate {
+	// 	if (this._outgoingMac == undefined)
+	// 		this._outgoingMac = this.cipherSuite.specifyMAC(this.key_material, this.entity);
+	// 	return this._outgoingMac;
+	// }
+	// private _incomingMac: MacDelegate;
+	// public get IncomingMac(): MacDelegate {
+	// 	if (this._incomingMac == undefined)
+	// 		this._incomingMac = this.cipherSuite.specifyMAC(this.key_material, this.entity === "client" ? "server" : "client");
+	// 	return this._incomingMac;
+	// }
 
 	/**
 	 * Compute the master secret from a given premaster secret

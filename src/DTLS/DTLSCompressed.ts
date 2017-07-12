@@ -69,7 +69,7 @@ export class DTLSCompressed extends TLSStruct implements DTLSPacket {
 			this.sequence_number,
 			this.type,
 			this.version,
-			this["length"]
+			this.fragment.length
 		)).serialize();
 	}
 

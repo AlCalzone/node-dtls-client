@@ -1,6 +1,8 @@
 ﻿import * as crypto from "crypto";
-import { GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial } from "./CipherSuite";
+import { GenericCipherDelegate, CipherDelegate, GenericDecipherDelegate, DecipherDelegate, GenericMacDelegate, KeyMaterial } from "./CipherSuite";
 import { ConnectionEnd } from "./ConnectionState";
+import { DTLSCompressed } from "../DTLS/DTLSCompressed";
+import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
 
 export type BlockCipherAlgorithm =
 	"aes-128-cbc" | "aes-256-cbc" |
@@ -12,12 +14,22 @@ export interface BlockCipherDelegate extends GenericCipherDelegate {
 	 * The block size of this algorithm
 	 */
 	blockSize: number;
+
+	/**
+	 * The length of IVs for each record
+	 */
+	recordIvLength: number;
 }
 export interface BlockDecipherDelegate extends GenericDecipherDelegate {
 	/**
 	 * The block size of this algorithm
 	 */
 	blockSize: number;
+
+	/**
+	 * The length of IVs for each record
+	 */
+	recordIvLength: number;	
 }
 
 interface BlockCipherParameter {
@@ -34,20 +46,38 @@ const BlockCipherParameters: { [algorithm in BlockCipherAlgorithm]?: BlockCipher
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used
+ * @param mac - The MAC delegate to be used
  */
 export function createCipher(
-	algorithm: BlockCipherAlgorithm, 
+	algorithm: BlockCipherAlgorithm,
+	mac: GenericMacDelegate
 ): BlockCipherDelegate
 {
-	const keyLengths = BlockCipherParameters[algorithm];
-	const ret = ((plaintext: Buffer, keyMaterial: KeyMaterial, connEnd: ConnectionEnd) => {
+	const cipherParams = BlockCipherParameters[algorithm];
+	const ret = ((packet: DTLSCompressed, keyMaterial: KeyMaterial, connEnd: ConnectionEnd) => {
+
+		// compute the MAC for this packet
+		const MAC = mac(
+			Buffer.concat([
+				packet.computeMACHeader(),
+				packet.fragment
+			]),
+			keyMaterial, connEnd
+		);
+
+		// combine that with the MAC to form the plaintext and encrypt it
+		const plaintext = Buffer.concat([
+			packet.fragment,
+			MAC
+		]);		
+
 		// figure out how much padding we need
-		const overflow = ((plaintext.length + 1) % keyLengths.blockSize);
-		const padLength = (overflow > 0) ? (keyLengths.blockSize - overflow) : 0;
+		const overflow = ((plaintext.length + 1) % cipherParams.blockSize);
+		const padLength = (overflow > 0) ? (cipherParams.blockSize - overflow) : 0;
 		const padding = Buffer.alloc(padLength + 1, /*fill=*/padLength); // one byte is the actual length of the padding array
 
 		// find the right encryption params
-		const record_iv = crypto.pseudoRandomBytes(keyLengths.blockSize);
+		const record_iv = crypto.pseudoRandomBytes(cipherParams.blockSize);
 		const cipher_key = (connEnd === "server") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
 		const cipher = crypto.createCipheriv(algorithm, cipher_key, record_iv);
 		cipher.setAutoPadding(false);
@@ -60,41 +90,40 @@ export function createCipher(
 		]);
 
 		// prepend it with the iv
-		return Buffer.concat([
+		const fragment = Buffer.concat([
 			record_iv,
 			ciphertext
 		]);
+
+		// and return the packet
+		return new DTLSCiphertext(
+			packet.type,
+			packet.version,
+			packet.epoch,
+			packet.sequence_number,
+			fragment
+		);
 	}) as BlockCipherDelegate;
 	// append key length information
-	ret.keyLength = keyLengths.keyLength;
-	ret.recordIvLength = ret.blockSize = keyLengths.blockSize;
+	ret.keyLength = cipherParams.keyLength;
+	ret.recordIvLength = ret.blockSize = cipherParams.blockSize;
 	return ret;
 }
 
 /**
  * Creates a block cipher delegate used to decrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used
+ * @param mac - The MAC delegate to be used
  */
 export function createDecipher(
 	algorithm: BlockCipherAlgorithm,
+	mac: GenericMacDelegate	
 ): BlockDecipherDelegate
 {
-	const keyLengths = BlockCipherParameters[algorithm];
-	const ret = ((ciphertext: Buffer, keyMaterial: KeyMaterial, connEnd: ConnectionEnd) => {
-		// find the right decryption params
-		const record_iv = ciphertext.slice(0, keyLengths.blockSize);
-		const decipher_key = (connEnd === "client") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
-		const decipher = crypto.createDecipheriv(algorithm, decipher_key, record_iv);
-		decipher.setAutoPadding(false);
+	const decipherParams = BlockCipherParameters[algorithm];
+	const ret = ((packet: DTLSCiphertext, keyMaterial: KeyMaterial, connEnd: ConnectionEnd) => {
 
-		// decrypt the ciphertext
-		const ciphered = ciphertext.slice(keyLengths.blockSize);
-		const deciphered = Buffer.concat([
-			decipher.update(ciphered),
-			decipher.final()
-		]);
-
-		function invalidMAC() {
+		function invalidMAC(deciphered?) {
 			// Even if we have an error, still return some plaintext.
 			// This allows to prevent a CBC timing attack
 			return {
@@ -103,28 +132,93 @@ export function createDecipher(
 			};
 		}
 
-		// check the padding
-		const len = deciphered.length;
-		if (len === 0) return invalidMAC(); // no data
-		const paddingLength = deciphered[len - 1];
-		if (len < paddingLength) throw invalidMAC(); // not enough data
-		for (let i = 1; i <= paddingLength; i++) {
-			// wrong values in padding
-			if (deciphered[len - 1 - i] !== paddingLength) throw invalidMAC();
+		const ciphertext = packet.fragment;
+
+		// decrypt in two steps. first try decrypting
+		const decipherResult: {err?: Error, result: Buffer} = (() => {
+			// find the right decryption params
+			const record_iv = ciphertext.slice(0, decipherParams.blockSize);
+			const decipher_key = (connEnd === "client") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
+			const decipher = crypto.createDecipheriv(algorithm, decipher_key, record_iv);
+			decipher.setAutoPadding(false);
+
+			// decrypt the ciphertext
+			const ciphered = ciphertext.slice(decipherParams.blockSize);
+			const deciphered = Buffer.concat([
+				decipher.update(ciphered),
+				decipher.final()
+			]);
+
+			// check the padding
+			const len = deciphered.length;
+			if (len === 0) return invalidMAC(deciphered); // no data
+			const paddingLength = deciphered[len - 1];
+			if (len < paddingLength) return invalidMAC(deciphered); // not enough data
+			for (let i = 1; i <= paddingLength; i++) {
+				// wrong values in padding
+				if (deciphered[len - 1 - i] !== paddingLength) return invalidMAC(deciphered);
+			}
+
+			// strip off padding
+			const plaintext = Buffer.from(
+				deciphered.slice(0, -1 - paddingLength)
+			);
+
+			// contains fragment + MAC
+			return { result: plaintext };
+		})();
+
+		const sourceConnEnd : ConnectionEnd = (connEnd === "client") ? "server" : "client";
+
+		// then verify the result/MAC
+		if (decipherResult.err) {
+			// calculate fake MAC to prevent a timing attack
+			mac(decipherResult.result, keyMaterial, sourceConnEnd);
+			// now throw the error
+			throw decipherResult.err;
 		}
 
-		// strip off padding
-		const plaintext = Buffer.from(
-			deciphered.slice(0, -1 - paddingLength)
+		// split the plaintext into content and MAC
+		const plaintext = decipherResult.result;
+		let content: Buffer, receivedMAC: Buffer;
+		if (mac.keyAndHashLength > 0) {
+			content = plaintext.slice(0, -mac.keyAndHashLength);
+			receivedMAC = plaintext.slice(-mac.keyAndHashLength);
+		} else {
+			content = Buffer.from(plaintext);
+			receivedMAC = Buffer.from([]);
+		}
+
+		// Create the compressed packet to return after verifying
+		const ret = new DTLSCompressed(
+			packet.type,
+			packet.version,
+			packet.epoch,
+			packet.sequence_number,
+			content
 		);
 
-		// contains fragment + MAC
-		return { result: plaintext };
+		// compute the expected MAC for this packet
+		const expectedMAC = mac(
+			Buffer.concat([
+				ret.computeMACHeader(),
+				ret.fragment
+			]),
+			keyMaterial, sourceConnEnd
+		);
+
+		// and check if it matches the actual one
+		if (!expectedMAC.equals(receivedMAC)) {
+			throw invalidMAC().err;
+		}
+
+		return ret;
+
 	}) as BlockDecipherDelegate;
 
 	// append key length information
-	ret.keyLength = keyLengths.keyLength;
-	ret.recordIvLength = ret.blockSize = keyLengths.blockSize;
+	ret.keyLength = decipherParams.keyLength;
+	ret.recordIvLength = ret.blockSize = decipherParams.blockSize;
 	return ret;
 }
 

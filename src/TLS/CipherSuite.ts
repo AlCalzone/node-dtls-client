@@ -6,6 +6,8 @@ import * as BlockCipher from "./BlockCipher";
 import * as AEADCipher from "./AEADCipher";
 import { HMAC } from "./PRF";
 import { extend } from "../lib/object-polyfill";
+import { DTLSCompressed } from "../DTLS/DTLSCompressed";
+import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
 
 export type HashAlgorithm =
 	"md5" |
@@ -23,6 +25,32 @@ export type KeyExchangeAlgorithm =
 	"rsa" | "dh_dss" | "dh_rsa" |
 	"psk" | "dhe_psk" | "rsa_psk"// Server/Client|KeyExchange: see https://tools.ietf.org/html/rfc4279#page-4
 	;
+
+// export interface MacDelegate {
+// 	/**
+// 	 * Generates a MAC hash from the given data using the underlying HMAC function.
+// 	 * @param data - The data to be hashed
+// 	 */
+// 	(data: Buffer): Buffer;
+// 	/**
+// 	 * The key and hash output length of this hash function
+// 	 */
+// 	keyAndHashLength: number;
+// }
+export interface GenericMacDelegate {
+	/**
+	 * Generates a MAC hash from the given data using the underlying HMAC function.
+	 * @param data - The data to be hashed
+	 * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the encryption
+	 * @param sourceConnEnd - Denotes which connection end the packet is coming from
+	 */
+	(data: Buffer, keyMaterial: KeyMaterial, sourceConnEnd: ConnectionEnd): Buffer;
+	/**
+	 * The key and hash output length of this hash function
+	 */
+	keyAndHashLength: number;
+}
+
 
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.
@@ -48,29 +76,29 @@ export function createMAC(
 
 export interface CipherDelegate {
 	/**
-	 * Encrypts the given plaintext buffer using previously defined parameters
-	 * @param plaintext - The plaintext to be encrypted
+	 * Encrypts the given plaintext packet using previously defined parameters
+	 * @param packet - The plaintext packet to be encrypted
 	 */
-	(plaintext: Buffer): Buffer;
+	(packet: DTLSCompressed): DTLSCiphertext;
+
+	// /**
+	//  * The length of encryption keys in bytes
+	//  */
+	// keyLength: number;
 
 	/**
-	 * The length of encryption keys in bytes
+	 * The inner delegate. This can represent different cipher types like block and AEAD ciphers
 	 */
-	keyLength: number;
-
-	/**
-	 * The length of IVs for each record
-	 */
-	recordIvLength: number;
+	inner: GenericCipherDelegate;
 }
 export interface GenericCipherDelegate {
 	/**
-	 * Encrypts the given plaintext buffer
-	 * @param plaintext - The plaintext to be encrypted
+	 * Encrypts the given plaintext packet
+	 * @param packet - The plaintext packet to be encrypted
 	 * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the encryption
 	 * @param connEnd - Denotes if the current entity is the server or client
 	 */
-	(plaintext: Buffer, keyMaterial: KeyMaterial, connEnd: ConnectionEnd): Buffer;
+	(packet: DTLSCompressed, keyMaterial: KeyMaterial, connEnd: ConnectionEnd): DTLSCiphertext;
 
 	/**
 	 * The length of encryption keys in bytes
@@ -78,36 +106,44 @@ export interface GenericCipherDelegate {
 	keyLength: number;
 
 	/**
-	 * The length of IVs for each record
+	 * The MAC delegate used to authenticate packets.
+	 * May be null for certain ciphers.
 	 */
-	recordIvLength: number;
+	MAC: GenericMacDelegate;
 }
+
 
 export interface DecipherDelegate {
 	/**
-	 * Decrypts the given plaintext buffer using previously defined parameters
-	 * @param ciphertext - The ciphertext to be decrypted
+	 * Decrypts the given ciphertext packet using previously defined parameters
+	 * @param packet - The ciphertext to be decrypted
 	 */
-	(plaintext: Buffer): { err?: Error, result: Buffer };
+	(packet: DTLSCiphertext): DTLSCompressed;
+
+	// /**
+	//  * The length of decryption keys in bytes
+	//  */
+	// keyLength: number;
 
 	/**
-	 * The length of decryption keys in bytes
+	 * The inner delegate. This can represent different cipher types like block and AEAD ciphers
 	 */
-	keyLength: number;
+	inner: GenericDecipherDelegate;
 
-	/**
-	 * The length of IVs for each record
-	 */
-	recordIvLength: number;
+	// /**
+	//  * The MAC delegate used to authenticate incoming packets.
+	//  * May be null for certain ciphers.
+	//  */
+	// incomingMac: MacDelegate;	
 }
 export interface GenericDecipherDelegate {
 	/**
-	 * Decrypts the given ciphertext buffer
-	 * @param ciphertext - The ciphertext to be decrypted
+	 * Decrypts the given ciphertext packet
+	 * @param packet - The ciphertext packet to be decrypted
 	 * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the decryption
 	 * @param connEnd - Denotes if the current entity is the server or client
 	 */
-	(ciphertext: Buffer, keyMaterial: KeyMaterial, connEnd: ConnectionEnd): { err?: Error, result: Buffer };
+	(packet: DTLSCiphertext, keyMaterial: KeyMaterial, connEnd: ConnectionEnd): DTLSCompressed;
 
 	/**
 	 * The length of decryption keys in bytes
@@ -115,34 +151,10 @@ export interface GenericDecipherDelegate {
 	keyLength: number;
 
 	/**
-	 * The length of IVs for each record
+	 * The MAC delegate used to authenticate packets.
+	 * May be null for certain ciphers.
 	 */
-	recordIvLength: number;
-}
-
-export interface MacDelegate {
-	/**
-	 * Generates a MAC hash from the given data using the underlying HMAC function.
-	 * @param data - The data to be hashed
-	 */
-	(data: Buffer): Buffer;
-	/**
-	 * The key and hash output length of this hash function
-	 */
-	keyAndHashLength: number;
-}
-export interface GenericMacDelegate {
-	/**
-	 * Generates a MAC hash from the given data using the underlying HMAC function.
-	 * @param data - The data to be hashed
-	 * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the encryption
-	 * @param sourceConnEnd - Denotes which connection end the packet is coming from
-	 */
-	(data: Buffer, keyMaterial: KeyMaterial, sourceConnEnd: ConnectionEnd): Buffer;
-	/**
-	 * The key and hash output length of this hash function
-	 */
-	keyAndHashLength: number;
+	MAC: GenericMacDelegate;	
 }
 
 export interface KeyMaterial {
@@ -156,15 +168,29 @@ export interface KeyMaterial {
 
 
 function createNullCipher(): GenericCipherDelegate {
-	const ret = ((plaintext, _1, _2) => Buffer.from(plaintext)) as GenericCipherDelegate;
+	const ret = ((packet: DTLSCompressed, _1, _2) => new DTLSCiphertext(
+		packet.type,
+		packet.version,
+		packet.epoch,
+		packet.sequence_number,
+		packet.fragment
+	)) as GenericCipherDelegate;	
+	//const ret = ((plaintext, _1, _2) => Buffer.from(plaintext.fragment)) as GenericCipherDelegate;
 	ret.keyLength = 0;
-	ret.recordIvLength = 0;
+	//ret.recordIvLength = 0;
 	return ret;
 }
 function createNullDecipher(): GenericDecipherDelegate {
-	const ret =  ((ciphertext, _1, _2) => ({ result: Buffer.from(ciphertext) })) as GenericDecipherDelegate;
+	const ret = ((packet: DTLSCiphertext, _1, _2) => new DTLSCompressed(
+		packet.type,
+		packet.version,
+		packet.epoch,
+		packet.sequence_number,
+		packet.fragment
+	)) as GenericDecipherDelegate;
+	//const ret =  ((ciphertext, _1, _2) => ({ result: Buffer.from(ciphertext) })) as GenericDecipherDelegate;
 	ret.keyLength = 0;
-	ret.recordIvLength = 0;
+	//ret.recordIvLength = 0;
 	return ret;
 }
 function createNullMAC(): GenericMacDelegate {
@@ -208,7 +234,8 @@ export class CipherSuite extends TLSStruct {
 				return createNullCipher();
 			case "block":
 				return BlockCipher.createCipher(
-					this.algorithm as BlockCipher.BlockCipherAlgorithm
+					this.algorithm as BlockCipher.BlockCipherAlgorithm,
+					this.MAC
 				);
 			default:
 				throw new Error(`createCipher not implemented for ${this.cipherType} cipher`);
@@ -216,10 +243,11 @@ export class CipherSuite extends TLSStruct {
 	}
 	public specifyCipher(keyMaterial: KeyMaterial, connEnd: ConnectionEnd): CipherDelegate {
 		const ret = (
-			(plaintext: Buffer) => this.Cipher(plaintext, keyMaterial, connEnd)
+			(plaintext: DTLSCompressed) => this.Cipher(plaintext, keyMaterial, connEnd)
 		) as CipherDelegate;
-		ret.keyLength = this.Cipher.keyLength;
-		ret.recordIvLength = this.Cipher.recordIvLength;
+		ret.inner = this.Cipher;
+		//ret.keyLength = this.Cipher.keyLength;
+		//ret.recordIvLength = this.Cipher.recordIvLength;
 		return ret;
 	}
 
@@ -235,7 +263,8 @@ export class CipherSuite extends TLSStruct {
 				return createNullDecipher();
 			case "block":
 				return BlockCipher.createDecipher(
-					this.algorithm as BlockCipher.BlockCipherAlgorithm
+					this.algorithm as BlockCipher.BlockCipherAlgorithm,
+					this.MAC
 				);
 			default:
 				throw new Error(`createDecipher not implemented for ${this.cipherType} cipher`);
@@ -243,10 +272,11 @@ export class CipherSuite extends TLSStruct {
 	}
 	public specifyDecipher(keyMaterial: KeyMaterial, connEnd: ConnectionEnd): DecipherDelegate {
 		const ret = (
-			(plaintext: Buffer) => this.Decipher(plaintext, keyMaterial, connEnd)
+			(packet: DTLSCiphertext) => this.Decipher(packet, keyMaterial, connEnd)
 		) as DecipherDelegate;
-		ret.keyLength = this.Decipher.keyLength;
-		ret.recordIvLength = this.Decipher.recordIvLength;
+		ret.inner = this.Decipher;
+		//ret.keyLength = this.Decipher.keyLength;
+		//ret.recordIvLength = this.Decipher.recordIvLength;
 		return ret;
 	}
 
@@ -260,6 +290,7 @@ export class CipherSuite extends TLSStruct {
 		// TODO: detect special cases
 		switch (this.cipherType) {
 			case null:
+			case "aead":
 				return createNullMAC();
 			case "block":
 				if (this.macAlgorithm == null)
@@ -269,12 +300,12 @@ export class CipherSuite extends TLSStruct {
 				throw new Error(`createMAC not implemented for ${this.cipherType} cipher`);
 		}
 	}
-	public specifyMAC(keyMaterial: KeyMaterial, sourceConnEnd: ConnectionEnd): MacDelegate {
-		const ret = (
-			(data: Buffer) => this.MAC(data, keyMaterial, sourceConnEnd)
-		) as MacDelegate;
-		ret.keyAndHashLength = this.MAC.keyAndHashLength;
-		return ret;
-	}
+	// public specifyMAC(keyMaterial: KeyMaterial, sourceConnEnd: ConnectionEnd): MacDelegate {
+	// 	const ret = (
+	// 		(data: Buffer) => this.MAC(data, keyMaterial, sourceConnEnd)
+	// 	) as MacDelegate;
+	// 	ret.keyAndHashLength = this.MAC.keyAndHashLength;
+	// 	return ret;
+	// }
 
 }

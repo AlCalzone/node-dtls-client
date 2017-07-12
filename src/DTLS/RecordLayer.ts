@@ -49,11 +49,12 @@ export class RecordLayer {
 
 		if (epoch.connectionState.cipherSuite.cipherType != null) {
 			// encrypt packet
-			packet = DTLSCiphertext.encrypt(
-				packet as DTLSCompressed,
-				epoch.connectionState.Cipher,
-				epoch.connectionState.OutgoingMac
-			);
+			packet = epoch.connectionState.Cipher(packet as DTLSCompressed);
+			// packet = DTLSCiphertext.encrypt(
+			// 	packet as DTLSCompressed,
+			// 	epoch.connectionState.Cipher /*,
+			// 	epoch.connectionState.OutgoingMac*/
+			// );
 		}
 
 		// get send buffer
@@ -118,7 +119,8 @@ export class RecordLayer {
 			.map((p: DTLSCiphertext) => {
 				const connectionState = this.epochs[p.epoch].connectionState;
 				try {
-					return p.decrypt(connectionState.Decipher, connectionState.IncomingMac);
+					return connectionState.Decipher(p);
+					//return p.decrypt(connectionState.Decipher/*, connectionState.IncomingMac*/);
 				} catch (e) {
 					// decryption can fail because of bad MAC etc...
 					// TODO: terminate connection if some threshold is passed (bad_record_mac)
