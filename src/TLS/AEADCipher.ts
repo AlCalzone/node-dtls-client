@@ -1,7 +1,8 @@
 ﻿import * as crypto from "crypto";
 import { GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial } from "./CipherSuite";
 import { ConnectionEnd } from "./ConnectionState";
-import { DTLSPacket } from "../DTLS/DTLSPacket";
+import { DTLSCompressed } from "../DTLS/DTLSCompressed";
+import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
 
 /* see
 https://tools.ietf.org/html/rfc5246#section-6.2.3.3
@@ -17,20 +18,7 @@ export type AEADCipherAlgorithm =
 	;
 
 
-export interface AEADCipherDelegate {
-	/**
-	 * Encrypts the given plaintext packet
-	 * @param plaintext - The plaintext to be encrypted
-	 * @param keyMaterial - The key material (mac and encryption keys) used in the encryption
-	 * @param connEnd - Denotes if the current entity is the server or client
-	 */
-	(plaintext: DTLSPacket, keyMaterial: KeyMaterial, connEnd: ConnectionEnd): Buffer;
-
-	/**
-	 * The length of encryption keys in bytes
-	 */
-	keyLength: number;
-
+export interface AEADCipherDelegate extends GenericCipherDelegate {
 	/**
 	 * The length of nonces for each record
 	 */
@@ -44,20 +32,7 @@ export interface AEADCipherDelegate {
 	 */
 	authTagLength: number;
 }
-export interface AEADDecipherDelegate {
-	/**
-	 * Decrypts the given ciphered packet
-	 * @param ciphertext - The ciphertext to be decrypted
-	 * @param keyMaterial - The key material (mac and encryption keys) used in the decryption
-	 * @param connEnd - Denotes if the current entity is the server or client
-	 */
-	(ciphertext: DTLSPacket, keyMaterial: KeyMaterial, connEnd: ConnectionEnd): { err?: Error, result: Buffer };
-
-	/**
-	 * The length of decryption keys in bytes
-	 */
-	keyLength: number;
-
+export interface AEADDecipherDelegate extends GenericDecipherDelegate {
 	/**
 	 * The length of nonces for each record
 	 */
@@ -97,16 +72,12 @@ export function createCipher(
 	algorithm: AEADCipherAlgorithm, 
 ): AEADCipherDelegate
 {
-	const params = AEADCipherParameters[algorithm];
-	const ret = ((packet: DTLSPacket, keyMaterial: KeyMaterial, connEnd: ConnectionEnd) => {
+	const cipherParams = AEADCipherParameters[algorithm];
+	const ret = ((packet: DTLSCompressed, keyMaterial: KeyMaterial, connEnd: ConnectionEnd) => {
 		const plaintext = packet.fragment;
-		// figure out how much padding we need
-		const overflow = ((plaintext.length + 1) % params.blockSize);
-		const padLength = (overflow > 0) ? (params.blockSize - overflow) : 0;
-		const padding = Buffer.alloc(padLength + 1, /*fill=*/padLength); // one byte is the actual length of the padding array
 
 		// find the right encryption params
-		const record_iv = crypto.pseudoRandomBytes(params.blockSize);
+		const record_iv = crypto.pseudoRandomBytes(cipherParams.blockSize);
 		const cipher_key = (connEnd === "server") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
 		const cipher = crypto.createCipheriv(algorithm, cipher_key, record_iv);
 		cipher.setAutoPadding(false);
@@ -114,19 +85,29 @@ export function createCipher(
 		// encrypt the plaintext
 		const ciphertext = Buffer.concat([
 			cipher.update(plaintext),
-			cipher.update(padding),
 			cipher.final()
 		]);
 
 		// prepend it with the iv
-		return Buffer.concat([
+		const fragment = Buffer.concat([
 			record_iv,
 			ciphertext
 		]);
+
+		// and return the packet
+		return new DTLSCiphertext(
+			packet.type,
+			packet.version,
+			packet.epoch,
+			packet.sequence_number,
+			fragment
+		);
 	}) as AEADCipherDelegate;
 	// append key length information
-	ret.keyLength = params.keyLength;
-	ret.recordIvLength = ret.blockSize = params.blockSize;
+	ret.keyLength = cipherParams.keyLength;
+	ret.blockSize = cipherParams.blockSize;
+	ret.authTagLength = cipherParams.authTagLength;
+	//ret.nonceLength = cipherParams.nonceLength;
 	return ret;
 }
 
@@ -138,53 +119,41 @@ export function createDecipher(
 	algorithm: AEADCipherAlgorithm,
 ): AEADDecipherDelegate
 {
-	const keyLengths = BlockCipherParameters[algorithm];
-	const ret = ((packet: DTLSPacket, keyMaterial: KeyMaterial, connEnd: ConnectionEnd) => {
+	const decipherParams = AEADCipherParameters[algorithm];
+	const ret = ((packet: DTLSCiphertext, keyMaterial: KeyMaterial, connEnd: ConnectionEnd) => {
 		const ciphertext = packet.fragment;
+		
 		// find the right decryption params
-		const record_iv = ciphertext.slice(0, keyLengths.blockSize);
+		const record_iv = ciphertext.slice(0, decipherParams.blockSize);
 		const decipher_key = (connEnd === "client") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
 		const decipher = crypto.createDecipheriv(algorithm, decipher_key, record_iv);
 		decipher.setAutoPadding(false);
 
 		// decrypt the ciphertext
-		const ciphered = ciphertext.slice(keyLengths.blockSize);
+		const ciphered = ciphertext.slice(decipherParams.blockSize);
 		const deciphered = Buffer.concat([
 			decipher.update(ciphered),
 			decipher.final()
 		]);
 
-		function invalidMAC() {
-			// Even if we have an error, still return some plaintext.
-			// This allows to prevent a CBC timing attack
-			return {
-				err: new Error("invalid MAC detected in DTLS packet"),
-				result: deciphered
-			};
-		}
-
-		// check the padding
-		const len = deciphered.length;
-		if (len === 0) return invalidMAC(); // no data
-		const paddingLength = deciphered[len - 1];
-		if (len < paddingLength) throw invalidMAC(); // not enough data
-		for (let i = 1; i <= paddingLength; i++) {
-			// wrong values in padding
-			if (deciphered[len - 1 - i] !== paddingLength) throw invalidMAC();
-		}
-
-		// strip off padding
 		const plaintext = Buffer.from(
-			deciphered.slice(0, -1 - paddingLength)
+			deciphered//.slice(0, -1 - paddingLength)
 		);
 
-		// contains fragment + MAC
-		return { result: plaintext };
+		return new DTLSCompressed(
+			packet.type,
+			packet.version,
+			packet.epoch,
+			packet.sequence_number,
+			plaintext
+		);
 	}) as AEADDecipherDelegate;
 
 	// append key length information
-	ret.keyLength = keyLengths.keyLength;
-	ret.recordIvLength = ret.blockSize = keyLengths.blockSize;
+	ret.keyLength = decipherParams.keyLength;
+	ret.blockSize = decipherParams.blockSize;
+	ret.authTagLength = decipherParams.authTagLength;
+	//ret.nonceLength = decipherParams.nonceLength;
 	return ret;
 }
 

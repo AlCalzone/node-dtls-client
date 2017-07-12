@@ -237,6 +237,10 @@ export class CipherSuite extends TLSStruct {
 					this.algorithm as BlockCipher.BlockCipherAlgorithm,
 					this.MAC
 				);
+			case "aead":
+				return AEADCipher.createCipher(
+					this.algorithm as AEADCipher.AEADCipherAlgorithm
+				);
 			default:
 				throw new Error(`createCipher not implemented for ${this.cipherType} cipher`);
 		}
@@ -266,6 +270,10 @@ export class CipherSuite extends TLSStruct {
 					this.algorithm as BlockCipher.BlockCipherAlgorithm,
 					this.MAC
 				);
+			case "aead":
+				return AEADCipher.createDecipher(
+					this.algorithm as AEADCipher.AEADCipherAlgorithm
+				);				
 			default:
 				throw new Error(`createDecipher not implemented for ${this.cipherType} cipher`);
 		}
