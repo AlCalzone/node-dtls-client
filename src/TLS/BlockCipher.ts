@@ -14,33 +14,24 @@ export interface BlockCipherDelegate extends GenericCipherDelegate {
 	 * The block size of this algorithm
 	 */
 	blockSize: number;
-
-	/**
-	 * The length of IVs for each record
-	 */
-	recordIvLength: number;
 }
 export interface BlockDecipherDelegate extends GenericDecipherDelegate {
 	/**
 	 * The block size of this algorithm
 	 */
 	blockSize: number;
-
-	/**
-	 * The length of IVs for each record
-	 */
-	recordIvLength: number;	
 }
 
 interface BlockCipherParameter {
 	keyLength: number,
-	blockSize: number
+	blockSize: number,
+	recordIvLength: number
 }
 
 const BlockCipherParameters: { [algorithm in BlockCipherAlgorithm]?: BlockCipherParameter } = {
-	"aes-128-cbc": { keyLength: 16, blockSize: 16 },
-	"aes-256-cbc": { keyLength: 32, blockSize: 16 },
-	"des-ede3-cbc": { keyLength: 24, blockSize: 16 },
+	"aes-128-cbc": { keyLength: 16, blockSize: 16, recordIvLength: 16 },
+	"aes-256-cbc": { keyLength: 32, blockSize: 16, recordIvLength: 16 },
+	"des-ede3-cbc": { keyLength: 24, blockSize: 16, recordIvLength: 16 },
 };
 
 /**
@@ -77,7 +68,7 @@ export function createCipher(
 		const padding = Buffer.alloc(padLength + 1, /*fill=*/padLength); // one byte is the actual length of the padding array
 
 		// find the right encryption params
-		const record_iv = crypto.pseudoRandomBytes(cipherParams.blockSize);
+		const record_iv = crypto.pseudoRandomBytes(cipherParams.recordIvLength);
 		const cipher_key = (connEnd === "server") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
 		const cipher = crypto.createCipheriv(algorithm, cipher_key, record_iv);
 		cipher.setAutoPadding(false);
@@ -106,7 +97,8 @@ export function createCipher(
 	}) as BlockCipherDelegate;
 	// append key length information
 	ret.keyLength = cipherParams.keyLength;
-	ret.recordIvLength = ret.blockSize = cipherParams.blockSize;
+	ret.recordIvLength = cipherParams.recordIvLength;
+	ret.blockSize = cipherParams.blockSize;
 	return ret;
 }
 
@@ -137,7 +129,7 @@ export function createDecipher(
 		// decrypt in two steps. first try decrypting
 		const decipherResult: {err?: Error, result: Buffer} = (() => {
 			// find the right decryption params
-			const record_iv = ciphertext.slice(0, decipherParams.blockSize);
+			const record_iv = ciphertext.slice(0, decipherParams.recordIvLength);
 			const decipher_key = (connEnd === "client") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
 			const decipher = crypto.createDecipheriv(algorithm, decipher_key, record_iv);
 			decipher.setAutoPadding(false);
@@ -218,7 +210,8 @@ export function createDecipher(
 
 	// append key length information
 	ret.keyLength = decipherParams.keyLength;
-	ret.recordIvLength = ret.blockSize = decipherParams.blockSize;
+	ret.recordIvLength = decipherParams.recordIvLength;
+	ret.blockSize = decipherParams.blockSize;
 	return ret;
 }
 

@@ -104,6 +104,14 @@ export interface GenericCipherDelegate {
 	 * The length of encryption keys in bytes
 	 */
 	keyLength: number;
+	/**
+	 * The length of fixed (for each session) IVs in bytes
+	 */
+	fixedIvLength: number;
+	/**
+	 * The length of record IVs in bytes
+	 */
+	recordIvLength: number;
 
 	/**
 	 * The MAC delegate used to authenticate packets.
@@ -149,6 +157,14 @@ export interface GenericDecipherDelegate {
 	 * The length of decryption keys in bytes
 	 */
 	keyLength: number;
+	/**
+	 * The length of fixed (for each session) IVs in bytes
+	 */
+	fixedIvLength: number;
+	/**
+	 * The length of record IVs in bytes
+	 */
+	recordIvLength: number;
 
 	/**
 	 * The MAC delegate used to authenticate packets.
@@ -177,7 +193,8 @@ function createNullCipher(): GenericCipherDelegate {
 	)) as GenericCipherDelegate;	
 	//const ret = ((plaintext, _1, _2) => Buffer.from(plaintext.fragment)) as GenericCipherDelegate;
 	ret.keyLength = 0;
-	//ret.recordIvLength = 0;
+	ret.fixedIvLength = 0;
+	ret.recordIvLength = 0;
 	return ret;
 }
 function createNullDecipher(): GenericDecipherDelegate {
@@ -190,7 +207,8 @@ function createNullDecipher(): GenericDecipherDelegate {
 	)) as GenericDecipherDelegate;
 	//const ret =  ((ciphertext, _1, _2) => ({ result: Buffer.from(ciphertext) })) as GenericDecipherDelegate;
 	ret.keyLength = 0;
-	//ret.recordIvLength = 0;
+	ret.fixedIvLength = 0;
+	ret.recordIvLength = 0;
 	return ret;
 }
 function createNullMAC(): GenericMacDelegate {
@@ -250,8 +268,9 @@ export class CipherSuite extends TLSStruct {
 			(plaintext: DTLSCompressed) => this.Cipher(plaintext, keyMaterial, connEnd)
 		) as CipherDelegate;
 		ret.inner = this.Cipher;
-		//ret.keyLength = this.Cipher.keyLength;
-		//ret.recordIvLength = this.Cipher.recordIvLength;
+		if (!ret.inner.keyLength) ret.inner.keyLength = 0;
+		if (!ret.inner.fixedIvLength) ret.inner.fixedIvLength = 0;
+		if (!ret.inner.recordIvLength) ret.inner.recordIvLength = 0;
 		return ret;
 	}
 
@@ -283,8 +302,9 @@ export class CipherSuite extends TLSStruct {
 			(packet: DTLSCiphertext) => this.Decipher(packet, keyMaterial, connEnd)
 		) as DecipherDelegate;
 		ret.inner = this.Decipher;
-		//ret.keyLength = this.Decipher.keyLength;
-		//ret.recordIvLength = this.Decipher.recordIvLength;
+		if (!ret.inner.keyLength) ret.inner.keyLength = 0;
+		if (!ret.inner.fixedIvLength) ret.inner.fixedIvLength = 0;
+		if (!ret.inner.recordIvLength) ret.inner.recordIvLength = 0;
 		return ret;
 	}
 

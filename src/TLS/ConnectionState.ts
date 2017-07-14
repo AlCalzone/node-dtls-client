@@ -49,7 +49,7 @@ export class ConnectionState {
 	//cipher_type: CipherType;
 	//enc_key_length: number;
 	//block_length: number;
-	fixed_iv_length: number; // TODO: put it into cipher suite?
+	//fixed_iv_length: number; // TODO: put it into cipher suite?
 	//record_iv_length: number;
 	//mac_algorithm: HashAlgorithm;
 	//mac_length: number;
@@ -114,7 +114,7 @@ export class ConnectionState {
 			this.master_secret,
 			"key expansion",
 			Buffer.concat([this.server_random, this.client_random]),
-			2 * (this.cipherSuite.MAC.keyAndHashLength + this.cipherSuite.Cipher.keyLength + this.fixed_iv_length)
+			2 * (this.cipherSuite.MAC.keyAndHashLength + this.cipherSuite.Cipher.keyLength + this.cipherSuite.Cipher.fixedIvLength)
 		);
 
 		let offset = 0;
@@ -129,8 +129,8 @@ export class ConnectionState {
 			server_write_MAC_key: read(this.cipherSuite.MAC.keyAndHashLength),
 			client_write_key: read(this.cipherSuite.Cipher.keyLength),
 			server_write_key: read(this.cipherSuite.Cipher.keyLength),
-			client_write_IV: read(this.fixed_iv_length),
-			server_write_IV: read(this.fixed_iv_length)
+			client_write_IV: read(this.cipherSuite.Cipher.fixedIvLength),
+			server_write_IV: read(this.cipherSuite.Cipher.fixedIvLength)
 		};
 		
 	}
