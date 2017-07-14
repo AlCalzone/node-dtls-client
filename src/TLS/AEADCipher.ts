@@ -9,6 +9,9 @@ import { Vector } from "./Vector";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
 
+import * as gcm from "node-aes-gcm";
+import * as ccm from "node-aes-ccm";
+
 /* see
 https://tools.ietf.org/html/rfc5246#section-6.2.3.3
 http://lollyrock.com/articles/nodejs-encryption/
@@ -52,7 +55,32 @@ export interface AEADDecipherDelegate extends GenericDecipherDelegate {
 	authTagLength: number;
 }
 
+interface EncryptionInterface {
+	encrypt: (
+		key: Buffer, 
+		iv: Buffer, 
+		plaintext: Buffer, 
+		additionalData: Buffer, 
+		auth_tag_length?: number
+	) => {
+		ciphertext: Buffer,
+		auth_tag: Buffer
+	};
+
+	decrypt: (
+		key: Buffer, 
+		iv: Buffer, 
+		ciphertext: Buffer, 
+		additionalData: Buffer, 
+		auth_tag: Buffer
+	) => {
+		plaintext: Buffer,
+		auth_ok: Boolean
+	};
+}
+
 interface AEADCipherParameter {
+	interface: EncryptionInterface,
 	keyLength: number,
 	blockSize: number,
 	authTagLength: number,
@@ -61,12 +89,12 @@ interface AEADCipherParameter {
 }
 
 const AEADCipherParameters: {[algorithm in AEADCipherAlgorithm]?: AEADCipherParameter } = {
-	"aes-128-ccm":  { keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
-	"aes-128-ccm8": { keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
-	"aes-256-ccm":  { keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
-	"aes-256-ccm8": { keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
-	"aes-128-gcm":  { keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
-	"aes-256-gcm":  { keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 }
+	"aes-128-ccm":  { interface: ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
+	"aes-128-ccm8": { interface: ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
+	"aes-256-ccm":  { interface: ccm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
+	"aes-256-ccm8": { interface: ccm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
+	"aes-128-gcm":  { interface: gcm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
+	"aes-256-gcm":  { interface: gcm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 }
 };
 
 class AdditionalData extends TLSStruct {
@@ -117,15 +145,15 @@ export function createCipher(
 		).serialize();
 		const cipher_key = (connEnd === "server") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
 
-		// Find the right function to encrypt (TODO)
-		const encrypt = (a,b,c,d):{ciphertext: Buffer, tag: Buffer} => {return null;}; // TODO
+		// Find the right function to encrypt
+		const encrypt = cipherParams.interface.encrypt;
 
 		// encrypt and concat the neccessary pieces
-		const encryptionResult = encrypt(cipher_key, nonce, plaintext, additionalData);
+		const encryptionResult = encrypt(cipher_key, nonce, plaintext, additionalData, cipherParams.authTagLength);
 		const fragment = Buffer.concat([
 			nonce_explicit,
 			encryptionResult.ciphertext,
-			encryptionResult.tag
+			encryptionResult.auth_tag
 		]);
 		
 
@@ -179,8 +207,8 @@ export function createDecipher(
 		
 		const decipher_key = (sourceConnEnd === "server") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
 
-		// Find the right function to encrypt (TODO)
-		const decrypt = (a,b,c,d,e):{plaintext: Buffer, auth_ok: Boolean} => {return null;}; // TODO
+		// Find the right function to decrypt
+		const decrypt = decipherParams.interface.decrypt;
 		
 		// decrypt the ciphertext and check the result
 		const ciphered = ciphertext.slice(decipherParams.recordIvLength, -decipherParams.authTagLength);
@@ -198,7 +226,7 @@ export function createDecipher(
 			packet.sequence_number,
 			decryptionResult.plaintext
 		);
-		
+
 	}) as AEADDecipherDelegate;
 
 	// append key length information
