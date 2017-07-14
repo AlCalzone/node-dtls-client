@@ -50,7 +50,7 @@ var DTLSCompressed = (function (_super) {
      * Computes the MAC header representing this packet. The MAC header is the input buffer of the MAC calculation minus the actual fragment buffer.
      */
     DTLSCompressed.prototype.computeMACHeader = function () {
-        return (new MACHeader(this.epoch, this.sequence_number, this.type, this.version, this["length"])).serialize();
+        return (new MACHeader(this.epoch, this.sequence_number, this.type, this.version, this.fragment.length)).serialize();
     };
     return DTLSCompressed;
 }(TLSStruct_1.TLSStruct));

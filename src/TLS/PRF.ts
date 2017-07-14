@@ -107,7 +107,7 @@ function P(algorithm: HashAlgorithm, secret: Buffer, seed: Buffer, length: numbe
 	}
 
 	// concatenate the individual hashes and trim it to the desired length
-	return Buffer.concat(hashes, hashesLength);
+	return Buffer.concat(hashes, length);
 	
 }
 

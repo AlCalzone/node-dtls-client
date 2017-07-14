@@ -21,10 +21,15 @@ export declare class RecordLayer {
      */
     send(msg: Message, callback?: dtls.SendCallback): void;
     /**
-     * Sends all given messages
+     * Transforms the given message into a DTLSCiphertext packet,
+     * does neccessary processing and buffers it up for sending
+     */
+    private processOutgoingMessage(msg);
+    /**
+     * Sends all messages of a flight in one packet
      * @param messages - The messages to be sent
      */
-    sendAll(messages: Message[]): void;
+    sendFlight(messages: Message[], callback?: dtls.SendCallback): void;
     /**
      * Receives DTLS messages from the given buffer.
      * @param buf The buffer containing DTLSCiphertext packets

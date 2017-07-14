@@ -12,7 +12,7 @@ export class Random extends TLSStruct {
 
 	static readonly __spec = {
 		gmt_unix_time: TypeSpecs.uint32,
-		random_bytes: TypeSpecs.define.Buffer(28,28)
+		random_bytes: TypeSpecs.define.Buffer(28)
 	}
 
 	constructor(

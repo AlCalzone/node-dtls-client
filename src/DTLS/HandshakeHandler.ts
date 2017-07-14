@@ -76,10 +76,7 @@ export class ClientHandshakeHandler {
 			[
 				// TODO: dynamically check which ones we can support
 				CipherSuites.TLS_PSK_WITH_AES_128_CCM_8,
-				CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA,
-				CipherSuites.TLS_PSK_WITH_AES_256_CBC_SHA,
-				CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA256,
-				CipherSuites.TLS_PSK_WITH_AES_256_CBC_SHA384,
+				CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA256
 			].map(cs => cs.id)
 		);
 		hello.compression_methods = new Vector<CompressionMethod>(
@@ -188,15 +185,15 @@ export class ClientHandshakeHandler {
 	}
 
 
-	/**
-	 * reacts to a ChangeCipherSpec message
-	 */
-	public changeCipherSpec() {
-		// advance the read epoch, so we understand the next messages received
-		this.recordLayer.advanceReadEpoch();
-		// TODO: how do we handle retransmission here?
-		// TODO: how do we handle reordering (i.e. Finished received before ChangeCipherSpec)?
-	}
+	///**
+	// * reacts to a ChangeCipherSpec message
+	// */
+	//public changeCipherSpec() {
+	//	// advance the read epoch, so we understand the next messages received
+	//	this.recordLayer.advanceReadEpoch();
+	//	// TODO: how do we handle retransmission here?
+	//	// TODO: how do we handle reordering (i.e. Finished received before ChangeCipherSpec)?
+	//}
 
 	/**
 	 * Sends the given flight of messages and remembers it for potential retransmission
@@ -207,41 +204,59 @@ export class ClientHandshakeHandler {
 	private sendFlight(flight: Handshake.Handshake[], expectedResponses: Handshake.HandshakeType[], retransmit = false) {
 		this.lastFlight = flight;
 		this.expectedResponses = expectedResponses;
+		const messages = [];
+
 		flight.forEach(handshake => {
 			if (handshake.msg_type === Handshake.HandshakeType.finished) {
 				// before finished messages, ALWAYS send a ChangeCipherSpec
-				this.sendChangeCipherSpecMessage();
+				messages.push({
+					type: ContentType.change_cipher_spec,
+					data: (ChangeCipherSpec.createEmpty()).serialize()
+				})
 				// TODO: how do we handle retransmission here?
 			}
 
 			if (!retransmit) {
+				// for first-time messages, increment the sequence number
+				// and buffer the data for verification purposes
 				handshake.message_seq = ++this.lastSentSeqNum;
+				this.bufferHandshakeData(handshake);
 			}
-			this.sendHandshakeMessage(handshake, retransmit)
+			// fragment the messages (TODO: make this dependent on previous messages in this flight)
+			const fragments = handshake
+				.fragmentMessage()
+				.map(fragment => ({
+					type: ContentType.handshake,
+					data: fragment.serialize()
+				}))
+				;
+			messages.push(...fragments);
 		});
+
+		this.recordLayer.sendFlight(messages);
 	}
 
-	/**
-	 * Fragments a handshake message, serializes the fragements into single messages and sends them over the record layer.
-	 * Don't call this directly, rather use *sendFlight*
-	 * @param handshake - The handshake message to be sent
-	 */
-	private sendHandshakeMessage(handshake: Handshake.Handshake, retransmit) {
-		// fragment the messages to send them over the record layer
-		const messages = handshake
-			.fragmentMessage()
-			.map(fragment => ({
-				type: ContentType.handshake,
-				data: fragment.serialize()
-			}))
-			;
-		this.recordLayer.sendAll(messages);
+	///**
+	// * Fragments a handshake message, serializes the fragements into single messages and sends them over the record layer.
+	// * Don't call this directly, rather use *sendFlight*
+	// * @param handshake - The handshake message to be sent
+	// */
+	//private sendHandshakeMessage(handshake: Handshake.Handshake, retransmit) {
+	//	// fragment the messages to send them over the record layer
+	//	const messages = handshake
+	//		.fragmentMessage()
+	//		.map(fragment => ({
+	//			type: ContentType.handshake,
+	//			data: fragment.serialize()
+	//		}))
+	//		;
+	//	this.recordLayer.sendFlight(messages);
 
-		// if this is not a retransmit, also remember the raw data for verification purposes
-		if (!retransmit) {
-			this.bufferHandshakeData(handshake);
-		}
-	}
+	//	// if this is not a retransmit, also remember the raw data for verification purposes
+	//	if (!retransmit) {
+	//		this.bufferHandshakeData(handshake);
+	//	}
+	//}
 
 	/**
 	 * remembers the raw data of handshake messages for verification purposes
@@ -255,6 +270,7 @@ export class ClientHandshakeHandler {
 		// stript out hello requests
 		messages = messages.filter(m => m.msg_type !== Handshake.HandshakeType.hello_request);
 		// and add the raw data
+		messages.forEach(m => console.log("buffering message with type " + m.msg_type));
 		buffers.push(...(messages.map(m => m.serialize())));
 		this.allHandshakeData = Buffer.concat(buffers);
 	}
@@ -273,18 +289,18 @@ export class ClientHandshakeHandler {
 		return verify_data;
 	}
 
-	/**
-	 * Sends a ChangeCipherSpec message
-	 */
-	private sendChangeCipherSpecMessage() {
-		const message = {
-			type: ContentType.change_cipher_spec,
-			data: (ChangeCipherSpec.createEmpty()).serialize()
-		};
-		this.recordLayer.send(message);
-		// advance the write epoch, so we use the new params for sending the next messages
-		this.recordLayer.advanceWriteEpoch();
-	}
+	///**
+	// * Sends a ChangeCipherSpec message
+	// */
+	//private sendChangeCipherSpecMessage() {
+	//	const message = {
+	//		type: ContentType.change_cipher_spec,
+	//		data: (ChangeCipherSpec.createEmpty()).serialize()
+	//	};
+	//	this.recordLayer.send(message);
+	//	//// advance the write epoch, so we use the new params for sending the next messages
+	//	//this.recordLayer.advanceWriteEpoch();
+	//}
 
 	/**
 	 * handles server messages

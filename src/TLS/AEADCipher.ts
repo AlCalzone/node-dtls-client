@@ -8,20 +8,14 @@ import { TLSStruct } from "./TLSStruct";
 import { Vector } from "./Vector";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
+import * as BitConverter from "../lib/BitConverter";
 
 import * as gcm from "node-aes-gcm";
 import * as ccm from "node-aes-ccm";
 
-/* see
-https://tools.ietf.org/html/rfc5246#section-6.2.3.3
-http://lollyrock.com/articles/nodejs-encryption/
-
-*/
-
 export type AEADCipherAlgorithm =
 	"aes-128-ccm" | "aes-256-ccm" |
 	"aes-128-ccm8" | "aes-256-ccm8" |
-	"aes-128-gcm" | "aes-256-gcm" |
 	"aes-128-gcm" | "aes-256-gcm"
 	;
 
@@ -135,7 +129,11 @@ export function createCipher(
 
 		// find the right encryption params
 		const salt = (connEnd === "server") ? keyMaterial.server_write_IV : keyMaterial.client_write_IV;
-		const nonce_explicit = crypto.pseudoRandomBytes(cipherParams.recordIvLength);
+		//const nonce_explicit = crypto.pseudoRandomBytes(cipherParams.recordIvLength);
+		const nonce_explicit = Buffer.concat([
+			BitConverter.numberToBuffer(packet.epoch, 16),
+			BitConverter.numberToBuffer(packet.sequence_number, 48)
+		]);
 		const nonce = Buffer.concat([salt, nonce_explicit]);
 		const additionalData = new AdditionalData(
 			packet.sequence_number,
@@ -147,6 +145,7 @@ export function createCipher(
 
 		// Find the right function to encrypt
 		const encrypt = cipherParams.interface.encrypt;
+		//const decrypt = cipherParams.interface.decrypt;
 
 		// encrypt and concat the neccessary pieces
 		const encryptionResult = encrypt(cipher_key, nonce, plaintext, additionalData, cipherParams.authTagLength);
@@ -155,6 +154,8 @@ export function createCipher(
 			encryptionResult.ciphertext,
 			encryptionResult.auth_tag
 		]);
+		//const decryptionResult = decrypt(cipher_key, nonce, encryptionResult.ciphertext, additionalData, encryptionResult.auth_tag);
+
 		
 
 		// and return the packet

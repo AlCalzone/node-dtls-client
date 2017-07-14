@@ -1,48 +1,91 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
-var crypto = require("crypto");
+var DTLSCompressed_1 = require("../DTLS/DTLSCompressed");
+var DTLSCiphertext_1 = require("../DTLS/DTLSCiphertext");
+var TypeSpecs = require("./TypeSpecs");
+var TLSStruct_1 = require("./TLSStruct");
+var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
+var ContentType_1 = require("../TLS/ContentType");
+var BitConverter = require("../lib/BitConverter");
+var gcm = require("node-aes-gcm");
+var ccm = require("node-aes-ccm");
 var AEADCipherParameters = {
-    "aes-128-ccm": { keyLength: 16, blockSize: 16, authTagLength: 16 },
-    "aes-128-ccm8": { keyLength: 16, blockSize: 16, authTagLength: 8 },
-    "aes-256-ccm": { keyLength: 16, blockSize: 32, authTagLength: 16 },
-    "aes-256-ccm8": { keyLength: 16, blockSize: 32, authTagLength: 8 },
-    "aes-128-gcm": { keyLength: 16, blockSize: 16, authTagLength: 16 },
-    "aes-128-gcm8": { keyLength: 16, blockSize: 16, authTagLength: 8 },
-    "aes-256-gcm": { keyLength: 16, blockSize: 32, authTagLength: 16 },
-    "aes-256-gcm8": { keyLength: 16, blockSize: 32, authTagLength: 8 }
+    "aes-128-ccm": { interface: ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
+    "aes-128-ccm8": { interface: ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
+    "aes-256-ccm": { interface: ccm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
+    "aes-256-ccm8": { interface: ccm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
+    "aes-128-gcm": { interface: gcm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
+    "aes-256-gcm": { interface: gcm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 }
+};
+var AdditionalData = (function (_super) {
+    __extends(AdditionalData, _super);
+    function AdditionalData(sequence_number, type, version, fragment_length) {
+        var _this = _super.call(this, AdditionalData.__spec) || this;
+        _this.sequence_number = sequence_number;
+        _this.type = type;
+        _this.version = version;
+        _this.fragment_length = fragment_length;
+        return _this;
+    }
+    AdditionalData.createEmpty = function () {
+        return new AdditionalData(null, null, null, null);
+    };
+    return AdditionalData;
+}(TLSStruct_1.TLSStruct));
+AdditionalData.__spec = {
+    sequence_number: TypeSpecs.uint48,
+    type: ContentType_1.ContentType.__spec,
+    version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+    fragment_length: TypeSpecs.uint16
 };
 /**
  * Creates an AEAD cipher delegate used to encrypt packet fragments.
  * @param algorithm - The AEAD cipher algorithm to be used
  */
 function createCipher(algorithm) {
-    var params = AEADCipherParameters[algorithm];
+    var cipherParams = AEADCipherParameters[algorithm];
     var ret = (function (packet, keyMaterial, connEnd) {
         var plaintext = packet.fragment;
-        // figure out how much padding we need
-        var overflow = ((plaintext.length + 1) % params.blockSize);
-        var padLength = (overflow > 0) ? (params.blockSize - overflow) : 0;
-        var padding = Buffer.alloc(padLength + 1, /*fill=*/ padLength); // one byte is the actual length of the padding array
         // find the right encryption params
-        var record_iv = crypto.pseudoRandomBytes(params.blockSize);
+        var salt = (connEnd === "server") ? keyMaterial.server_write_IV : keyMaterial.client_write_IV;
+        //const nonce_explicit = crypto.pseudoRandomBytes(cipherParams.recordIvLength);
+        var nonce_explicit = Buffer.concat([
+            BitConverter.numberToBuffer(packet.epoch, 16),
+            BitConverter.numberToBuffer(packet.sequence_number, 48)
+        ]);
+        var nonce = Buffer.concat([salt, nonce_explicit]);
+        var additionalData = new AdditionalData(packet.sequence_number, packet.type, packet.version, packet.fragment.length).serialize();
         var cipher_key = (connEnd === "server") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
-        var cipher = crypto.createCipheriv(algorithm, cipher_key, record_iv);
-        cipher.setAutoPadding(false);
-        // encrypt the plaintext
-        var ciphertext = Buffer.concat([
-            cipher.update(plaintext),
-            cipher.update(padding),
-            cipher.final()
+        // Find the right function to encrypt
+        var encrypt = cipherParams.interface.encrypt;
+        //const decrypt = cipherParams.interface.decrypt;
+        // encrypt and concat the neccessary pieces
+        var encryptionResult = encrypt(cipher_key, nonce, plaintext, additionalData, cipherParams.authTagLength);
+        var fragment = Buffer.concat([
+            nonce_explicit,
+            encryptionResult.ciphertext,
+            encryptionResult.auth_tag
         ]);
-        // prepend it with the iv
-        return Buffer.concat([
-            record_iv,
-            ciphertext
-        ]);
+        //const decryptionResult = decrypt(cipher_key, nonce, encryptionResult.ciphertext, additionalData, encryptionResult.auth_tag);
+        // and return the packet
+        return new DTLSCiphertext_1.DTLSCiphertext(packet.type, packet.version, packet.epoch, packet.sequence_number, fragment);
     });
     // append key length information
-    ret.keyLength = params.keyLength;
-    ret.recordIvLength = ret.blockSize = params.blockSize;
+    ret.keyLength = cipherParams.keyLength;
+    ret.blockSize = cipherParams.blockSize;
+    ret.authTagLength = cipherParams.authTagLength;
+    ret.fixedIvLength = cipherParams.fixedIvLength;
+    ret.recordIvLength = cipherParams.recordIvLength;
     return ret;
 }
 exports.createCipher = createCipher;
@@ -51,48 +94,36 @@ exports.createCipher = createCipher;
  * @param algorithm - The AEAD cipher algorithm to be used
  */
 function createDecipher(algorithm) {
-    var keyLengths = BlockCipherParameters[algorithm];
+    var decipherParams = AEADCipherParameters[algorithm];
     var ret = (function (packet, keyMaterial, connEnd) {
         var ciphertext = packet.fragment;
+        var sourceConnEnd = (connEnd === "client") ? "server" : "client";
         // find the right decryption params
-        var record_iv = ciphertext.slice(0, keyLengths.blockSize);
-        var decipher_key = (connEnd === "client") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
-        var decipher = crypto.createDecipheriv(algorithm, decipher_key, record_iv);
-        decipher.setAutoPadding(false);
-        // decrypt the ciphertext
-        var ciphered = ciphertext.slice(keyLengths.blockSize);
-        var deciphered = Buffer.concat([
-            decipher.update(ciphered),
-            decipher.final()
-        ]);
-        function invalidMAC() {
-            // Even if we have an error, still return some plaintext.
-            // This allows to prevent a CBC timing attack
-            return {
-                err: new Error("invalid MAC detected in DTLS packet"),
-                result: deciphered
-            };
+        var salt = (sourceConnEnd === "server") ? keyMaterial.server_write_IV : keyMaterial.client_write_IV;
+        var nonce_explicit = ciphertext.slice(0, decipherParams.recordIvLength);
+        var nonce = Buffer.concat([salt, nonce_explicit]);
+        var additionalData = new AdditionalData(packet.sequence_number, packet.type, packet.version, 
+        // subtract the AEAD overhead from the packet length for authentication
+        packet.fragment.length - decipherParams.recordIvLength - decipherParams.authTagLength).serialize();
+        var authTag = ciphertext.slice(-decipherParams.authTagLength);
+        var decipher_key = (sourceConnEnd === "server") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
+        // Find the right function to decrypt
+        var decrypt = decipherParams.interface.decrypt;
+        // decrypt the ciphertext and check the result
+        var ciphered = ciphertext.slice(decipherParams.recordIvLength, -decipherParams.authTagLength);
+        var decryptionResult = decrypt(decipher_key, nonce, ciphered, additionalData, authTag);
+        if (!decryptionResult.auth_ok) {
+            throw new Error("Authenticated decryption of the packet failed.");
         }
-        // check the padding
-        var len = deciphered.length;
-        if (len === 0)
-            return invalidMAC(); // no data
-        var paddingLength = deciphered[len - 1];
-        if (len < paddingLength)
-            throw invalidMAC(); // not enough data
-        for (var i = 1; i <= paddingLength; i++) {
-            // wrong values in padding
-            if (deciphered[len - 1 - i] !== paddingLength)
-                throw invalidMAC();
-        }
-        // strip off padding
-        var plaintext = Buffer.from(deciphered.slice(0, -1 - paddingLength));
-        // contains fragment + MAC
-        return { result: plaintext };
+        // everything good, return the decrypted packet
+        return new DTLSCompressed_1.DTLSCompressed(packet.type, packet.version, packet.epoch, packet.sequence_number, decryptionResult.plaintext);
     });
     // append key length information
-    ret.keyLength = keyLengths.keyLength;
-    ret.recordIvLength = ret.blockSize = keyLengths.blockSize;
+    ret.keyLength = decipherParams.keyLength;
+    ret.blockSize = decipherParams.blockSize;
+    ret.authTagLength = decipherParams.authTagLength;
+    ret.fixedIvLength = decipherParams.fixedIvLength;
+    ret.recordIvLength = decipherParams.recordIvLength;
     return ret;
 }
 exports.createDecipher = createDecipher;

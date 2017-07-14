@@ -28,6 +28,18 @@ var ClientHandshakeHandler = (function () {
         this.recordLayer = recordLayer;
         this.options = options;
         this.finishedCallback = finishedCallback;
+        ///**
+        // * Sends a ChangeCipherSpec message
+        // */
+        //private sendChangeCipherSpecMessage() {
+        //	const message = {
+        //		type: ContentType.change_cipher_spec,
+        //		data: (ChangeCipherSpec.createEmpty()).serialize()
+        //	};
+        //	this.recordLayer.send(message);
+        //	//// advance the write epoch, so we use the new params for sending the next messages
+        //	//this.recordLayer.advanceWriteEpoch();
+        //}
         /**
          * handles server messages
          */
@@ -156,10 +168,7 @@ var ClientHandshakeHandler = (function () {
         hello.cipher_suites = new Vector_1.Vector([
             // TODO: dynamically check which ones we can support
             CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CCM_8,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_256_CBC_SHA,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA256,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_256_CBC_SHA384,
+            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA256
         ].map(function (cs) { return cs.id; }));
         hello.compression_methods = new Vector_1.Vector([ConnectionState_1.CompressionMethod.null]);
         hello.extensions = new Vector_1.Vector();
@@ -240,15 +249,15 @@ var ClientHandshakeHandler = (function () {
         }
         return false;
     };
-    /**
-     * reacts to a ChangeCipherSpec message
-     */
-    ClientHandshakeHandler.prototype.changeCipherSpec = function () {
-        // advance the read epoch, so we understand the next messages received
-        this.recordLayer.advanceReadEpoch();
-        // TODO: how do we handle retransmission here?
-        // TODO: how do we handle reordering (i.e. Finished received before ChangeCipherSpec)?
-    };
+    ///**
+    // * reacts to a ChangeCipherSpec message
+    // */
+    //public changeCipherSpec() {
+    //	// advance the read epoch, so we understand the next messages received
+    //	this.recordLayer.advanceReadEpoch();
+    //	// TODO: how do we handle retransmission here?
+    //	// TODO: how do we handle reordering (i.e. Finished received before ChangeCipherSpec)?
+    //}
     /**
      * Sends the given flight of messages and remembers it for potential retransmission
      * @param flight The flight to be sent.
@@ -260,37 +269,53 @@ var ClientHandshakeHandler = (function () {
         if (retransmit === void 0) { retransmit = false; }
         this.lastFlight = flight;
         this.expectedResponses = expectedResponses;
+        var messages = [];
         flight.forEach(function (handshake) {
             if (handshake.msg_type === Handshake.HandshakeType.finished) {
                 // before finished messages, ALWAYS send a ChangeCipherSpec
-                _this.sendChangeCipherSpecMessage();
+                messages.push({
+                    type: ContentType_1.ContentType.change_cipher_spec,
+                    data: (ChangeCipherSpec_1.ChangeCipherSpec.createEmpty()).serialize()
+                });
                 // TODO: how do we handle retransmission here?
             }
             if (!retransmit) {
+                // for first-time messages, increment the sequence number
+                // and buffer the data for verification purposes
                 handshake.message_seq = ++_this.lastSentSeqNum;
+                _this.bufferHandshakeData(handshake);
             }
-            _this.sendHandshakeMessage(handshake, retransmit);
+            // fragment the messages (TODO: make this dependent on previous messages in this flight)
+            var fragments = handshake
+                .fragmentMessage()
+                .map(function (fragment) { return ({
+                type: ContentType_1.ContentType.handshake,
+                data: fragment.serialize()
+            }); });
+            messages.push.apply(messages, fragments);
         });
+        this.recordLayer.sendFlight(messages);
     };
-    /**
-     * Fragments a handshake message, serializes the fragements into single messages and sends them over the record layer.
-     * Don't call this directly, rather use *sendFlight*
-     * @param handshake - The handshake message to be sent
-     */
-    ClientHandshakeHandler.prototype.sendHandshakeMessage = function (handshake, retransmit) {
-        // fragment the messages to send them over the record layer
-        var messages = handshake
-            .fragmentMessage()
-            .map(function (fragment) { return ({
-            type: ContentType_1.ContentType.handshake,
-            data: fragment.serialize()
-        }); });
-        this.recordLayer.sendAll(messages);
-        // if this is not a retransmit, also remember the raw data for verification purposes
-        if (!retransmit) {
-            this.bufferHandshakeData(handshake);
-        }
-    };
+    ///**
+    // * Fragments a handshake message, serializes the fragements into single messages and sends them over the record layer.
+    // * Don't call this directly, rather use *sendFlight*
+    // * @param handshake - The handshake message to be sent
+    // */
+    //private sendHandshakeMessage(handshake: Handshake.Handshake, retransmit) {
+    //	// fragment the messages to send them over the record layer
+    //	const messages = handshake
+    //		.fragmentMessage()
+    //		.map(fragment => ({
+    //			type: ContentType.handshake,
+    //			data: fragment.serialize()
+    //		}))
+    //		;
+    //	this.recordLayer.sendFlight(messages);
+    //	// if this is not a retransmit, also remember the raw data for verification purposes
+    //	if (!retransmit) {
+    //		this.bufferHandshakeData(handshake);
+    //	}
+    //}
     /**
      * remembers the raw data of handshake messages for verification purposes
      * @param messages - the messages to be remembered
@@ -307,6 +332,7 @@ var ClientHandshakeHandler = (function () {
         // stript out hello requests
         messages = messages.filter(function (m) { return m.msg_type !== Handshake.HandshakeType.hello_request; });
         // and add the raw data
+        messages.forEach(function (m) { return console.log("buffering message with type " + m.msg_type); });
         buffers.push.apply(buffers, (messages.map(function (m) { return m.serialize(); })));
         this.allHandshakeData = Buffer.concat(buffers);
     };
@@ -321,18 +347,6 @@ var ClientHandshakeHandler = (function () {
         // and use it to compute the verify data
         var verify_data = PRF_fn(connState.master_secret, source + " finished", handshakeHash, connState.cipherSuite.verify_data_length);
         return verify_data;
-    };
-    /**
-     * Sends a ChangeCipherSpec message
-     */
-    ClientHandshakeHandler.prototype.sendChangeCipherSpecMessage = function () {
-        var message = {
-            type: ContentType_1.ContentType.change_cipher_spec,
-            data: (ChangeCipherSpec_1.ChangeCipherSpec.createEmpty()).serialize()
-        };
-        this.recordLayer.send(message);
-        // advance the write epoch, so we use the new params for sending the next messages
-        this.recordLayer.advanceWriteEpoch();
     };
     return ClientHandshakeHandler;
 }());

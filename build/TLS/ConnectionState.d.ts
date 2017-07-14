@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import * as TypeSpecs from "./TypeSpecs";
 import { PreMasterSecret } from "./PreMasterSecret";
-import { KeyMaterial, CipherSuite, CipherDelegate, DecipherDelegate, MacDelegate } from "./CipherSuite";
+import { KeyMaterial, CipherSuite, CipherDelegate, DecipherDelegate } from "./CipherSuite";
 export declare enum CompressionMethod {
     null = 0,
 }
@@ -13,7 +13,6 @@ export declare class ConnectionState {
     constructor(values?: any);
     entity: ConnectionEnd;
     cipherSuite: CipherSuite;
-    fixed_iv_length: number;
     compression_algorithm: CompressionMethod;
     master_secret: Buffer;
     client_random: Buffer;
@@ -23,10 +22,6 @@ export declare class ConnectionState {
     readonly Cipher: CipherDelegate;
     private _decipher;
     readonly Decipher: DecipherDelegate;
-    private _outgoingMac;
-    readonly OutgoingMac: MacDelegate;
-    private _incomingMac;
-    readonly IncomingMac: MacDelegate;
     /**
      * Compute the master secret from a given premaster secret
      * @param preMasterSecret - The secret used to calculate the master secret

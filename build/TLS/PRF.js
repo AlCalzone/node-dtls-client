@@ -65,7 +65,7 @@ function P(algorithm, secret, seed, length) {
         hashesLength += newHash.length;
     }
     // concatenate the individual hashes and trim it to the desired length
-    return Buffer.concat(hashes, hashesLength);
+    return Buffer.concat(hashes, length);
 }
 exports.PRF = {
     "md5": PRF_factory("md5"),

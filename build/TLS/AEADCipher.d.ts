@@ -1,20 +1,6 @@
-/// <reference types="node" />
-import { KeyMaterial } from "./CipherSuite";
-import { ConnectionEnd } from "./ConnectionState";
-import { DTLSPacket } from "../DTLS/DTLSPacket";
-export declare type AEADCipherAlgorithm = "aes-128-ccm" | "aes-256-ccm" | "aes-128-ccm8" | "aes-256-ccm8" | "aes-128-gcm" | "aes-256-gcm" | "aes-128-gcm8" | "aes-256-gcm8";
-export interface AEADCipherDelegate {
-    /**
-     * Encrypts the given plaintext packet
-     * @param plaintext - The plaintext to be encrypted
-     * @param keyMaterial - The key material (mac and encryption keys) used in the encryption
-     * @param connEnd - Denotes if the current entity is the server or client
-     */
-    (plaintext: DTLSPacket, keyMaterial: KeyMaterial, connEnd: ConnectionEnd): Buffer;
-    /**
-     * The length of encryption keys in bytes
-     */
-    keyLength: number;
+import { GenericCipherDelegate, GenericDecipherDelegate } from "./CipherSuite";
+export declare type AEADCipherAlgorithm = "aes-128-ccm" | "aes-256-ccm" | "aes-128-ccm8" | "aes-256-ccm8" | "aes-128-gcm" | "aes-256-gcm";
+export interface AEADCipherDelegate extends GenericCipherDelegate {
     /**
      * The length of nonces for each record
      */
@@ -28,21 +14,7 @@ export interface AEADCipherDelegate {
      */
     authTagLength: number;
 }
-export interface AEADDecipherDelegate {
-    /**
-     * Decrypts the given ciphered packet
-     * @param ciphertext - The ciphertext to be decrypted
-     * @param keyMaterial - The key material (mac and encryption keys) used in the decryption
-     * @param connEnd - Denotes if the current entity is the server or client
-     */
-    (ciphertext: DTLSPacket, keyMaterial: KeyMaterial, connEnd: ConnectionEnd): {
-        err?: Error;
-        result: Buffer;
-    };
-    /**
-     * The length of decryption keys in bytes
-     */
-    keyLength: number;
+export interface AEADDecipherDelegate extends GenericDecipherDelegate {
     /**
      * The length of nonces for each record
      */

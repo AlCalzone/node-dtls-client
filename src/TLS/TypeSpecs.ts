@@ -81,7 +81,7 @@ export const define = {
 		minLength, maxLength,
 		optional
 	}),
-	Buffer: (minLength = 0, maxLength = Number.POSITIVE_INFINITY): Buffer => ({
+	Buffer: (minLength = Number.POSITIVE_INFINITY, maxLength = minLength): Buffer => ({
 		type: "buffer",
 		minLength, maxLength
 	})

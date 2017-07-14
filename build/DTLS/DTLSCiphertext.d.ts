@@ -3,8 +3,6 @@ import * as TypeSpecs from "../TLS/TypeSpecs";
 import { TLSStruct } from "../TLS/TLSStruct";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
-import { DTLSCompressed } from "./DTLSCompressed";
-import { CipherDelegate, DecipherDelegate, MacDelegate } from "../TLS/CipherSuite";
 import { DTLSPacket } from "./DTLSPacket";
 export declare class DTLSCiphertext extends TLSStruct implements DTLSPacket {
     type: ContentType;
@@ -22,17 +20,4 @@ export declare class DTLSCiphertext extends TLSStruct implements DTLSPacket {
     static readonly spec: TypeSpecs.Struct;
     constructor(type: ContentType, version: ProtocolVersion, epoch: number, sequence_number: number, fragment: Buffer);
     static createEmpty(): DTLSCiphertext;
-    /**
-     * Encrypts the given compressed packet
-     * @param packet - The packet to be encrypted
-     * @param cipher - The cipher used to encrypt the given packet
-     * @param outgoingMac - The MAC function used for outgoing packets
-     */
-    static encrypt(packet: DTLSCompressed, cipher: CipherDelegate, outgoingMac: MacDelegate): DTLSCiphertext;
-    /**
-     * Decrypts this packet into a compressed packet
-     * @param decipher - The decipher used to decrypt this packet
-     * @param incomingMac - The MAC function used for incoming packets
-     */
-    decrypt(decipher: DecipherDelegate, incomingMac: MacDelegate): DTLSCompressed;
 }

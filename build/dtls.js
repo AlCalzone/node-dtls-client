@@ -105,7 +105,7 @@ var dtls;
                         this.handshakeHandler.processMessage(handshake);
                         break;
                     case ContentType_1.ContentType.change_cipher_spec:
-                        this.handshakeHandler.changeCipherSpec();
+                        this.recordLayer.advanceReadEpoch();
                         break;
                     case ContentType_1.ContentType.alert:
                         // TODO: read spec to see how we handle this

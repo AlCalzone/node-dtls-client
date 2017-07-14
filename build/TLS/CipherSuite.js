@@ -13,7 +13,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
 var BlockCipher = require("./BlockCipher");
+var AEADCipher = require("./AEADCipher");
 var PRF_1 = require("./PRF");
+var DTLSCompressed_1 = require("../DTLS/DTLSCompressed");
+var DTLSCiphertext_1 = require("../DTLS/DTLSCiphertext");
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used
@@ -33,14 +36,18 @@ function createMAC(algorithm) {
 }
 exports.createMAC = createMAC;
 function createNullCipher() {
-    var ret = (function (plaintext, _1, _2) { return Buffer.from(plaintext); });
+    var ret = (function (packet, _1, _2) { return new DTLSCiphertext_1.DTLSCiphertext(packet.type, packet.version, packet.epoch, packet.sequence_number, packet.fragment); });
+    //const ret = ((plaintext, _1, _2) => Buffer.from(plaintext.fragment)) as GenericCipherDelegate;
     ret.keyLength = 0;
+    ret.fixedIvLength = 0;
     ret.recordIvLength = 0;
     return ret;
 }
 function createNullDecipher() {
-    var ret = (function (ciphertext, _1, _2) { return ({ result: Buffer.from(ciphertext) }); });
+    var ret = (function (packet, _1, _2) { return new DTLSCompressed_1.DTLSCompressed(packet.type, packet.version, packet.epoch, packet.sequence_number, packet.fragment); });
+    //const ret =  ((ciphertext, _1, _2) => ({ result: Buffer.from(ciphertext) })) as GenericDecipherDelegate;
     ret.keyLength = 0;
+    ret.fixedIvLength = 0;
     ret.recordIvLength = 0;
     return ret;
 }
@@ -76,20 +83,31 @@ var CipherSuite = (function (_super) {
         configurable: true
     });
     CipherSuite.prototype.createCipher = function () {
-        switch (this.cipherType) {
-            case null:
-                return createNullCipher();
-            case "block":
-                return BlockCipher.createCipher(this.algorithm);
-            default:
-                throw new Error("createCipher not implemented for " + this.cipherType + " cipher");
-        }
+        var _this = this;
+        var ret = (function () {
+            switch (_this.cipherType) {
+                case null:
+                    return createNullCipher();
+                case "block":
+                    return BlockCipher.createCipher(_this.algorithm, _this.MAC);
+                case "aead":
+                    return AEADCipher.createCipher(_this.algorithm);
+                default:
+                    throw new Error("createCipher not implemented for " + _this.cipherType + " cipher");
+            }
+        })();
+        if (!ret.keyLength)
+            ret.keyLength = 0;
+        if (!ret.fixedIvLength)
+            ret.fixedIvLength = 0;
+        if (!ret.recordIvLength)
+            ret.recordIvLength = 0;
+        return ret;
     };
     CipherSuite.prototype.specifyCipher = function (keyMaterial, connEnd) {
         var _this = this;
         var ret = (function (plaintext) { return _this.Cipher(plaintext, keyMaterial, connEnd); });
-        ret.keyLength = this.Cipher.keyLength;
-        ret.recordIvLength = this.Cipher.recordIvLength;
+        ret.inner = this.Cipher;
         return ret;
     };
     Object.defineProperty(CipherSuite.prototype, "Decipher", {
@@ -102,20 +120,31 @@ var CipherSuite = (function (_super) {
         configurable: true
     });
     CipherSuite.prototype.createDecipher = function () {
-        switch (this.cipherType) {
-            case null:
-                return createNullDecipher();
-            case "block":
-                return BlockCipher.createDecipher(this.algorithm);
-            default:
-                throw new Error("createDecipher not implemented for " + this.cipherType + " cipher");
-        }
+        var _this = this;
+        var ret = (function () {
+            switch (_this.cipherType) {
+                case null:
+                    return createNullDecipher();
+                case "block":
+                    return BlockCipher.createDecipher(_this.algorithm, _this.MAC);
+                case "aead":
+                    return AEADCipher.createDecipher(_this.algorithm);
+                default:
+                    throw new Error("createDecipher not implemented for " + _this.cipherType + " cipher");
+            }
+        })();
+        if (!ret.keyLength)
+            ret.keyLength = 0;
+        if (!ret.fixedIvLength)
+            ret.fixedIvLength = 0;
+        if (!ret.recordIvLength)
+            ret.recordIvLength = 0;
+        return ret;
     };
     CipherSuite.prototype.specifyDecipher = function (keyMaterial, connEnd) {
         var _this = this;
-        var ret = (function (plaintext) { return _this.Decipher(plaintext, keyMaterial, connEnd); });
-        ret.keyLength = this.Decipher.keyLength;
-        ret.recordIvLength = this.Decipher.recordIvLength;
+        var ret = (function (packet) { return _this.Decipher(packet, keyMaterial, connEnd); });
+        ret.inner = this.Decipher;
         return ret;
     };
     Object.defineProperty(CipherSuite.prototype, "MAC", {
@@ -131,8 +160,8 @@ var CipherSuite = (function (_super) {
         // TODO: detect special cases
         switch (this.cipherType) {
             case null:
+            case "aead":
                 return createNullMAC();
-            case "stream":
             case "block":
                 if (this.macAlgorithm == null)
                     return createNullMAC();
@@ -140,12 +169,6 @@ var CipherSuite = (function (_super) {
             default:
                 throw new Error("createMAC not implemented for " + this.cipherType + " cipher");
         }
-    };
-    CipherSuite.prototype.specifyMAC = function (keyMaterial, sourceConnEnd) {
-        var _this = this;
-        var ret = (function (data) { return _this.MAC(data, keyMaterial, sourceConnEnd); });
-        ret.keyAndHashLength = this.MAC.keyAndHashLength;
-        return ret;
     };
     return CipherSuite;
 }(TLSStruct_1.TLSStruct));

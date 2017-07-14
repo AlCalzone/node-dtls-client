@@ -107,7 +107,7 @@ export module dtls {
 						this.handshakeHandler.processMessage(handshake);
 						break;
 					case ContentType.change_cipher_spec:
-						this.handshakeHandler.changeCipherSpec();
+						this.recordLayer.advanceReadEpoch();
 						break;
 					case ContentType.alert:
 						// TODO: read spec to see how we handle this

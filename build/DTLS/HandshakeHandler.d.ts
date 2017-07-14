@@ -43,22 +43,12 @@ export declare class ClientHandshakeHandler {
      */
     private tryAssembleFragments(reference);
     /**
-     * reacts to a ChangeCipherSpec message
-     */
-    changeCipherSpec(): void;
-    /**
      * Sends the given flight of messages and remembers it for potential retransmission
      * @param flight The flight to be sent.
      * @param expectedResponses The types of possible responses we are expecting.
      * @param retransmit If the flight is retransmitted, i.e. no sequence numbers are increased
      */
     private sendFlight(flight, expectedResponses, retransmit?);
-    /**
-     * Fragments a handshake message, serializes the fragements into single messages and sends them over the record layer.
-     * Don't call this directly, rather use *sendFlight*
-     * @param handshake - The handshake message to be sent
-     */
-    private sendHandshakeMessage(handshake, retransmit);
     /**
      * remembers the raw data of handshake messages for verification purposes
      * @param messages - the messages to be remembered
@@ -69,10 +59,6 @@ export declare class ClientHandshakeHandler {
      * @param handshakeMessages - the concatenated messages received so far
      */
     private computeVerifyData(handshakeMessages, source);
-    /**
-     * Sends a ChangeCipherSpec message
-     */
-    private sendChangeCipherSpecMessage();
     /**
      * handles server messages
      */

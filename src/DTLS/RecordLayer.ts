@@ -8,6 +8,7 @@ import { DTLSPlaintext } from "./DTLSPlaintext";
 import { DTLSCompressed } from "./DTLSCompressed";
 import { DTLSCiphertext } from "./DTLSCiphertext";
 import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
+import { ContentType } from "../TLS/ContentType";
 
 export interface Epoch {
 	index: number;
@@ -33,6 +34,38 @@ export class RecordLayer {
 	 * @param callback - The function to be called after sending the message.
 	 */
 	public send(msg: Message, callback?: dtls.SendCallback) {
+		//const epoch = this.epochs[this.writeEpochNr];
+
+		//let packet: DTLSPlaintext | DTLSCompressed | DTLSCiphertext = new DTLSPlaintext(
+		//	msg.type,
+		//	new ProtocolVersion(~1, ~2), // 2's complement of 1.2
+		//	this._writeEpochNr,
+		//	++epoch.writeSequenceNumber, // sequence number increased by 1
+		//	msg.data
+		//);
+
+		//// compress packet
+		//const compressor = (identity) => identity; // TODO: implement compression algorithms
+		//packet = DTLSCompressed.compress(packet, compressor);
+
+		//if (epoch.connectionState.cipherSuite.cipherType != null) {
+		//	// encrypt packet
+		//	packet = epoch.connectionState.Cipher(packet as DTLSCompressed);
+		//}
+
+		//// get send buffer
+		//const buf = packet.serialize();
+		//// TODO: check if the buffer satisfies the configured MTU
+		//// and send it
+
+		const buf = this.processOutgoingMessage(msg);
+		this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+	}
+	/**
+	 * Transforms the given message into a DTLSCiphertext packet,
+	 * does neccessary processing and buffers it up for sending
+	 */
+	private processOutgoingMessage(msg: Message): Buffer {
 		const epoch = this.epochs[this.writeEpochNr];
 
 		let packet: DTLSPlaintext | DTLSCompressed | DTLSCiphertext = new DTLSPlaintext(
@@ -50,26 +83,31 @@ export class RecordLayer {
 		if (epoch.connectionState.cipherSuite.cipherType != null) {
 			// encrypt packet
 			packet = epoch.connectionState.Cipher(packet as DTLSCompressed);
-			// packet = DTLSCiphertext.encrypt(
-			// 	packet as DTLSCompressed,
-			// 	epoch.connectionState.Cipher /*,
-			// 	epoch.connectionState.OutgoingMac*/
-			// );
 		}
 
 		// get send buffer
-		const buf = packet.serialize();
-		// TODO: check if the buffer satisfies the configured MTU
-		// and send it
-		this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+		const ret = packet.serialize();
+
+		// advance the write epoch, so we use the new params for sending the next messages
+		if (msg.type === ContentType.change_cipher_spec) {
+			this.advanceWriteEpoch();
+		}
+
+		return ret;
+
 	}
 	/**
-	 * Sends all given messages
+	 * Sends all messages of a flight in one packet
 	 * @param messages - The messages to be sent
 	 */
-	public sendAll(messages: Message[]) {
-		// TODO: enable send callbacks for bulk sending
-		messages.forEach(msg => this.send(msg));
+	public sendFlight(messages: Message[], callback?: dtls.SendCallback) {
+		const buf = Buffer.concat(
+			messages.map(msg => this.processOutgoingMessage(msg))
+			);
+		this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+
+		//// TODO: enable send callbacks for bulk sending
+		//messages.forEach(msg => this.send(msg));
 	}
 
 	/**

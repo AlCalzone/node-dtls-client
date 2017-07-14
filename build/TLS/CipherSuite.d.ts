@@ -4,95 +4,11 @@ import { TLSStruct } from "./TLSStruct";
 import { ConnectionEnd } from "./ConnectionState";
 import * as BlockCipher from "./BlockCipher";
 import * as AEADCipher from "./AEADCipher";
+import { DTLSCompressed } from "../DTLS/DTLSCompressed";
+import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
 export declare type HashAlgorithm = "md5" | "sha1" | "sha256" | "sha384" | "sha512";
-export declare type CipherType = "stream" | "block" | "aead";
+export declare type CipherType = "block" | "aead";
 export declare type KeyExchangeAlgorithm = "dhe_dss" | "dhe_rsa" | "rsa" | "dh_dss" | "dh_rsa" | "psk" | "dhe_psk" | "rsa_psk";
-/**
- * Creates a block cipher delegate used to encrypt packet fragments.
- * @param algorithm - The block cipher algorithm to be used
- */
-export declare function createMAC(algorithm: HashAlgorithm): GenericMacDelegate;
-export interface CipherDelegate {
-    /**
-     * Encrypts the given plaintext buffer using previously defined parameters
-     * @param plaintext - The plaintext to be encrypted
-     */
-    (plaintext: Buffer): Buffer;
-    /**
-     * The length of encryption keys in bytes
-     */
-    keyLength: number;
-    /**
-     * The length of IVs for each record
-     */
-    recordIvLength: number;
-}
-export interface GenericCipherDelegate {
-    /**
-     * Encrypts the given plaintext buffer
-     * @param plaintext - The plaintext to be encrypted
-     * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the encryption
-     * @param connEnd - Denotes if the current entity is the server or client
-     */
-    (plaintext: Buffer, keyMaterial: KeyMaterial, connEnd: ConnectionEnd): Buffer;
-    /**
-     * The length of encryption keys in bytes
-     */
-    keyLength: number;
-    /**
-     * The length of IVs for each record
-     */
-    recordIvLength: number;
-}
-export interface DecipherDelegate {
-    /**
-     * Decrypts the given plaintext buffer using previously defined parameters
-     * @param ciphertext - The ciphertext to be decrypted
-     */
-    (plaintext: Buffer): {
-        err?: Error;
-        result: Buffer;
-    };
-    /**
-     * The length of decryption keys in bytes
-     */
-    keyLength: number;
-    /**
-     * The length of IVs for each record
-     */
-    recordIvLength: number;
-}
-export interface GenericDecipherDelegate {
-    /**
-     * Decrypts the given ciphertext buffer
-     * @param ciphertext - The ciphertext to be decrypted
-     * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the decryption
-     * @param connEnd - Denotes if the current entity is the server or client
-     */
-    (ciphertext: Buffer, keyMaterial: KeyMaterial, connEnd: ConnectionEnd): {
-        err?: Error;
-        result: Buffer;
-    };
-    /**
-     * The length of decryption keys in bytes
-     */
-    keyLength: number;
-    /**
-     * The length of IVs for each record
-     */
-    recordIvLength: number;
-}
-export interface MacDelegate {
-    /**
-     * Generates a MAC hash from the given data using the underlying HMAC function.
-     * @param data - The data to be hashed
-     */
-    (data: Buffer): Buffer;
-    /**
-     * The key and hash output length of this hash function
-     */
-    keyAndHashLength: number;
-}
 export interface GenericMacDelegate {
     /**
      * Generates a MAC hash from the given data using the underlying HMAC function.
@@ -105,6 +21,85 @@ export interface GenericMacDelegate {
      * The key and hash output length of this hash function
      */
     keyAndHashLength: number;
+}
+/**
+ * Creates a block cipher delegate used to encrypt packet fragments.
+ * @param algorithm - The block cipher algorithm to be used
+ */
+export declare function createMAC(algorithm: HashAlgorithm): GenericMacDelegate;
+export interface CipherDelegate {
+    /**
+     * Encrypts the given plaintext packet using previously defined parameters
+     * @param packet - The plaintext packet to be encrypted
+     */
+    (packet: DTLSCompressed): DTLSCiphertext;
+    /**
+     * The inner delegate. This can represent different cipher types like block and AEAD ciphers
+     */
+    inner: GenericCipherDelegate;
+}
+export interface GenericCipherDelegate {
+    /**
+     * Encrypts the given plaintext packet
+     * @param packet - The plaintext packet to be encrypted
+     * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the encryption
+     * @param connEnd - Denotes if the current entity is the server or client
+     */
+    (packet: DTLSCompressed, keyMaterial: KeyMaterial, connEnd: ConnectionEnd): DTLSCiphertext;
+    /**
+     * The length of encryption keys in bytes
+     */
+    keyLength: number;
+    /**
+     * The length of fixed (for each session) IVs in bytes
+     */
+    fixedIvLength: number;
+    /**
+     * The length of record IVs in bytes
+     */
+    recordIvLength: number;
+    /**
+     * The MAC delegate used to authenticate packets.
+     * May be null for certain ciphers.
+     */
+    MAC: GenericMacDelegate;
+}
+export interface DecipherDelegate {
+    /**
+     * Decrypts the given ciphertext packet using previously defined parameters
+     * @param packet - The ciphertext to be decrypted
+     */
+    (packet: DTLSCiphertext): DTLSCompressed;
+    /**
+     * The inner delegate. This can represent different cipher types like block and AEAD ciphers
+     */
+    inner: GenericDecipherDelegate;
+}
+export interface GenericDecipherDelegate {
+    /**
+     * Decrypts the given ciphertext packet
+     * @param packet - The ciphertext packet to be decrypted
+     * @param keyMaterial - The key material (mac and encryption keys and IVs) used in the decryption
+     * @param connEnd - Denotes if the current entity is the server or client
+     */
+    (packet: DTLSCiphertext, keyMaterial: KeyMaterial, connEnd: ConnectionEnd): DTLSCompressed;
+    /**
+     * The length of decryption keys in bytes
+     */
+    keyLength: number;
+    /**
+     * The length of fixed (for each session) IVs in bytes
+     */
+    fixedIvLength: number;
+    /**
+     * The length of record IVs in bytes
+     */
+    recordIvLength: number;
+    /**
+     * The MAC delegate used to authenticate packets.
+     * May be null for certain ciphers.
+     */
+    MAC: GenericMacDelegate;
 }
 export interface KeyMaterial {
     client_write_MAC_key: Buffer;
@@ -139,5 +134,4 @@ export declare class CipherSuite extends TLSStruct {
     private _mac;
     readonly MAC: GenericMacDelegate;
     private createMAC();
-    specifyMAC(keyMaterial: KeyMaterial, sourceConnEnd: ConnectionEnd): MacDelegate;
 }

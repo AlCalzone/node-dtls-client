@@ -40,8 +40,8 @@ exports.define = {
         });
     },
     Buffer: function (minLength, maxLength) {
-        if (minLength === void 0) { minLength = 0; }
-        if (maxLength === void 0) { maxLength = Number.POSITIVE_INFINITY; }
+        if (minLength === void 0) { minLength = Number.POSITIVE_INFINITY; }
+        if (maxLength === void 0) { maxLength = minLength; }
         return ({
             type: "buffer",
             minLength: minLength, maxLength: maxLength

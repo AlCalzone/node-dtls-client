@@ -246,31 +246,34 @@ export class CipherSuite extends TLSStruct {
 			this._cipher = this.createCipher();
 		return this._cipher;
 	}
-	private createCipher() : GenericCipherDelegate {
-		switch (this.cipherType) {
-			case null:
-				return createNullCipher();
-			case "block":
-				return BlockCipher.createCipher(
-					this.algorithm as BlockCipher.BlockCipherAlgorithm,
-					this.MAC
-				);
-			case "aead":
-				return AEADCipher.createCipher(
-					this.algorithm as AEADCipher.AEADCipherAlgorithm
-				);
-			default:
-				throw new Error(`createCipher not implemented for ${this.cipherType} cipher`);
-		}
+	private createCipher(): GenericCipherDelegate {
+		const ret = (() => {
+			switch (this.cipherType) {
+				case null:
+					return createNullCipher();
+				case "block":
+					return BlockCipher.createCipher(
+						this.algorithm as BlockCipher.BlockCipherAlgorithm,
+						this.MAC
+					);
+				case "aead":
+					return AEADCipher.createCipher(
+						this.algorithm as AEADCipher.AEADCipherAlgorithm
+					);
+				default:
+					throw new Error(`createCipher not implemented for ${this.cipherType} cipher`);
+			}
+		})();
+		if (!ret.keyLength) ret.keyLength = 0;
+		if (!ret.fixedIvLength) ret.fixedIvLength = 0;
+		if (!ret.recordIvLength) ret.recordIvLength = 0;
+		return ret;
 	}
 	public specifyCipher(keyMaterial: KeyMaterial, connEnd: ConnectionEnd): CipherDelegate {
 		const ret = (
 			(plaintext: DTLSCompressed) => this.Cipher(plaintext, keyMaterial, connEnd)
 		) as CipherDelegate;
 		ret.inner = this.Cipher;
-		if (!ret.inner.keyLength) ret.inner.keyLength = 0;
-		if (!ret.inner.fixedIvLength) ret.inner.fixedIvLength = 0;
-		if (!ret.inner.recordIvLength) ret.inner.recordIvLength = 0;
 		return ret;
 	}
 
@@ -281,30 +284,33 @@ export class CipherSuite extends TLSStruct {
 		return this._decipher;
 	}
 	private createDecipher() : GenericDecipherDelegate {
-		switch (this.cipherType) {
-			case null:
-				return createNullDecipher();
-			case "block":
-				return BlockCipher.createDecipher(
-					this.algorithm as BlockCipher.BlockCipherAlgorithm,
-					this.MAC
-				);
-			case "aead":
-				return AEADCipher.createDecipher(
-					this.algorithm as AEADCipher.AEADCipherAlgorithm
-				);				
-			default:
-				throw new Error(`createDecipher not implemented for ${this.cipherType} cipher`);
-		}
+		const ret = (() => {
+			switch (this.cipherType) {
+				case null:
+					return createNullDecipher();
+				case "block":
+					return BlockCipher.createDecipher(
+						this.algorithm as BlockCipher.BlockCipherAlgorithm,
+						this.MAC
+					);
+				case "aead":
+					return AEADCipher.createDecipher(
+						this.algorithm as AEADCipher.AEADCipherAlgorithm
+					);
+				default:
+					throw new Error(`createDecipher not implemented for ${this.cipherType} cipher`);
+			}
+		})();
+		if (!ret.keyLength) ret.keyLength = 0;
+		if (!ret.fixedIvLength) ret.fixedIvLength = 0;
+		if (!ret.recordIvLength) ret.recordIvLength = 0;
+		return ret;
 	}
 	public specifyDecipher(keyMaterial: KeyMaterial, connEnd: ConnectionEnd): DecipherDelegate {
 		const ret = (
 			(packet: DTLSCiphertext) => this.Decipher(packet, keyMaterial, connEnd)
 		) as DecipherDelegate;
 		ret.inner = this.Decipher;
-		if (!ret.inner.keyLength) ret.inner.keyLength = 0;
-		if (!ret.inner.fixedIvLength) ret.inner.fixedIvLength = 0;
-		if (!ret.inner.recordIvLength) ret.inner.recordIvLength = 0;
 		return ret;
 	}
 

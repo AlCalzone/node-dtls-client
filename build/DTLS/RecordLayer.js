@@ -6,6 +6,7 @@ var DTLSPlaintext_1 = require("./DTLSPlaintext");
 var DTLSCompressed_1 = require("./DTLSCompressed");
 var DTLSCiphertext_1 = require("./DTLSCiphertext");
 var AntiReplayWindow_1 = require("../TLS/AntiReplayWindow");
+var ContentType_1 = require("../TLS/ContentType");
 var RecordLayer = (function () {
     // TODO: specify connection end
     function RecordLayer(udpSocket, options) {
@@ -30,6 +31,33 @@ var RecordLayer = (function () {
      * @param callback - The function to be called after sending the message.
      */
     RecordLayer.prototype.send = function (msg, callback) {
+        //const epoch = this.epochs[this.writeEpochNr];
+        //let packet: DTLSPlaintext | DTLSCompressed | DTLSCiphertext = new DTLSPlaintext(
+        //	msg.type,
+        //	new ProtocolVersion(~1, ~2), // 2's complement of 1.2
+        //	this._writeEpochNr,
+        //	++epoch.writeSequenceNumber, // sequence number increased by 1
+        //	msg.data
+        //);
+        //// compress packet
+        //const compressor = (identity) => identity; // TODO: implement compression algorithms
+        //packet = DTLSCompressed.compress(packet, compressor);
+        //if (epoch.connectionState.cipherSuite.cipherType != null) {
+        //	// encrypt packet
+        //	packet = epoch.connectionState.Cipher(packet as DTLSCompressed);
+        //}
+        //// get send buffer
+        //const buf = packet.serialize();
+        //// TODO: check if the buffer satisfies the configured MTU
+        //// and send it
+        var buf = this.processOutgoingMessage(msg);
+        this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+    };
+    /**
+     * Transforms the given message into a DTLSCiphertext packet,
+     * does neccessary processing and buffers it up for sending
+     */
+    RecordLayer.prototype.processOutgoingMessage = function (msg) {
         var epoch = this.epochs[this.writeEpochNr];
         var packet = new DTLSPlaintext_1.DTLSPlaintext(msg.type, new ProtocolVersion_1.ProtocolVersion(~1, ~2), // 2's complement of 1.2
         this._writeEpochNr, ++epoch.writeSequenceNumber, // sequence number increased by 1
@@ -39,22 +67,26 @@ var RecordLayer = (function () {
         packet = DTLSCompressed_1.DTLSCompressed.compress(packet, compressor);
         if (epoch.connectionState.cipherSuite.cipherType != null) {
             // encrypt packet
-            packet = DTLSCiphertext_1.DTLSCiphertext.encrypt(packet, epoch.connectionState.Cipher, epoch.connectionState.OutgoingMac);
+            packet = epoch.connectionState.Cipher(packet);
         }
         // get send buffer
-        var buf = packet.serialize();
-        // TODO: check if the buffer satisfies the configured MTU
-        // and send it
-        this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+        var ret = packet.serialize();
+        // advance the write epoch, so we use the new params for sending the next messages
+        if (msg.type === ContentType_1.ContentType.change_cipher_spec) {
+            this.advanceWriteEpoch();
+        }
+        return ret;
     };
     /**
-     * Sends all given messages
+     * Sends all messages of a flight in one packet
      * @param messages - The messages to be sent
      */
-    RecordLayer.prototype.sendAll = function (messages) {
+    RecordLayer.prototype.sendFlight = function (messages, callback) {
         var _this = this;
-        // TODO: enable send callbacks for bulk sending
-        messages.forEach(function (msg) { return _this.send(msg); });
+        var buf = Buffer.concat(messages.map(function (msg) { return _this.processOutgoingMessage(msg); }));
+        this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+        //// TODO: enable send callbacks for bulk sending
+        //messages.forEach(msg => this.send(msg));
     };
     /**
      * Receives DTLS messages from the given buffer.
@@ -101,7 +133,8 @@ var RecordLayer = (function () {
             .map(function (p) {
             var connectionState = _this.epochs[p.epoch].connectionState;
             try {
-                return p.decrypt(connectionState.Decipher, connectionState.IncomingMac);
+                return connectionState.Decipher(p);
+                //return p.decrypt(connectionState.Decipher/*, connectionState.IncomingMac*/);
             }
             catch (e) {
                 // decryption can fail because of bad MAC etc...
