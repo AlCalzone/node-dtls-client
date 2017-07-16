@@ -94,6 +94,7 @@ const AEADCipherParameters: {[algorithm in AEADCipherAlgorithm]?: AEADCipherPara
 class AdditionalData extends TLSStruct {
 
 	static readonly __spec = {
+		epoch: TypeSpecs.uint16, // the seq_num in the specs refers to the TLS seq_num, which is 64 bits!
 		sequence_number: TypeSpecs.uint48,
 		type: ContentType.__spec,
 		version: TypeSpecs.define.Struct(ProtocolVersion),
@@ -101,6 +102,7 @@ class AdditionalData extends TLSStruct {
 	}
 
 	constructor(
+		public epoch: number,
 		public sequence_number: number,
 		public type: ContentType,
 		public version: ProtocolVersion,
@@ -110,7 +112,7 @@ class AdditionalData extends TLSStruct {
 	}
 
 	static createEmpty(): AdditionalData {
-		return new AdditionalData(null, null, null, null);
+		return new AdditionalData(null, null, null, null, null);
 	}
 
 }
@@ -129,13 +131,15 @@ export function createCipher(
 
 		// find the right encryption params
 		const salt = (connEnd === "server") ? keyMaterial.server_write_IV : keyMaterial.client_write_IV;
-		//const nonce_explicit = crypto.pseudoRandomBytes(cipherParams.recordIvLength);
-		const nonce_explicit = Buffer.concat([
-			BitConverter.numberToBuffer(packet.epoch, 16),
-			BitConverter.numberToBuffer(packet.sequence_number, 48)
-		]);
+		const nonce_explicit = crypto.pseudoRandomBytes(cipherParams.recordIvLength);
+		// alternatively:
+		//const nonce_explicit = Buffer.concat([
+		//	BitConverter.numberToBuffer(packet.epoch, 16),
+		//	BitConverter.numberToBuffer(packet.sequence_number, 48)
+		//]);
 		const nonce = Buffer.concat([salt, nonce_explicit]);
 		const additionalData = new AdditionalData(
+			packet.epoch,
 			packet.sequence_number,
 			packet.type,
 			packet.version,
@@ -145,7 +149,6 @@ export function createCipher(
 
 		// Find the right function to encrypt
 		const encrypt = cipherParams.interface.encrypt;
-		//const decrypt = cipherParams.interface.decrypt;
 
 		// encrypt and concat the neccessary pieces
 		const encryptionResult = encrypt(cipher_key, nonce, plaintext, additionalData, cipherParams.authTagLength);
@@ -154,9 +157,7 @@ export function createCipher(
 			encryptionResult.ciphertext,
 			encryptionResult.auth_tag
 		]);
-		//const decryptionResult = decrypt(cipher_key, nonce, encryptionResult.ciphertext, additionalData, encryptionResult.auth_tag);
-
-		
+	
 
 		// and return the packet
 		return new DTLSCiphertext(
@@ -197,6 +198,7 @@ export function createDecipher(
 		const nonce = Buffer.concat([salt, nonce_explicit]);
 
 		const additionalData = new AdditionalData(
+			packet.epoch,
 			packet.sequence_number,
 			packet.type,
 			packet.version,

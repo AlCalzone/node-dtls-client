@@ -2,17 +2,16 @@
 import { TLSStruct } from "./TLSStruct";
 import { entries } from "../lib/object-polyfill";
 import { PreMasterSecret } from "./PreMasterSecret";
+import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { PRF } from "./PRF";
 import {
 	HashAlgorithm,
-	//BulkCipherAlgorithm,
-	//AEADAlgorithm,
 	CipherType,
 	KeyMaterial,
 	CipherSuite,
 	GenericCipherDelegate, CipherDelegate,
 	GenericDecipherDelegate, DecipherDelegate,
-	GenericMacDelegate, /*MacDelegate,*/
+	GenericMacDelegate, 
 	KeyExchangeAlgorithm
 } from "./CipherSuite";
 import { CipherSuites } from "../DTLS/CipherSuites";
@@ -44,24 +43,12 @@ export class ConnectionState {
 
 	entity: ConnectionEnd = "client";
 	cipherSuite: CipherSuite = CipherSuites.TLS_NULL_WITH_NULL_NULL;
-	//prf_algorithm: HashAlgorithm;
-	//bulk_cipher_algorithm: BulkCipherAlgorithm;
-	//cipher_type: CipherType;
-	//enc_key_length: number;
-	//block_length: number;
-	//fixed_iv_length: number; // TODO: put it into cipher suite?
-	//record_iv_length: number;
-	//mac_algorithm: HashAlgorithm;
-	//mac_length: number;
-	//mac_key_length: number;
+	protocolVersion: ProtocolVersion = new ProtocolVersion(~1, ~0); // default to DTLSv1.0 during handshakes
 	compression_algorithm: CompressionMethod = CompressionMethod.null;
 	master_secret: Buffer /*48*/;
 	client_random: Buffer /*32*/;
 	server_random: Buffer /*32*/;
-
 	key_material: KeyMaterial
-
-	// TODO: Gehört das wirklich hier hin?
 
 	private _cipher: CipherDelegate;
 	public get Cipher(): CipherDelegate {
@@ -75,18 +62,6 @@ export class ConnectionState {
 			this._decipher = this.cipherSuite.specifyDecipher(this.key_material, this.entity);
 		return this._decipher;
 	}
-	// private _outgoingMac: MacDelegate;
-	// public get OutgoingMac(): MacDelegate {
-	// 	if (this._outgoingMac == undefined)
-	// 		this._outgoingMac = this.cipherSuite.specifyMAC(this.key_material, this.entity);
-	// 	return this._outgoingMac;
-	// }
-	// private _incomingMac: MacDelegate;
-	// public get IncomingMac(): MacDelegate {
-	// 	if (this._incomingMac == undefined)
-	// 		this._incomingMac = this.cipherSuite.specifyMAC(this.key_material, this.entity === "client" ? "server" : "client");
-	// 	return this._incomingMac;
-	// }
 
 	/**
 	 * Compute the master secret from a given premaster secret
@@ -107,7 +82,7 @@ export class ConnectionState {
 	}
 
 	/**
-	 * Berechnet die Schlüsselkomponenten
+	 * Calculates the key components
 	 */
 	private computeKeyMaterial(): void {
 		const keyBlock = PRF[this.cipherSuite.prfAlgorithm](

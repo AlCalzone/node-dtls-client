@@ -37,7 +37,6 @@ function createMAC(algorithm) {
 exports.createMAC = createMAC;
 function createNullCipher() {
     var ret = (function (packet, _1, _2) { return new DTLSCiphertext_1.DTLSCiphertext(packet.type, packet.version, packet.epoch, packet.sequence_number, packet.fragment); });
-    //const ret = ((plaintext, _1, _2) => Buffer.from(plaintext.fragment)) as GenericCipherDelegate;
     ret.keyLength = 0;
     ret.fixedIvLength = 0;
     ret.recordIvLength = 0;
@@ -45,7 +44,6 @@ function createNullCipher() {
 }
 function createNullDecipher() {
     var ret = (function (packet, _1, _2) { return new DTLSCompressed_1.DTLSCompressed(packet.type, packet.version, packet.epoch, packet.sequence_number, packet.fragment); });
-    //const ret =  ((ciphertext, _1, _2) => ({ result: Buffer.from(ciphertext) })) as GenericDecipherDelegate;
     ret.keyLength = 0;
     ret.fixedIvLength = 0;
     ret.recordIvLength = 0;

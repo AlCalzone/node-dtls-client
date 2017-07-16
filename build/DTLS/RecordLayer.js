@@ -16,7 +16,6 @@ var RecordLayer = (function () {
          * All known connection epochs
          */
         this.epochs = [];
-        //private connectionStates: ConnectionState[/* epoch */] = [];
         this._readEpochNr = 0;
         this._writeEpochNr = 0;
         // initialize with NULL cipherspec
@@ -31,25 +30,6 @@ var RecordLayer = (function () {
      * @param callback - The function to be called after sending the message.
      */
     RecordLayer.prototype.send = function (msg, callback) {
-        //const epoch = this.epochs[this.writeEpochNr];
-        //let packet: DTLSPlaintext | DTLSCompressed | DTLSCiphertext = new DTLSPlaintext(
-        //	msg.type,
-        //	new ProtocolVersion(~1, ~2), // 2's complement of 1.2
-        //	this._writeEpochNr,
-        //	++epoch.writeSequenceNumber, // sequence number increased by 1
-        //	msg.data
-        //);
-        //// compress packet
-        //const compressor = (identity) => identity; // TODO: implement compression algorithms
-        //packet = DTLSCompressed.compress(packet, compressor);
-        //if (epoch.connectionState.cipherSuite.cipherType != null) {
-        //	// encrypt packet
-        //	packet = epoch.connectionState.Cipher(packet as DTLSCompressed);
-        //}
-        //// get send buffer
-        //const buf = packet.serialize();
-        //// TODO: check if the buffer satisfies the configured MTU
-        //// and send it
         var buf = this.processOutgoingMessage(msg);
         this.udpSocket.send(buf, this.options.port, this.options.address, callback);
     };
@@ -59,8 +39,7 @@ var RecordLayer = (function () {
      */
     RecordLayer.prototype.processOutgoingMessage = function (msg) {
         var epoch = this.epochs[this.writeEpochNr];
-        var packet = new DTLSPlaintext_1.DTLSPlaintext(msg.type, new ProtocolVersion_1.ProtocolVersion(~1, ~2), // 2's complement of 1.2
-        this._writeEpochNr, ++epoch.writeSequenceNumber, // sequence number increased by 1
+        var packet = new DTLSPlaintext_1.DTLSPlaintext(msg.type, epoch.connectionState.protocolVersion || RecordLayer.DTLSVersion, this._writeEpochNr, ++epoch.writeSequenceNumber, // sequence number increased by 1
         msg.data);
         // compress packet
         var compressor = function (identity) { return identity; }; // TODO: implement compression algorithms
@@ -83,10 +62,11 @@ var RecordLayer = (function () {
      */
     RecordLayer.prototype.sendFlight = function (messages, callback) {
         var _this = this;
-        var buf = Buffer.concat(messages.map(function (msg) { return _this.processOutgoingMessage(msg); }));
-        this.udpSocket.send(buf, this.options.port, this.options.address, callback);
-        //// TODO: enable send callbacks for bulk sending
-        //messages.forEach(msg => this.send(msg));
+        messages.forEach(function (m) { return _this.send(m); });
+        //const buf = Buffer.concat(
+        //	messages.map(msg => this.processOutgoingMessage(msg))
+        //	);
+        //this.udpSocket.send(buf, this.options.port, this.options.address, callback);
     };
     /**
      * Receives DTLS messages from the given buffer.
@@ -134,7 +114,6 @@ var RecordLayer = (function () {
             var connectionState = _this.epochs[p.epoch].connectionState;
             try {
                 return connectionState.Decipher(p);
-                //return p.decrypt(connectionState.Decipher/*, connectionState.IncomingMac*/);
             }
             catch (e) {
                 // decryption can fail because of bad MAC etc...
@@ -235,12 +214,13 @@ var RecordLayer = (function () {
     ;
     return RecordLayer;
 }());
-// TODO: mal sehen, ob das nicht woanders besser aufgehoben ist
 /**
  * Maximum transfer unit of the underlying connection.
  * Note: Ethernet supports up to 1500 bytes, of which 20 bytes are reserved for the IP header and 8 for the UDP header
  */
 RecordLayer.MTU = 1280;
 RecordLayer.MTU_OVERHEAD = 20 + 8;
+// Default to DTLSv1.2
+RecordLayer.DTLSVersion = new ProtocolVersion_1.ProtocolVersion(~1, ~2);
 exports.RecordLayer = RecordLayer;
 //# sourceMappingURL=RecordLayer.js.map

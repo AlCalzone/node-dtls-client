@@ -36,52 +36,34 @@ export abstract class Handshake extends TLSStruct {
 	}
 
 	public message_seq: number;
-	
+
 	/**
-	 * Fragments this packet into a series of packets according to the configured MTU
-	 * @returns An array of fragmented handshake messages - or a single one if it is small enough.
+	 * Converts this Handshake message into a fragment ready to be sent
 	 */
-	fragmentMessage(): FragmentedHandshake[] {
-		
+	public toFragment(): FragmentedHandshake {
 		// spec only contains the body, so serialize() will only return that
-		const wholeMessage : Buffer = this.serialize();
-		let start = 0;
-		let fragments: FragmentedHandshake[] = [];
-		const maxFragmentLength = RecordLayer.MAX_PAYLOAD_SIZE - FragmentedHandshake.headerLength;
-		// loop through the message and fragment it
-		while (!fragments.length && start < wholeMessage.length) {
-			// calculate maximum length, limited by MTU - IP/UDP headers - handshake overhead
-			let fragmentLength = Math.min(maxFragmentLength, wholeMessage.length - start);
-			// slice and dice
-			const fragment = wholeMessage.slice(start, start + fragmentLength);
-			//create the message
-			fragments.push(new FragmentedHandshake(
-				this.msg_type,
-				wholeMessage.length,
-				this.message_seq,
-				start,
-				fragment
-			));
-			// step forward by the actual fragment length
-			start += fragment.length;
-		}
-		
-		return fragments;
+		const body = this.serialize();
+		return new FragmentedHandshake(
+			this.msg_type,
+			body.length,
+			this.message_seq,
+			0,
+			body
+		);
 	}
+	
 	
 	/**
 	 * Parses a re-assembled handshake message into the correct object struture
 	 * @param assembled - the re-assembled (or never-fragmented) message
 	 */
-	static parse(assembled: FragmentedHandshake) : Handshake {
+	static fromFragment(assembled: FragmentedHandshake) : Handshake {
 		if (assembled.isFragmented())
 			throw new Error("the message to be parsed MUST NOT be fragmented");
 		
 		if (HandshakeMessages[assembled.msg_type] != undefined) {
 			// find the right type for the body object
 			const msgClass = HandshakeMessages[assembled.msg_type];
-			//// extract the struct spec
-			//const __spec = msgClass.__spec; // we can expect this to exist
 			// turn it into the correct type
 			const spec = TypeSpecs.define.Struct(msgClass);
 			// parse the body object into a new Handshake instance
@@ -105,7 +87,6 @@ export class FragmentedHandshake extends TLSStruct {
 		total_length: TypeSpecs.uint24,
 		message_seq: TypeSpecs.uint16,
 		fragment_offset: TypeSpecs.uint24,
-		// uint24 fragment_length is implied in the variable size vector
 		fragment: TypeSpecs.define.Buffer(0, 2**24-1)
 	}
 	static readonly spec = TypeSpecs.define.Struct(FragmentedHandshake);
@@ -134,6 +115,8 @@ export class FragmentedHandshake extends TLSStruct {
 	isFragmented(): boolean {
 		return (this.fragment_offset !== 0) || (this.total_length > this.fragment.length);
 	}
+
+
 	
 	/**
 	 * Enforces an array of fragments to belong to a single message
@@ -206,7 +189,42 @@ export class FragmentedHandshake extends TLSStruct {
 		
 		return noHoles;
 	}
-	
+
+
+	/**
+	 * Fragments this packet into a series of packets according to the configured MTU
+	 * @returns An array of fragmented handshake messages - or a single one if it is small enough.
+	 */
+	split(maxFragmentLength?: number): FragmentedHandshake[] {
+
+		let
+			start = 0,
+			totalLength = this.fragment.length
+			;
+		let fragments: FragmentedHandshake[] = [];
+		if (maxFragmentLength == null)
+			maxFragmentLength = RecordLayer.MAX_PAYLOAD_SIZE - FragmentedHandshake.headerLength;
+		// loop through the message and fragment it
+		while (!fragments.length && start < totalLength) {
+			// calculate maximum length, limited by MTU - IP/UDP headers - handshake overhead
+			let fragmentLength = Math.min(maxFragmentLength, totalLength - start);
+			// slice and dice
+			const data = Buffer.from(this.fragment.slice(start, start + fragmentLength));
+			//create the message
+			fragments.push(new FragmentedHandshake(
+				this.msg_type,
+				totalLength,
+				this.message_seq,
+				start,
+				data
+			));
+			// step forward by the actual fragment length
+			start += data.length;
+		}
+
+		return fragments;
+	}
+
 	/**
 	 * Reassembles a series of fragmented handshake messages into a complete one.
 	 * Warning: doesn't check for validity, do that in advance!
@@ -288,7 +306,7 @@ export class ServerHello extends Handshake {
 		server_version: TypeSpecs.define.Struct(ProtocolVersion),
 		random: TypeSpecs.define.Struct(Random),
 		session_id: SessionID.spec,
-		cipher_suite: CipherSuite.__spec.id,//TypeSpecs.define.Struct(CipherSuite),
+		cipher_suite: CipherSuite.__spec.id,
 		compression_method: CompressionMethod.spec,
 		extensions: TypeSpecs.define.Vector(Extension.spec, 0, 2 ** 16 - 1, true),
 	}
@@ -335,14 +353,6 @@ export class ServerKeyExchange extends Handshake {
 		raw_data: TypeSpecs.define.Buffer() // the entire fragment
 	}
 
-	//static readonly __specs: {
-	//	[algorithm in KeyExchangeAlgorithm]?: TypeSpecs.StructSpec
-	//} = {
-	//	psk: {
-	//		psk_identity_hint: TypeSpecs.define.Vector(TypeSpecs.uint8, 0, 2 ** 16 - 1)
-	//	}
-	//}
-
 	public raw_data: Buffer;
 
 	constructor() {
@@ -375,14 +385,6 @@ export class ServerKeyExchange_PSK extends TLSStruct {
 
 
 export class ClientKeyExchange extends Handshake {
-
-	//static readonly __specs: {
-	//	[algorithm in KeyExchangeAlgorithm]?: TypeSpecs.StructSpec
-	//} = {
-	//	psk: {
-	//		psk_identity: TypeSpecs.define.Buffer(0, 2 ** 16 - 1)
-	//	}
-	//}
 
 	static readonly __spec = {
 		raw_data: TypeSpecs.define.Buffer() // the entire fragment

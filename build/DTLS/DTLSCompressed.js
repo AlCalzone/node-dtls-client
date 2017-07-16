@@ -59,7 +59,7 @@ DTLSCompressed.__spec = {
     version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
     epoch: TypeSpecs.uint16,
     sequence_number: TypeSpecs.uint48,
-    // length field is implied in the variable length vector //length: new TypeSpecs.Calculated("uint16", "serializedLength", "fragment"),
+    // length field is implied in the variable length vector
     fragment: TypeSpecs.define.Buffer(0, 1024 + Math.pow(2, 14))
 };
 DTLSCompressed.spec = TypeSpecs.define.Struct(DTLSCompressed);

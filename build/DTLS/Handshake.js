@@ -42,40 +42,23 @@ var Handshake = (function (_super) {
         return _this;
     }
     /**
-     * Fragments this packet into a series of packets according to the configured MTU
-     * @returns An array of fragmented handshake messages - or a single one if it is small enough.
+     * Converts this Handshake message into a fragment ready to be sent
      */
-    Handshake.prototype.fragmentMessage = function () {
+    Handshake.prototype.toFragment = function () {
         // spec only contains the body, so serialize() will only return that
-        var wholeMessage = this.serialize();
-        var start = 0;
-        var fragments = [];
-        var maxFragmentLength = RecordLayer_1.RecordLayer.MAX_PAYLOAD_SIZE - FragmentedHandshake.headerLength;
-        // loop through the message and fragment it
-        while (!fragments.length && start < wholeMessage.length) {
-            // calculate maximum length, limited by MTU - IP/UDP headers - handshake overhead
-            var fragmentLength = Math.min(maxFragmentLength, wholeMessage.length - start);
-            // slice and dice
-            var fragment = wholeMessage.slice(start, start + fragmentLength);
-            //create the message
-            fragments.push(new FragmentedHandshake(this.msg_type, wholeMessage.length, this.message_seq, start, fragment));
-            // step forward by the actual fragment length
-            start += fragment.length;
-        }
-        return fragments;
+        var body = this.serialize();
+        return new FragmentedHandshake(this.msg_type, body.length, this.message_seq, 0, body);
     };
     /**
      * Parses a re-assembled handshake message into the correct object struture
      * @param assembled - the re-assembled (or never-fragmented) message
      */
-    Handshake.parse = function (assembled) {
+    Handshake.fromFragment = function (assembled) {
         if (assembled.isFragmented())
             throw new Error("the message to be parsed MUST NOT be fragmented");
         if (exports.HandshakeMessages[assembled.msg_type] != undefined) {
             // find the right type for the body object
             var msgClass = exports.HandshakeMessages[assembled.msg_type];
-            //// extract the struct spec
-            //const __spec = msgClass.__spec; // we can expect this to exist
             // turn it into the correct type
             var spec = TypeSpecs.define.Struct(msgClass);
             // parse the body object into a new Handshake instance
@@ -180,6 +163,28 @@ var FragmentedHandshake = (function (_super) {
         return noHoles;
     };
     /**
+     * Fragments this packet into a series of packets according to the configured MTU
+     * @returns An array of fragmented handshake messages - or a single one if it is small enough.
+     */
+    FragmentedHandshake.prototype.split = function (maxFragmentLength) {
+        var start = 0, totalLength = this.fragment.length;
+        var fragments = [];
+        if (maxFragmentLength == null)
+            maxFragmentLength = RecordLayer_1.RecordLayer.MAX_PAYLOAD_SIZE - FragmentedHandshake.headerLength;
+        // loop through the message and fragment it
+        while (!fragments.length && start < totalLength) {
+            // calculate maximum length, limited by MTU - IP/UDP headers - handshake overhead
+            var fragmentLength = Math.min(maxFragmentLength, totalLength - start);
+            // slice and dice
+            var data = Buffer.from(this.fragment.slice(start, start + fragmentLength));
+            //create the message
+            fragments.push(new FragmentedHandshake(this.msg_type, totalLength, this.message_seq, start, data));
+            // step forward by the actual fragment length
+            start += data.length;
+        }
+        return fragments;
+    };
+    /**
      * Reassembles a series of fragmented handshake messages into a complete one.
      * Warning: doesn't check for validity, do that in advance!
      */
@@ -205,7 +210,6 @@ FragmentedHandshake.__spec = {
     total_length: TypeSpecs.uint24,
     message_seq: TypeSpecs.uint16,
     fragment_offset: TypeSpecs.uint24,
-    // uint24 fragment_length is implied in the variable size vector
     fragment: TypeSpecs.define.Buffer(0, Math.pow(2, 24) - 1)
 };
 FragmentedHandshake.spec = TypeSpecs.define.Struct(FragmentedHandshake);
@@ -340,13 +344,6 @@ var ClientKeyExchange = (function (_super) {
     };
     return ClientKeyExchange;
 }(Handshake));
-//static readonly __specs: {
-//	[algorithm in KeyExchangeAlgorithm]?: TypeSpecs.StructSpec
-//} = {
-//	psk: {
-//		psk_identity: TypeSpecs.define.Buffer(0, 2 ** 16 - 1)
-//	}
-//}
 ClientKeyExchange.__spec = {
     raw_data: TypeSpecs.define.Buffer() // the entire fragment
 };

@@ -32,7 +32,6 @@ export interface StructSpec {
 }
 export interface Struct {
 	type: "struct";
-	//spec: StructSpec;
 	structType: ISerializableConstructor;
 }
 
@@ -71,8 +70,6 @@ export const define = {
 	Number: (size: Numbers): Number => ({ type: "number", size }),
 	Struct: (structType: any): Struct => ({
 		type: "struct",
-		// we shouldn't need this, each struct knows its own spec
-		//spec: (structType as any as IStruct).__spec, // require this property, we don't want to repeat us that much
 		structType: (structType as ISerializableConstructor)
 	}),
 	Vector: (itemSpec: Complex, minLength = 0, maxLength = minLength, optional = false): Vector => ({
@@ -92,4 +89,3 @@ export const uint24 = Object.freeze(define.Number("uint24"));
 export const uint32 = Object.freeze(define.Number("uint32"));
 export const uint48 = Object.freeze(define.Number("uint48"));
 export const uint64 = Object.freeze(define.Number("uint64"));
-//export const buffer = Object.freeze(define.Buffer());

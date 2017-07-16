@@ -34,30 +34,6 @@ export class RecordLayer {
 	 * @param callback - The function to be called after sending the message.
 	 */
 	public send(msg: Message, callback?: dtls.SendCallback) {
-		//const epoch = this.epochs[this.writeEpochNr];
-
-		//let packet: DTLSPlaintext | DTLSCompressed | DTLSCiphertext = new DTLSPlaintext(
-		//	msg.type,
-		//	new ProtocolVersion(~1, ~2), // 2's complement of 1.2
-		//	this._writeEpochNr,
-		//	++epoch.writeSequenceNumber, // sequence number increased by 1
-		//	msg.data
-		//);
-
-		//// compress packet
-		//const compressor = (identity) => identity; // TODO: implement compression algorithms
-		//packet = DTLSCompressed.compress(packet, compressor);
-
-		//if (epoch.connectionState.cipherSuite.cipherType != null) {
-		//	// encrypt packet
-		//	packet = epoch.connectionState.Cipher(packet as DTLSCompressed);
-		//}
-
-		//// get send buffer
-		//const buf = packet.serialize();
-		//// TODO: check if the buffer satisfies the configured MTU
-		//// and send it
-
 		const buf = this.processOutgoingMessage(msg);
 		this.udpSocket.send(buf, this.options.port, this.options.address, callback);
 	}
@@ -70,7 +46,7 @@ export class RecordLayer {
 
 		let packet: DTLSPlaintext | DTLSCompressed | DTLSCiphertext = new DTLSPlaintext(
 			msg.type,
-			new ProtocolVersion(~1, ~2), // 2's complement of 1.2
+			epoch.connectionState.protocolVersion || RecordLayer.DTLSVersion,
 			this._writeEpochNr,
 			++epoch.writeSequenceNumber, // sequence number increased by 1
 			msg.data
@@ -101,13 +77,11 @@ export class RecordLayer {
 	 * @param messages - The messages to be sent
 	 */
 	public sendFlight(messages: Message[], callback?: dtls.SendCallback) {
-		const buf = Buffer.concat(
-			messages.map(msg => this.processOutgoingMessage(msg))
-			);
-		this.udpSocket.send(buf, this.options.port, this.options.address, callback);
-
-		//// TODO: enable send callbacks for bulk sending
-		//messages.forEach(msg => this.send(msg));
+		messages.forEach(m => this.send(m));
+		//const buf = Buffer.concat(
+		//	messages.map(msg => this.processOutgoingMessage(msg))
+		//	);
+		//this.udpSocket.send(buf, this.options.port, this.options.address, callback);
 	}
 
 	/**
@@ -158,7 +132,6 @@ export class RecordLayer {
 				const connectionState = this.epochs[p.epoch].connectionState;
 				try {
 					return connectionState.Decipher(p);
-					//return p.decrypt(connectionState.Decipher/*, connectionState.IncomingMac*/);
 				} catch (e) {
 					// decryption can fail because of bad MAC etc...
 					// TODO: terminate connection if some threshold is passed (bad_record_mac)
@@ -180,7 +153,6 @@ export class RecordLayer {
 	 * All known connection epochs
 	 */
 	private epochs: Epoch[] = [];
-	//private connectionStates: ConnectionState[/* epoch */] = [];
 	private _readEpochNr: number = 0;
 	public get readEpochNr(): number { return this._readEpochNr; }
 	/**
@@ -234,8 +206,6 @@ export class RecordLayer {
 	}
 
 
-	// TODO: mal sehen, ob das nicht woanders besser aufgehoben ist
-	
 	/**
 	 * Maximum transfer unit of the underlying connection.
 	 * Note: Ethernet supports up to 1500 bytes, of which 20 bytes are reserved for the IP header and 8 for the UDP header
@@ -243,5 +213,8 @@ export class RecordLayer {
 	public static MTU: number = 1280;
 	public static readonly MTU_OVERHEAD = 20+8;
 	public static get MAX_PAYLOAD_SIZE() { return RecordLayer.MTU - RecordLayer.MTU_OVERHEAD };
+
+	// Default to DTLSv1.2
+	public static DTLSVersion = new ProtocolVersion(~1, ~2);
 
 }

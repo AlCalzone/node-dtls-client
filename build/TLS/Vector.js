@@ -24,7 +24,6 @@ var Vector = (function () {
             case "number":
             case "enum":
                 bitSize = TypeSpecs.getPrimitiveSize(spec.itemSpec);
-                //+(spec.itemSpec as (TypeSpecs.Number | TypeSpecs.Enum)).size.substr("uint".length) as BitSizes;
                 serializedItems = this.items.map(function (v) { return BitConverter_1.numberToBuffer(v, bitSize); });
                 break;
             case "struct":

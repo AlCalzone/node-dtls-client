@@ -1,6 +1,7 @@
 /// <reference types="node" />
 import * as TypeSpecs from "./TypeSpecs";
 import { PreMasterSecret } from "./PreMasterSecret";
+import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { KeyMaterial, CipherSuite, CipherDelegate, DecipherDelegate } from "./CipherSuite";
 export declare enum CompressionMethod {
     null = 0,
@@ -13,6 +14,7 @@ export declare class ConnectionState {
     constructor(values?: any);
     entity: ConnectionEnd;
     cipherSuite: CipherSuite;
+    protocolVersion: ProtocolVersion;
     compression_algorithm: CompressionMethod;
     master_secret: Buffer;
     client_random: Buffer;
@@ -30,7 +32,7 @@ export declare class ConnectionState {
      */
     computeMasterSecret(preMasterSecret: PreMasterSecret): void;
     /**
-     * Berechnet die Schlüsselkomponenten
+     * Calculates the key components
      */
     private computeKeyMaterial();
 }

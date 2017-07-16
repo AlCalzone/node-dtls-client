@@ -102,7 +102,7 @@ var dtls;
                 switch (msg.type) {
                     case ContentType_1.ContentType.handshake:
                         var handshake = TLSStruct_1.TLSStruct.from(Handshake_1.FragmentedHandshake.spec, msg.data).result;
-                        this.handshakeHandler.processMessage(handshake);
+                        this.handshakeHandler.processIncomingMessage(handshake);
                         break;
                     case ContentType_1.ContentType.change_cipher_spec:
                         this.recordLayer.advanceReadEpoch();

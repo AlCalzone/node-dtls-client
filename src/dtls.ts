@@ -104,7 +104,7 @@ export module dtls {
 				switch (msg.type) {
 					case ContentType.handshake:
 						const handshake = TLSStruct.from(FragmentedHandshake.spec, msg.data).result as FragmentedHandshake;
-						this.handshakeHandler.processMessage(handshake);
+						this.handshakeHandler.processIncomingMessage(handshake);
 						break;
 					case ContentType.change_cipher_spec:
 						this.recordLayer.advanceReadEpoch();

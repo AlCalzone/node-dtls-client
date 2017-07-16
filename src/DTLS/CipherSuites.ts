@@ -71,7 +71,6 @@ export const CipherSuites = {
 	TLS_PSK_DHE_WITH_AES_128_CCM_8:			new CipherSuite(0xC0AA, "dhe_psk",	null,	"sha256",	"aead",		"aes-128-ccm8"),
 	TLS_PSK_DHE_WITH_AES_256_CCM_8:			new CipherSuite(0xC0AB, "dhe_psk",	null,	"sha256",	"aead",		"aes-256-ccm8"),
 
-
 	// TRADFRI wants TLS_PSK_WITH_AES_128_CCM_8 or TLS_PSK_WITH_AES_128_CBC_SHA256
 }
 

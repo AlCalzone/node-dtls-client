@@ -8,7 +8,6 @@ var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var Random_1 = require("../TLS/Random");
 var Vector_1 = require("../TLS/Vector");
 var ConnectionState_1 = require("../TLS/ConnectionState");
-var BitConverter_1 = require("../lib/BitConverter");
 var PRF_1 = require("../TLS/PRF");
 var PreMasterSecret_1 = require("../TLS/PreMasterSecret");
 /**
@@ -28,18 +27,8 @@ var ClientHandshakeHandler = (function () {
         this.recordLayer = recordLayer;
         this.options = options;
         this.finishedCallback = finishedCallback;
-        ///**
-        // * Sends a ChangeCipherSpec message
-        // */
-        //private sendChangeCipherSpecMessage() {
-        //	const message = {
-        //		type: ContentType.change_cipher_spec,
-        //		data: (ChangeCipherSpec.createEmpty()).serialize()
-        //	};
-        //	this.recordLayer.send(message);
-        //	//// advance the write epoch, so we use the new params for sending the next messages
-        //	//this.recordLayer.advanceWriteEpoch();
-        //}
+        this.bufferedOutgoingMessages = [];
+        this.sendFlight_begin_wasCalled = false;
         /**
          * handles server messages
          */
@@ -67,6 +56,8 @@ var ClientHandshakeHandler = (function () {
                             // set the cipher suite and compression method to be used
                             _this.recordLayer.nextEpoch.connectionState.cipherSuite = CipherSuites_1.CipherSuites[hello.cipher_suite];
                             _this.recordLayer.nextEpoch.connectionState.compression_algorithm = hello.compression_method;
+                            _this.recordLayer.currentWriteEpoch.connectionState.protocolVersion = hello.server_version;
+                            _this.recordLayer.nextWriteEpoch.connectionState.protocolVersion = hello.server_version;
                             // TODO: parse/support extensions?
                             // TODO: remember the session id?
                             break;
@@ -100,30 +91,39 @@ var ClientHandshakeHandler = (function () {
                                     var psk = Buffer.from(_this.options.psk[psk_identity], "ascii");
                                     preMasterSecret = new PreMasterSecret_1.PreMasterSecret(null, psk);
                                     break;
+                                default:
+                                    throw new Error(connState.cipherSuite.keyExchange + " key exchange not implemented");
                             }
                             // we now have everything to compute the master secret
                             connState.computeMasterSecret(preMasterSecret);
-                            // now we can send the finished message
-                            // therefore concat the previous messages in this flight with all other data so far
-                            // to calculate verify_data
-                            var handshake_messages = Buffer.concat([_this.allHandshakeData].concat(flight.map(function (f) { return f.serialize(); })));
-                            // now build the finished message and add it to the flight
-                            var finished = new Handshake.Finished(_this.computeVerifyData(handshake_messages, "client"));
-                            flight.push(finished);
-                            // send the complete flight
-                            _this.sendFlight(flight, [Handshake.HandshakeType.finished]);
+                            // in order to build the finished message, we need to process the partial flight so far
+                            _this.sendFlight_begin();
+                            _this.sendFlight_processPartial(flight);
+                            // now we can compute the verify_data
+                            var handshake_messages = Buffer.concat(_this.allHandshakeData);
+                            var verify_data = _this.computeVerifyData(handshake_messages, "client");
+                            // now build the finished message and process it
+                            var finished = new Handshake.Finished(verify_data);
+                            _this.sendFlight_processPartial([finished]);
+                            // finish sending the flight
+                            _this.sendFlight_finish([Handshake.HandshakeType.finished]);
                             break;
                     }
                 }
             },
             /** Handles a Finished flight */
             _a[Handshake.HandshakeType.finished] = function (messages) {
-                // this flight should only contain a single message, 
+                console.log("verifying server finished message...");
+                // this flight should only contain a single message (server->client),
                 // but to be sure extract the last one
                 var finished = messages[messages.length - 1];
                 // compute the expected verify data
-                var expectedVerifyData = _this.computeVerifyData(_this.allHandshakeData, "server");
-                if (BitConverter_1.buffersEqual(finished.verify_data, expectedVerifyData)) {
+                var handshake_messages = Buffer.concat(_this.allHandshakeData);
+                console.log("handshake data: " + handshake_messages.toString("hex"));
+                var expectedVerifyData = _this.computeVerifyData(handshake_messages, "server");
+                console.log("expected: " + expectedVerifyData.toString("hex"));
+                console.log("actual: " + finished.verify_data.toString("hex"));
+                if (finished.verify_data.equals(expectedVerifyData)) {
                     // all good!
                     _this.finishedCallback();
                 }
@@ -153,7 +153,7 @@ var ClientHandshakeHandler = (function () {
         this.incompleteMessages = [];
         this.completeMessages = {};
         this.expectedResponses = [];
-        this.allHandshakeData = null;
+        this.allHandshakeData = [];
         //this.cscReceived = false;
         //this.serverFinishedPending = false;
         // ==============================
@@ -184,9 +184,8 @@ var ClientHandshakeHandler = (function () {
     /**
      * Processes a received handshake message
      */
-    ClientHandshakeHandler.prototype.processMessage = function (msg) {
+    ClientHandshakeHandler.prototype.processIncomingMessage = function (msg) {
         var _this = this;
-        console.log("processing message (" + msg.msg_type + ")");
         var checkFlight;
         if (msg.isFragmented()) {
             // remember incomplete messages and try to assemble them afterwards
@@ -195,18 +194,14 @@ var ClientHandshakeHandler = (function () {
         }
         else {
             // the message is already complete, we only need to parse it
-            var test_1 = msg.fragment.toString();
-            this.completeMessages[msg.message_seq] = Handshake.Handshake.parse(msg);
+            this.completeMessages[msg.message_seq] = Handshake.Handshake.fromFragment(msg);
             checkFlight = true;
         }
-        console.log("--> complete messages: " + Object.keys(this.completeMessages).join(", "));
         // check if the flight is the current one, and complete
         if (checkFlight) {
-            console.log("checking flight...");
             var completeMsgIndizes = Object.keys(this.completeMessages).map(function (k) { return +k; });
             // a flight is complete if it forms a non-interrupted sequence of seq-nums
             var isComplete = [this.lastProcessedSeqNum].concat(completeMsgIndizes).every(function (val, i, arr) { return (i === 0) || (val === arr[i - 1] + 1); });
-            console.log("--> flight complete: " + isComplete);
             if (!isComplete)
                 return;
             var lastMsg = this.completeMessages[Math.max.apply(Math, completeMsgIndizes)];
@@ -219,11 +214,26 @@ var ClientHandshakeHandler = (function () {
                     // call the handler and clear the buffer
                     var messages = completeMsgIndizes.map(function (i) { return _this.completeMessages[i]; });
                     this.completeMessages = {};
-                    this.bufferHandshakeData.apply(this, messages);
+                    if (lastMsg.msg_type === Handshake.HandshakeType.finished) {
+                        // for the finished flight, only buffer the finished message AFTER handling it
+                        this.bufferHandshakeData.apply(this, (messages.slice(0, -1)
+                            .filter(function (m) { return _this.needsToHashMessage(m); })
+                            .map(function (m) { return m.toFragment(); }) // TODO: avoid unneccessary assembly and fragmentation of messages
+                        ));
+                    }
+                    else {
+                        this.bufferHandshakeData.apply(this, (messages
+                            .filter(function (m) { return _this.needsToHashMessage(m); })
+                            .map(function (m) { return m.toFragment(); }) // TODO: avoid unneccessary assembly and fragmentation of messages
+                        ));
+                    }
+                    // handle the message
                     this.handle[lastMsg.msg_type](messages);
+                    if (lastMsg.msg_type === Handshake.HandshakeType.finished) {
+                        // for the finished flight, only buffer the finished message AFTER handling it
+                        this.bufferHandshakeData(lastMsg.toFragment());
+                    }
                     // TODO: clear a retransmission timer
-                    console.log("--> flight handled");
-                    console.log("--> complete messages: " + Object.keys(this.completeMessages).join(", "));
                 }
             }
             else {
@@ -242,38 +252,32 @@ var ClientHandshakeHandler = (function () {
             // if we found all, reassemble them
             var reassembled = Handshake.FragmentedHandshake.reassemble(allFragments);
             // add the message to the list of complete ones
-            this.completeMessages[reassembled.message_seq] = Handshake.Handshake.parse(reassembled);
+            this.completeMessages[reassembled.message_seq] = Handshake.Handshake.fromFragment(reassembled);
             // and remove the other ones from the list of incomplete ones
             this.incompleteMessages = this.incompleteMessages.filter(function (fragment) { return allFragments.indexOf(fragment) === -1; });
             return true;
         }
         return false;
     };
-    ///**
-    // * reacts to a ChangeCipherSpec message
-    // */
-    //public changeCipherSpec() {
-    //	// advance the read epoch, so we understand the next messages received
-    //	this.recordLayer.advanceReadEpoch();
-    //	// TODO: how do we handle retransmission here?
-    //	// TODO: how do we handle reordering (i.e. Finished received before ChangeCipherSpec)?
-    //}
+    ClientHandshakeHandler.prototype.sendFlight_begin = function () {
+        this.sendFlight_begin_wasCalled = true;
+        this.lastFlight = [];
+    };
     /**
-     * Sends the given flight of messages and remembers it for potential retransmission
-     * @param flight The flight to be sent.
-     * @param expectedResponses The types of possible responses we are expecting.
-     * @param retransmit If the flight is retransmitted, i.e. no sequence numbers are increased
+     * Processes a flight (including giving the messages a seq_num), but does not actually send it.
+     * @param flight - The flight to be sent.
+     * @param retransmit - If the flight is retransmitted, i.e. no sequence numbers are increased
      */
-    ClientHandshakeHandler.prototype.sendFlight = function (flight, expectedResponses, retransmit) {
+    ClientHandshakeHandler.prototype.sendFlight_processPartial = function (flight, retransmit) {
         var _this = this;
         if (retransmit === void 0) { retransmit = false; }
-        this.lastFlight = flight;
-        this.expectedResponses = expectedResponses;
-        var messages = [];
+        if (!this.sendFlight_begin_wasCalled)
+            throw new Error("Need to call sendFlight_beginPartial() before using this function");
+        (_a = this.lastFlight).push.apply(_a, flight);
         flight.forEach(function (handshake) {
             if (handshake.msg_type === Handshake.HandshakeType.finished) {
                 // before finished messages, ALWAYS send a ChangeCipherSpec
-                messages.push({
+                _this.bufferedOutgoingMessages.push({
                     type: ContentType_1.ContentType.change_cipher_spec,
                     data: (ChangeCipherSpec_1.ChangeCipherSpec.createEmpty()).serialize()
                 });
@@ -281,41 +285,52 @@ var ClientHandshakeHandler = (function () {
             }
             if (!retransmit) {
                 // for first-time messages, increment the sequence number
-                // and buffer the data for verification purposes
                 handshake.message_seq = ++_this.lastSentSeqNum;
-                _this.bufferHandshakeData(handshake);
+            }
+            var fragment = handshake.toFragment();
+            if (!retransmit) {
+                // for first-time messages, buffer the data for verification purposes
+                if (_this.needsToHashMessage(handshake))
+                    _this.bufferHandshakeData(fragment);
             }
             // fragment the messages (TODO: make this dependent on previous messages in this flight)
-            var fragments = handshake
-                .fragmentMessage()
+            var fragments = fragment
+                .split()
                 .map(function (fragment) { return ({
                 type: ContentType_1.ContentType.handshake,
                 data: fragment.serialize()
             }); });
-            messages.push.apply(messages, fragments);
+            (_a = _this.bufferedOutgoingMessages).push.apply(_a, fragments);
+            var _a;
         });
-        this.recordLayer.sendFlight(messages);
+        var _a;
     };
-    ///**
-    // * Fragments a handshake message, serializes the fragements into single messages and sends them over the record layer.
-    // * Don't call this directly, rather use *sendFlight*
-    // * @param handshake - The handshake message to be sent
-    // */
-    //private sendHandshakeMessage(handshake: Handshake.Handshake, retransmit) {
-    //	// fragment the messages to send them over the record layer
-    //	const messages = handshake
-    //		.fragmentMessage()
-    //		.map(fragment => ({
-    //			type: ContentType.handshake,
-    //			data: fragment.serialize()
-    //		}))
-    //		;
-    //	this.recordLayer.sendFlight(messages);
-    //	// if this is not a retransmit, also remember the raw data for verification purposes
-    //	if (!retransmit) {
-    //		this.bufferHandshakeData(handshake);
-    //	}
-    //}
+    /**
+     * Sends the currently buffered flight of messages
+     * @param flight The flight to be sent.
+     * @param expectedResponses The types of possible responses we are expecting.
+     * @param retransmit If the flight is retransmitted, i.e. no sequence numbers are increased
+     */
+    ClientHandshakeHandler.prototype.sendFlight_finish = function (expectedResponses) {
+        this.expectedResponses = expectedResponses;
+        this.recordLayer.sendFlight(this.bufferedOutgoingMessages);
+        // clear the buffers for future use
+        this.bufferedOutgoingMessages = [];
+        this.sendFlight_begin_wasCalled = false;
+    };
+    /**
+     * Sends the given flight of messages and remembers it for potential retransmission
+     * @param flight The flight to be sent.
+     * @param expectedResponses The types of possible responses we are expecting.
+     * @param retransmit If the flight is retransmitted, i.e. no sequence numbers are increased
+     */
+    ClientHandshakeHandler.prototype.sendFlight = function (flight, expectedResponses, retransmit) {
+        if (retransmit === void 0) { retransmit = false; }
+        // this is actually just a convenience function for sending complete flights
+        this.sendFlight_begin();
+        this.sendFlight_processPartial(flight, retransmit);
+        this.sendFlight_finish(expectedResponses);
+    };
     /**
      * remembers the raw data of handshake messages for verification purposes
      * @param messages - the messages to be remembered
@@ -325,23 +340,33 @@ var ClientHandshakeHandler = (function () {
         for (var _i = 0; _i < arguments.length; _i++) {
             messages[_i] = arguments[_i];
         }
-        // remember data up to now
-        var buffers = [];
-        if (this.allHandshakeData != null)
-            buffers.push(this.allHandshakeData);
-        // stript out hello requests
-        messages = messages.filter(function (m) { return m.msg_type !== Handshake.HandshakeType.hello_request; });
-        // and add the raw data
-        messages.forEach(function (m) { return console.log("buffering message with type " + m.msg_type); });
-        buffers.push.apply(buffers, (messages.map(function (m) { return m.serialize(); })));
-        this.allHandshakeData = Buffer.concat(buffers);
+        (_a = this.allHandshakeData).push.apply(_a, (messages.map(function (m) { return m.serialize(); })));
+        var _a;
+    };
+    /**
+     * For a given message, check if it needs to be hashed
+     */
+    ClientHandshakeHandler.prototype.needsToHashMessage = function (message) {
+        switch (message.msg_type) {
+            // hello (verify) requests
+            case Handshake.HandshakeType.hello_verify_request: return false;
+            case Handshake.HandshakeType.hello_request: return false;
+            // client hello without cookie (TODO only if verify request is used)
+            case Handshake.HandshakeType.client_hello:
+                var cookie = message.cookie;
+                return (cookie != null) && (cookie.length > 0);
+            // everything else will be hashed
+            default: return true;
+        }
     };
     /**
      * computes the verify data for a Finished message
      * @param handshakeMessages - the concatenated messages received so far
      */
     ClientHandshakeHandler.prototype.computeVerifyData = function (handshakeMessages, source) {
-        var connState = this.recordLayer.nextEpoch.connectionState;
+        var connState = (source === "client")
+            ? this.recordLayer.nextWriteEpoch.connectionState
+            : this.recordLayer.currentReadEpoch.connectionState;
         var PRF_fn = PRF_1.PRF[connState.cipherSuite.prfAlgorithm];
         var handshakeHash = PRF_fn.hashFunction(handshakeMessages);
         // and use it to compute the verify data

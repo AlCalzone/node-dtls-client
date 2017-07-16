@@ -24,15 +24,14 @@ export declare abstract class Handshake extends TLSStruct {
     constructor(msg_type: HandshakeType, bodySpec: TypeSpecs.StructSpec, initial?: any);
     message_seq: number;
     /**
-     * Fragments this packet into a series of packets according to the configured MTU
-     * @returns An array of fragmented handshake messages - or a single one if it is small enough.
+     * Converts this Handshake message into a fragment ready to be sent
      */
-    fragmentMessage(): FragmentedHandshake[];
+    toFragment(): FragmentedHandshake;
     /**
      * Parses a re-assembled handshake message into the correct object struture
      * @param assembled - the re-assembled (or never-fragmented) message
      */
-    static parse(assembled: FragmentedHandshake): Handshake;
+    static fromFragment(assembled: FragmentedHandshake): Handshake;
 }
 export declare class FragmentedHandshake extends TLSStruct {
     msg_type: HandshakeType;
@@ -73,6 +72,11 @@ export declare class FragmentedHandshake extends TLSStruct {
      * Checks if the provided handshake fragments form a complete message
      */
     static isComplete(fragments: FragmentedHandshake[]): boolean;
+    /**
+     * Fragments this packet into a series of packets according to the configured MTU
+     * @returns An array of fragmented handshake messages - or a single one if it is small enough.
+     */
+    split(maxFragmentLength?: number): FragmentedHandshake[];
     /**
      * Reassembles a series of fragmented handshake messages into a complete one.
      * Warning: doesn't check for validity, do that in advance!

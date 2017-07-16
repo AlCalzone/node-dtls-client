@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var TypeSpecs = require("./TypeSpecs");
 var object_polyfill_1 = require("../lib/object-polyfill");
+var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var PRF_1 = require("./PRF");
 var CipherSuites_1 = require("../DTLS/CipherSuites");
 var CompressionMethod;
@@ -18,16 +19,7 @@ var ConnectionState = (function () {
     function ConnectionState(values) {
         this.entity = "client";
         this.cipherSuite = CipherSuites_1.CipherSuites.TLS_NULL_WITH_NULL_NULL;
-        //prf_algorithm: HashAlgorithm;
-        //bulk_cipher_algorithm: BulkCipherAlgorithm;
-        //cipher_type: CipherType;
-        //enc_key_length: number;
-        //block_length: number;
-        //fixed_iv_length: number; // TODO: put it into cipher suite?
-        //record_iv_length: number;
-        //mac_algorithm: HashAlgorithm;
-        //mac_length: number;
-        //mac_key_length: number;
+        this.protocolVersion = new ProtocolVersion_1.ProtocolVersion(~1, ~0); // default to DTLSv1.0 during handshakes
         this.compression_algorithm = CompressionMethod.null;
         if (values) {
             for (var _i = 0, _a = object_polyfill_1.entries(values); _i < _a.length; _i++) {
@@ -55,18 +47,6 @@ var ConnectionState = (function () {
         enumerable: true,
         configurable: true
     });
-    // private _outgoingMac: MacDelegate;
-    // public get OutgoingMac(): MacDelegate {
-    // 	if (this._outgoingMac == undefined)
-    // 		this._outgoingMac = this.cipherSuite.specifyMAC(this.key_material, this.entity);
-    // 	return this._outgoingMac;
-    // }
-    // private _incomingMac: MacDelegate;
-    // public get IncomingMac(): MacDelegate {
-    // 	if (this._incomingMac == undefined)
-    // 		this._incomingMac = this.cipherSuite.specifyMAC(this.key_material, this.entity === "client" ? "server" : "client");
-    // 	return this._incomingMac;
-    // }
     /**
      * Compute the master secret from a given premaster secret
      * @param preMasterSecret - The secret used to calculate the master secret
@@ -79,7 +59,7 @@ var ConnectionState = (function () {
         this.computeKeyMaterial();
     };
     /**
-     * Berechnet die Schlüsselkomponenten
+     * Calculates the key components
      */
     ConnectionState.prototype.computeKeyMaterial = function () {
         var keyBlock = PRF_1.PRF[this.cipherSuite.prfAlgorithm](this.master_secret, "key expansion", Buffer.concat([this.server_random, this.client_random]), 2 * (this.cipherSuite.MAC.keyAndHashLength + this.cipherSuite.Cipher.keyLength + this.cipherSuite.Cipher.fixedIvLength));

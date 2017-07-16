@@ -10,13 +10,13 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+var crypto = require("crypto");
 var DTLSCompressed_1 = require("../DTLS/DTLSCompressed");
 var DTLSCiphertext_1 = require("../DTLS/DTLSCiphertext");
 var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var ContentType_1 = require("../TLS/ContentType");
-var BitConverter = require("../lib/BitConverter");
 var gcm = require("node-aes-gcm");
 var ccm = require("node-aes-ccm");
 var AEADCipherParameters = {
@@ -29,8 +29,9 @@ var AEADCipherParameters = {
 };
 var AdditionalData = (function (_super) {
     __extends(AdditionalData, _super);
-    function AdditionalData(sequence_number, type, version, fragment_length) {
+    function AdditionalData(epoch, sequence_number, type, version, fragment_length) {
         var _this = _super.call(this, AdditionalData.__spec) || this;
+        _this.epoch = epoch;
         _this.sequence_number = sequence_number;
         _this.type = type;
         _this.version = version;
@@ -38,11 +39,12 @@ var AdditionalData = (function (_super) {
         return _this;
     }
     AdditionalData.createEmpty = function () {
-        return new AdditionalData(null, null, null, null);
+        return new AdditionalData(null, null, null, null, null);
     };
     return AdditionalData;
 }(TLSStruct_1.TLSStruct));
 AdditionalData.__spec = {
+    epoch: TypeSpecs.uint16,
     sequence_number: TypeSpecs.uint48,
     type: ContentType_1.ContentType.__spec,
     version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
@@ -58,17 +60,17 @@ function createCipher(algorithm) {
         var plaintext = packet.fragment;
         // find the right encryption params
         var salt = (connEnd === "server") ? keyMaterial.server_write_IV : keyMaterial.client_write_IV;
-        //const nonce_explicit = crypto.pseudoRandomBytes(cipherParams.recordIvLength);
-        var nonce_explicit = Buffer.concat([
-            BitConverter.numberToBuffer(packet.epoch, 16),
-            BitConverter.numberToBuffer(packet.sequence_number, 48)
-        ]);
+        var nonce_explicit = crypto.pseudoRandomBytes(cipherParams.recordIvLength);
+        // alternatively:
+        //const nonce_explicit = Buffer.concat([
+        //	BitConverter.numberToBuffer(packet.epoch, 16),
+        //	BitConverter.numberToBuffer(packet.sequence_number, 48)
+        //]);
         var nonce = Buffer.concat([salt, nonce_explicit]);
-        var additionalData = new AdditionalData(packet.sequence_number, packet.type, packet.version, packet.fragment.length).serialize();
+        var additionalData = new AdditionalData(packet.epoch, packet.sequence_number, packet.type, packet.version, packet.fragment.length).serialize();
         var cipher_key = (connEnd === "server") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
         // Find the right function to encrypt
         var encrypt = cipherParams.interface.encrypt;
-        //const decrypt = cipherParams.interface.decrypt;
         // encrypt and concat the neccessary pieces
         var encryptionResult = encrypt(cipher_key, nonce, plaintext, additionalData, cipherParams.authTagLength);
         var fragment = Buffer.concat([
@@ -76,7 +78,6 @@ function createCipher(algorithm) {
             encryptionResult.ciphertext,
             encryptionResult.auth_tag
         ]);
-        //const decryptionResult = decrypt(cipher_key, nonce, encryptionResult.ciphertext, additionalData, encryptionResult.auth_tag);
         // and return the packet
         return new DTLSCiphertext_1.DTLSCiphertext(packet.type, packet.version, packet.epoch, packet.sequence_number, fragment);
     });
@@ -102,7 +103,7 @@ function createDecipher(algorithm) {
         var salt = (sourceConnEnd === "server") ? keyMaterial.server_write_IV : keyMaterial.client_write_IV;
         var nonce_explicit = ciphertext.slice(0, decipherParams.recordIvLength);
         var nonce = Buffer.concat([salt, nonce_explicit]);
-        var additionalData = new AdditionalData(packet.sequence_number, packet.type, packet.version, 
+        var additionalData = new AdditionalData(packet.epoch, packet.sequence_number, packet.type, packet.version, 
         // subtract the AEAD overhead from the packet length for authentication
         packet.fragment.length - decipherParams.recordIvLength - decipherParams.authTagLength).serialize();
         var authTag = ciphertext.slice(-decipherParams.authTagLength);

@@ -24,8 +24,6 @@ exports.define = {
     Number: function (size) { return ({ type: "number", size: size }); },
     Struct: function (structType) { return ({
         type: "struct",
-        // we shouldn't need this, each struct knows its own spec
-        //spec: (structType as any as IStruct).__spec, // require this property, we don't want to repeat us that much
         structType: structType
     }); },
     Vector: function (itemSpec, minLength, maxLength, optional) {
@@ -54,5 +52,4 @@ exports.uint24 = Object.freeze(exports.define.Number("uint24"));
 exports.uint32 = Object.freeze(exports.define.Number("uint32"));
 exports.uint48 = Object.freeze(exports.define.Number("uint48"));
 exports.uint64 = Object.freeze(exports.define.Number("uint64"));
-//export const buffer = Object.freeze(define.Buffer()); 
 //# sourceMappingURL=TypeSpecs.js.map

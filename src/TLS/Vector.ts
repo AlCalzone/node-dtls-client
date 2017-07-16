@@ -27,7 +27,6 @@ export class Vector<T extends number | ISerializable> {
 			case "number":
 			case "enum":
 				bitSize = TypeSpecs.getPrimitiveSize(spec.itemSpec) as BitSizes;
-				//+(spec.itemSpec as (TypeSpecs.Number | TypeSpecs.Enum)).size.substr("uint".length) as BitSizes;
 				serializedItems = (this.items as number[]).map(v => numberToBuffer(v, bitSize));
 				break;
 
@@ -85,13 +84,5 @@ export class Vector<T extends number | ISerializable> {
 			return { result: ret, readBytes: ret.deserialize(spec, buf, offset) };
 		}
 	}
-
-	//static createFromBuffer(buf: Buffer) {
-	//	return new Vector<number>(bufferToByteArray(buf));
-	//}
-
-	/*static isVariableLength(spec: TypeSpecs.Vector): boolean {
-		return spec.maxLength !== spec.minLength;
-	}*/
 
 }

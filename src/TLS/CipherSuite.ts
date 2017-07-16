@@ -26,17 +26,6 @@ export type KeyExchangeAlgorithm =
 	"psk" | "dhe_psk" | "rsa_psk"// Server/Client|KeyExchange: see https://tools.ietf.org/html/rfc4279#page-4
 	;
 
-// export interface MacDelegate {
-// 	/**
-// 	 * Generates a MAC hash from the given data using the underlying HMAC function.
-// 	 * @param data - The data to be hashed
-// 	 */
-// 	(data: Buffer): Buffer;
-// 	/**
-// 	 * The key and hash output length of this hash function
-// 	 */
-// 	keyAndHashLength: number;
-// }
 export interface GenericMacDelegate {
 	/**
 	 * Generates a MAC hash from the given data using the underlying HMAC function.
@@ -81,11 +70,6 @@ export interface CipherDelegate {
 	 */
 	(packet: DTLSCompressed): DTLSCiphertext;
 
-	// /**
-	//  * The length of encryption keys in bytes
-	//  */
-	// keyLength: number;
-
 	/**
 	 * The inner delegate. This can represent different cipher types like block and AEAD ciphers
 	 */
@@ -128,21 +112,10 @@ export interface DecipherDelegate {
 	 */
 	(packet: DTLSCiphertext): DTLSCompressed;
 
-	// /**
-	//  * The length of decryption keys in bytes
-	//  */
-	// keyLength: number;
-
 	/**
 	 * The inner delegate. This can represent different cipher types like block and AEAD ciphers
 	 */
 	inner: GenericDecipherDelegate;
-
-	// /**
-	//  * The MAC delegate used to authenticate incoming packets.
-	//  * May be null for certain ciphers.
-	//  */
-	// incomingMac: MacDelegate;	
 }
 export interface GenericDecipherDelegate {
 	/**
@@ -191,7 +164,6 @@ function createNullCipher(): GenericCipherDelegate {
 		packet.sequence_number,
 		packet.fragment
 	)) as GenericCipherDelegate;	
-	//const ret = ((plaintext, _1, _2) => Buffer.from(plaintext.fragment)) as GenericCipherDelegate;
 	ret.keyLength = 0;
 	ret.fixedIvLength = 0;
 	ret.recordIvLength = 0;
@@ -205,7 +177,6 @@ function createNullDecipher(): GenericDecipherDelegate {
 		packet.sequence_number,
 		packet.fragment
 	)) as GenericDecipherDelegate;
-	//const ret =  ((ciphertext, _1, _2) => ({ result: Buffer.from(ciphertext) })) as GenericDecipherDelegate;
 	ret.keyLength = 0;
 	ret.fixedIvLength = 0;
 	ret.recordIvLength = 0;
@@ -334,12 +305,5 @@ export class CipherSuite extends TLSStruct {
 				throw new Error(`createMAC not implemented for ${this.cipherType} cipher`);
 		}
 	}
-	// public specifyMAC(keyMaterial: KeyMaterial, sourceConnEnd: ConnectionEnd): MacDelegate {
-	// 	const ret = (
-	// 		(data: Buffer) => this.MAC(data, keyMaterial, sourceConnEnd)
-	// 	) as MacDelegate;
-	// 	ret.keyAndHashLength = this.MAC.keyAndHashLength;
-	// 	return ret;
-	// }
 
 }

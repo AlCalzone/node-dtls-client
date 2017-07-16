@@ -3,6 +3,7 @@ import * as dgram from "dgram";
 import { dtls } from "../dtls";
 import { ConnectionState } from "../TLS/ConnectionState";
 import { Message } from "../TLS/Message";
+import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
 export interface Epoch {
     index: number;
@@ -73,4 +74,5 @@ export declare class RecordLayer {
     static MTU: number;
     static readonly MTU_OVERHEAD: number;
     static readonly MAX_PAYLOAD_SIZE: number;
+    static DTLSVersion: ProtocolVersion;
 }

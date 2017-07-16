@@ -12,7 +12,7 @@ export class DTLSCompressed extends TLSStruct implements DTLSPacket {
 		version: TypeSpecs.define.Struct(ProtocolVersion),
 		epoch: TypeSpecs.uint16,
 		sequence_number: TypeSpecs.uint48,
-		// length field is implied in the variable length vector //length: new TypeSpecs.Calculated("uint16", "serializedLength", "fragment"),
+		// length field is implied in the variable length vector
 		fragment: TypeSpecs.define.Buffer(0, 1024 + 2 ** 14)
 	};
 	static readonly spec = TypeSpecs.define.Struct(DTLSCompressed);
