@@ -1,14 +1,22 @@
 ﻿const PRF = require("../build/TLS/PRF").PRF;
 const PreMasterSecret = require("../build/TLS/PreMasterSecret").PreMasterSecret;
 
-var dtls = require("../build/dtls").dtls;
+var dtls = require("../");
 
 const socket = dtls.createSocket({
 	type: "udp4",
 	address: "192.168.1.115", //192.168.1.115 // 127.0.0.1
 	port: 5684,
 	psk: { "Client_identity": "X9LStOPeYT3UZu5w" } // 58394c53744f5065595433555a753577
-});
+})
+	.on("connected", () => {
+		console.log("secure connection established");
+		socket.send(Buffer.from("01020304", "hex"));
+	})
+	.on("error", (e) => console.error(`error: ${e.message}`))
+	.on("message", (msg) => console.log(`received message: ${msg}`))
+	.on("close", () => console.log("connection closed"))
+	;
 
 /*
 openssl s_server -psk 58394c53744f5065595433555a753577 -dtls1_2 -accept 127.0.0.1:5684 -debug -msg -state -cipher PSK-AES128-CCM8 -nocert -no_ticket

@@ -19,10 +19,11 @@ import { PRF } from "../TLS/PRF";
 import { PreMasterSecret } from "../TLS/PreMasterSecret";
 
 
-/**
-* DTLS Timeout and retransmission state machine for the handshake protocol
-* according to https://tools.ietf.org/html/rfc6347#section-4.2.4
-*/
+// TODO
+/////**
+////* DTLS Timeout and retransmission state machine for the handshake protocol
+////* according to https://tools.ietf.org/html/rfc6347#section-4.2.4
+////*/
 
 export enum HandshakeStates {
 	preparing,
@@ -31,11 +32,13 @@ export enum HandshakeStates {
 	finished
 }
 
+export type HandshakeFinishedCallback = (err?: Error) => void;
+
 type FlightHandler = (flight: Handshake.Handshake[]) => void;
 
 export class ClientHandshakeHandler {
 
-	constructor(private recordLayer: RecordLayer, private options: dtls.Options, private finishedCallback: Function) {
+	constructor(private recordLayer: RecordLayer, private options: dtls.Options, private finishedCallback: HandshakeFinishedCallback) {
 		this.renegotiate();
 	}
 
@@ -71,8 +74,17 @@ export class ClientHandshakeHandler {
 		hello.cipher_suites = new Vector<number>(
 			[
 				// TODO: dynamically check which ones we can support
+				CipherSuites.TLS_PSK_WITH_3DES_EDE_CBC_SHA,
+				CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA,
+				CipherSuites.TLS_PSK_WITH_AES_256_CBC_SHA,
+				CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA256,
+				CipherSuites.TLS_PSK_WITH_AES_256_CBC_SHA384,
+				CipherSuites.TLS_PSK_WITH_AES_128_GCM_SHA256,
+				CipherSuites.TLS_PSK_WITH_AES_256_GCM_SHA384,
+				CipherSuites.TLS_PSK_WITH_AES_128_CCM,
+				CipherSuites.TLS_PSK_WITH_AES_256_CCM,
 				CipherSuites.TLS_PSK_WITH_AES_128_CCM_8,
-				CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA256
+				CipherSuites.TLS_PSK_WITH_AES_256_CCM_8
 			].map(cs => cs.id)
 		);
 		hello.compression_methods = new Vector<CompressionMethod>(
@@ -156,7 +168,12 @@ export class ClientHandshakeHandler {
 						));
 					}
 					// handle the message
-					this.handle[lastMsg.msg_type](messages);
+					try {
+						this.handle[lastMsg.msg_type](messages);
+					} catch (e) {
+						this.finishedCallback(e);
+						return;
+					}
 					if (lastMsg.msg_type === Handshake.HandshakeType.finished) {
 						// for the finished flight, only buffer the finished message AFTER handling it
 						this.bufferHandshakeData(lastMsg.toFragment());
@@ -416,23 +433,21 @@ export class ClientHandshakeHandler {
 		/** Handles a Finished flight */
 		[Handshake.HandshakeType.finished]: (messages: Handshake.Handshake[]) => {
 
-			console.log("verifying server finished message...");
 			// this flight should only contain a single message (server->client),
 			// but to be sure extract the last one
 			const finished = messages[messages.length - 1] as Handshake.Finished;
 			// compute the expected verify data
 			const handshake_messages = Buffer.concat(this.allHandshakeData);
-			console.log(`handshake data: ${handshake_messages.toString("hex")}`);
 
 			const expectedVerifyData = this.computeVerifyData(handshake_messages, "server");
-			console.log(`expected: ${expectedVerifyData.toString("hex")}`);
-			console.log(`actual: ${finished.verify_data.toString("hex")}`)
 
 			if (finished.verify_data.equals(expectedVerifyData)) {
 				// all good!
 				this.finishedCallback();
 			} else {
-				// TODO: raise error, cancel connection
+				// TODO: send alert
+				this.finishedCallback(new Error("DTLS handshake failed"));
+				// TODO: cancel connection
 			}
 		},
 

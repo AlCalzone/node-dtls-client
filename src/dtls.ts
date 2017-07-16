@@ -20,8 +20,13 @@ export module dtls {
 	 */
 	export function createSocket(options: Options, callback?: MessageEventHandler): Socket {
 		const ret = new Socket(options);
-		// TODO: only bind "message" event after the handshake is finished
-		if (callback != null) ret.on("message", callback);
+
+		// bind "message" event after the handshake is finished
+		if (callback != null) {
+			ret.on("connected", () => {
+				ret.on("message", callback);
+			});
+		}
 		return ret;
 	}
 
@@ -145,7 +150,7 @@ export module dtls {
 		address: string;
 		port: number;
 		psk: { [identity: string]: string };
-		keyContext?: any; // TODO: DTLS-security options
+		//keyContext?: any; // TODO: DTLS-security options
 	}
 
 	export type ListeningEventHandler = () => void;

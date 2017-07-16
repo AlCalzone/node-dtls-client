@@ -29,9 +29,12 @@ var dtls;
      */
     function createSocket(options, callback) {
         var ret = new Socket(options);
-        // TODO: only bind "message" event after the handshake is finished
-        if (callback != null)
-            ret.on("message", callback);
+        // bind "message" event after the handshake is finished
+        if (callback != null) {
+            ret.on("connected", function () {
+                ret.on("message", callback);
+            });
+        }
         return ret;
     }
     dtls.createSocket = createSocket;

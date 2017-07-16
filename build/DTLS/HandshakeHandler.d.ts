@@ -1,21 +1,18 @@
 import { dtls } from "../dtls";
 import { RecordLayer } from "./RecordLayer";
 import * as Handshake from "./Handshake";
-/**
-* DTLS Timeout and retransmission state machine for the handshake protocol
-* according to https://tools.ietf.org/html/rfc6347#section-4.2.4
-*/
 export declare enum HandshakeStates {
     preparing = 0,
     sending = 1,
     waiting = 2,
     finished = 3,
 }
+export declare type HandshakeFinishedCallback = (err?: Error) => void;
 export declare class ClientHandshakeHandler {
     private recordLayer;
     private options;
     private finishedCallback;
-    constructor(recordLayer: RecordLayer, options: dtls.Options, finishedCallback: Function);
+    constructor(recordLayer: RecordLayer, options: dtls.Options, finishedCallback: HandshakeFinishedCallback);
     private _state;
     readonly state: HandshakeStates;
     /**

@@ -62,11 +62,9 @@ var RecordLayer = (function () {
      */
     RecordLayer.prototype.sendFlight = function (messages, callback) {
         var _this = this;
-        messages.forEach(function (m) { return _this.send(m); });
-        //const buf = Buffer.concat(
-        //	messages.map(msg => this.processOutgoingMessage(msg))
-        //	);
-        //this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+        //messages.forEach(m => this.send(m));
+        var buf = Buffer.concat(messages.map(function (msg) { return _this.processOutgoingMessage(msg); }));
+        this.udpSocket.send(buf, this.options.port, this.options.address, callback);
     };
     /**
      * Receives DTLS messages from the given buffer.

@@ -40,7 +40,6 @@ export declare module dtls {
         psk: {
             [identity: string]: string;
         };
-        keyContext?: any;
     }
     type ListeningEventHandler = () => void;
     type MessageEventHandler = (msg: Buffer, rinfo: dgram.RemoteInfo) => void;

@@ -77,11 +77,11 @@ export class RecordLayer {
 	 * @param messages - The messages to be sent
 	 */
 	public sendFlight(messages: Message[], callback?: dtls.SendCallback) {
-		messages.forEach(m => this.send(m));
-		//const buf = Buffer.concat(
-		//	messages.map(msg => this.processOutgoingMessage(msg))
-		//	);
-		//this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+		//messages.forEach(m => this.send(m));
+		const buf = Buffer.concat(
+			messages.map(msg => this.processOutgoingMessage(msg))
+			);
+		this.udpSocket.send(buf, this.options.port, this.options.address, callback);
 	}
 
 	/**
