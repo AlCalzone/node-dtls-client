@@ -2,7 +2,7 @@
     "name": "node-dtls-client",
     "version": "0.0.1",
     "description": "DTLS protocol implementation for Node.js written in TypeScript.",
-    "main": "index.js",
+    "main": "build/dtls.js",
     "author": {
         "name": "AlCalzone",
         "email": "d.griesel@gmx.net"
