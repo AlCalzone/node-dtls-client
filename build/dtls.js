@@ -89,7 +89,7 @@ var dtls;
                 // also emit all buffered messages
                 while (_this.bufferedMessages.length > 0) {
                     var _a = _this.bufferedMessages.shift(), msg = _a.msg, rinfo = _a.rinfo;
-                    _this.emit("message", msg, rinfo);
+                    _this.emit("message", msg.data, rinfo);
                 }
             });
         };
@@ -119,7 +119,7 @@ var dtls;
                             // else emit the message
                             // TODO: extend params?
                             // TODO: do we need to emit rinfo?
-                            this.emit("message", msg, rinfo);
+                            this.emit("message", msg.data, rinfo);
                         }
                         break;
                 }

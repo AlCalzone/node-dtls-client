@@ -92,7 +92,7 @@ export module dtls {
 				// also emit all buffered messages
 				while (this.bufferedMessages.length > 0) {
 					let {msg, rinfo} = this.bufferedMessages.shift();
-					this.emit("message", msg, rinfo);
+					this.emit("message", msg.data, rinfo);
 				}
 			});
 		}
@@ -123,7 +123,7 @@ export module dtls {
 							// else emit the message
 							// TODO: extend params?
 							// TODO: do we need to emit rinfo?
-							this.emit("message", msg, rinfo);
+							this.emit("message", msg.data, rinfo);
 						}
 						break;
 				}
