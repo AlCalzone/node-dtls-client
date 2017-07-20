@@ -10,18 +10,6 @@ var Vector_1 = require("../TLS/Vector");
 var ConnectionState_1 = require("../TLS/ConnectionState");
 var PRF_1 = require("../TLS/PRF");
 var PreMasterSecret_1 = require("../TLS/PreMasterSecret");
-// TODO
-/////**
-////* DTLS Timeout and retransmission state machine for the handshake protocol
-////* according to https://tools.ietf.org/html/rfc6347#section-4.2.4
-////*/
-var HandshakeStates;
-(function (HandshakeStates) {
-    HandshakeStates[HandshakeStates["preparing"] = 0] = "preparing";
-    HandshakeStates[HandshakeStates["sending"] = 1] = "sending";
-    HandshakeStates[HandshakeStates["waiting"] = 2] = "waiting";
-    HandshakeStates[HandshakeStates["finished"] = 3] = "finished";
-})(HandshakeStates = exports.HandshakeStates || (exports.HandshakeStates = {}));
 var ClientHandshakeHandler = (function () {
     function ClientHandshakeHandler(recordLayer, options, finishedCallback) {
         var _this = this;
@@ -122,10 +110,12 @@ var ClientHandshakeHandler = (function () {
                 var expectedVerifyData = _this.computeVerifyData(handshake_messages, "server");
                 if (finished.verify_data.equals(expectedVerifyData)) {
                     // all good!
+                    _this._isHandshaking = false;
                     _this.finishedCallback();
                 }
                 else {
                     // TODO: send alert
+                    _this._isHandshaking = false;
                     _this.finishedCallback(new Error("DTLS handshake failed"));
                     // TODO: cancel connection
                 }
@@ -134,9 +124,9 @@ var ClientHandshakeHandler = (function () {
         this.renegotiate();
         var _a;
     }
-    Object.defineProperty(ClientHandshakeHandler.prototype, "state", {
+    Object.defineProperty(ClientHandshakeHandler.prototype, "isHandshaking", {
         get: function () {
-            return this._state;
+            return this._isHandshaking;
         },
         enumerable: true,
         configurable: true
@@ -146,7 +136,8 @@ var ClientHandshakeHandler = (function () {
      */
     ClientHandshakeHandler.prototype.renegotiate = function () {
         // reset variables
-        this._state = HandshakeStates.preparing;
+        //this._state = HandshakeStates.preparing;
+        this._isHandshaking = true;
         this.lastProcessedSeqNum = -1;
         this.lastSentSeqNum = -1;
         this.incompleteMessages = [];
@@ -240,6 +231,7 @@ var ClientHandshakeHandler = (function () {
                         this.handle[lastMsg.msg_type](messages);
                     }
                     catch (e) {
+                        this._isHandshaking = false;
                         this.finishedCallback(e);
                         return;
                     }

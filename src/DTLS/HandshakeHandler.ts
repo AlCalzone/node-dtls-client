@@ -25,12 +25,12 @@ import { PreMasterSecret } from "../TLS/PreMasterSecret";
 ////* according to https://tools.ietf.org/html/rfc6347#section-4.2.4
 ////*/
 
-export enum HandshakeStates {
-	preparing,
-	sending,
-	waiting,
-	finished
-}
+//export enum HandshakeStates {
+//	preparing,
+//	sending,
+//	waiting,
+//	finished
+//}
 
 export type HandshakeFinishedCallback = (err?: Error) => void;
 
@@ -42,9 +42,14 @@ export class ClientHandshakeHandler {
 		this.renegotiate();
 	}
 
-	private _state;
-	public get state(): HandshakeStates {
-		return this._state;
+	//private _state;
+	//public get state(): HandshakeStates {
+	//	return this._state;
+	//}
+
+	private _isHandshaking: boolean;
+	public get isHandshaking(): boolean {
+		return this._isHandshaking;
 	}
 
 	/**
@@ -52,7 +57,8 @@ export class ClientHandshakeHandler {
 	 */
 	public renegotiate() {
 		// reset variables
-		this._state = HandshakeStates.preparing;
+		//this._state = HandshakeStates.preparing;
+		this._isHandshaking = true;
 		this.lastProcessedSeqNum = -1;
 		this.lastSentSeqNum = -1;
 		this.incompleteMessages = [];
@@ -171,6 +177,7 @@ export class ClientHandshakeHandler {
 					try {
 						this.handle[lastMsg.msg_type](messages);
 					} catch (e) {
+						this._isHandshaking = false;
 						this.finishedCallback(e);
 						return;
 					}
@@ -443,9 +450,11 @@ export class ClientHandshakeHandler {
 
 			if (finished.verify_data.equals(expectedVerifyData)) {
 				// all good!
+				this._isHandshaking = false;
 				this.finishedCallback();
 			} else {
 				// TODO: send alert
+				this._isHandshaking = false;
 				this.finishedCallback(new Error("DTLS handshake failed"));
 				// TODO: cancel connection
 			}

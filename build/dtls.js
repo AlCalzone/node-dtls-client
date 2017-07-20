@@ -17,9 +17,6 @@ var ContentType_1 = require("./TLS/ContentType");
 var HandshakeHandler_1 = require("./DTLS/HandshakeHandler");
 var Handshake_1 = require("./DTLS/Handshake");
 var TLSStruct_1 = require("./TLS/TLSStruct");
-//import { DTLSPlaintext } from "./DTLS/DTLSPlaintext";
-//import { DTLSCompressed } from "./DTLS/DTLSCompressed";
-//import { DTLSCiphertext } from "./DTLS/DTLSCiphertext";
 var dtls;
 (function (dtls) {
     /**
@@ -114,7 +111,7 @@ var dtls;
                         // TODO: read spec to see how we handle this
                         break;
                     case ContentType_1.ContentType.application_data:
-                        if (this.handshakeHandler.state !== HandshakeHandler_1.HandshakeStates.finished) {
+                        if (this.handshakeHandler.isHandshaking) {
                             // if we are still shaking hands, buffer the message until we're done
                             this.bufferedMessages.push({ msg: msg, rinfo: rinfo });
                         }

@@ -133,9 +133,6 @@
   <ItemGroup>
     <Compile Include="coverage\prettify.js" />
     <Compile Include="coverage\sorter.js" />
-    <Compile Include="index.js">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="src\lib\BitConverter.ts" />
     <Compile Include="tests\testServer.js">
       <SubType>Code</SubType>

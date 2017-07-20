@@ -1,20 +1,14 @@
 import { dtls } from "../dtls";
 import { RecordLayer } from "./RecordLayer";
 import * as Handshake from "./Handshake";
-export declare enum HandshakeStates {
-    preparing = 0,
-    sending = 1,
-    waiting = 2,
-    finished = 3,
-}
 export declare type HandshakeFinishedCallback = (err?: Error) => void;
 export declare class ClientHandshakeHandler {
     private recordLayer;
     private options;
     private finishedCallback;
     constructor(recordLayer: RecordLayer, options: dtls.Options, finishedCallback: HandshakeFinishedCallback);
-    private _state;
-    readonly state: HandshakeStates;
+    private _isHandshaking;
+    readonly isHandshaking: boolean;
     /**
      * (Re)negotiates a DTLS session. Is automatically called when the Handshake handler is created
      */
