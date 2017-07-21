@@ -35,7 +35,7 @@ export class RecordLayer {
 	 */
 	public send(msg: Message, callback?: dtls.SendCallback) {
 		const buf = this.processOutgoingMessage(msg);
-		this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+		this.udpSocket.send(buf, 0, buf.length, this.options.port, this.options.address, callback);
 	}
 	/**
 	 * Transforms the given message into a DTLSCiphertext packet,
@@ -81,7 +81,7 @@ export class RecordLayer {
 		const buf = Buffer.concat(
 			messages.map(msg => this.processOutgoingMessage(msg))
 			);
-		this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+		this.udpSocket.send(buf, 0, buf.length, this.options.port, this.options.address, callback);
 	}
 
 	/**

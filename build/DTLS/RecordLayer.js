@@ -31,7 +31,7 @@ var RecordLayer = (function () {
      */
     RecordLayer.prototype.send = function (msg, callback) {
         var buf = this.processOutgoingMessage(msg);
-        this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+        this.udpSocket.send(buf, 0, buf.length, this.options.port, this.options.address, callback);
     };
     /**
      * Transforms the given message into a DTLSCiphertext packet,
@@ -64,7 +64,7 @@ var RecordLayer = (function () {
         var _this = this;
         //messages.forEach(m => this.send(m));
         var buf = Buffer.concat(messages.map(function (msg) { return _this.processOutgoingMessage(msg); }));
-        this.udpSocket.send(buf, this.options.port, this.options.address, callback);
+        this.udpSocket.send(buf, 0, buf.length, this.options.port, this.options.address, callback);
     };
     /**
      * Receives DTLS messages from the given buffer.
