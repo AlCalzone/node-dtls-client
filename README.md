@@ -33,11 +33,12 @@ The DtlsOptions object looks as follows:
 	type: "udp4",
 	address: "ip or host",
 	port: 5684,
-	psk: { "psk_hint": "PSK" }
+	psk: { "psk_hint": "PSK" },
+	timeout: 1000 // in ms, optional, minimum 100, default 1000
 }
 ```
 
-Send some data:
+Send some data (after the `connected` event was received):
 ```
 socket.send(data /* Buffer */, [callback]);
 ```
@@ -56,6 +57,16 @@ The events are defined as follows:
 - [ ] packet retransmission
 - [ ] session renegotiation
 - [ ] other compression algorithms except NULL
+
+
+## Changelog
+
+#### 0.0.2 (2015-07-XX)
+* (AlCalzone) improved error and timeout handling in the socket wrapper.
+
+#### 0.0.1
+* (AlCalzone) initial release. 
+
 
 ## License
 The MIT License (MIT)
