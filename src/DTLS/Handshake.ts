@@ -120,9 +120,8 @@ export class FragmentedHandshake extends TLSStruct {
 	
 	/**
 	 * Enforces an array of fragments to belong to a single message
-	 * @throws Error
+	 * @throws Throws an error if the fragements belong to multiple messages. Passes otherwise.
 	 */
-	// TODO: error Documentation
 	private static enforceSingleMessage(fragments: FragmentedHandshake[]): void {
 		// check if we are looking at a single message, i.e. compare type, seq_num and length
 		const singleMessage = fragments.every((val, i, arr) => {
@@ -135,7 +134,7 @@ export class FragmentedHandshake extends TLSStruct {
 			return true;
 		});
 		if (!singleMessage) 
-			throw new Error('this series of fragments belongs to multiple messages'); // TODO: better type?		
+			throw new Error('this series of fragments belongs to multiple messages');
 	}
 
 	/**
@@ -232,7 +231,7 @@ export class FragmentedHandshake extends TLSStruct {
 	static reassemble(messages : FragmentedHandshake[]) : FragmentedHandshake {
 		// cannot reassemble empty arrays
 		if (!(messages && messages.length)) 
-			throw new Error("cannot reassemble handshake from empty array"); // TODO: Better type?
+			throw new Error("cannot reassemble handshake from empty array");
 		
 		// sort by fragment start
 		messages = messages.sort((a,b) => a.fragment_offset - b.fragment_offset);

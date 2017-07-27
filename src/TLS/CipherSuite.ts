@@ -155,7 +155,7 @@ export interface KeyMaterial {
 	server_write_IV: Buffer /*ConnectionState.fixed_iv_length*/;
 }
 
-
+/** Creates a dummy cipher which is just an identity operation */
 function createNullCipher(): GenericCipherDelegate {
 	const ret = ((packet: DTLSCompressed, _1, _2) => new DTLSCiphertext(
 		packet.type,
@@ -169,6 +169,7 @@ function createNullCipher(): GenericCipherDelegate {
 	ret.recordIvLength = 0;
 	return ret;
 }
+/** Creates a dummy decipher which is just an identity operation */
 function createNullDecipher(): GenericDecipherDelegate {
 	const ret = ((packet: DTLSCiphertext, _1, _2) => new DTLSCompressed(
 		packet.type,
@@ -182,12 +183,14 @@ function createNullDecipher(): GenericDecipherDelegate {
 	ret.recordIvLength = 0;
 	return ret;
 }
+/** Creates a dummy MAC which just returns an empty Buffer */
 function createNullMAC(): GenericMacDelegate {
 	const ret = ((data, _1, _2) => Buffer.from([])) as GenericMacDelegate;
 	ret.keyAndHashLength = 0;
 	return ret;
 }
 
+// TODO: Documentation
 export class CipherSuite extends TLSStruct {
 
 	static readonly __spec = {
@@ -292,7 +295,6 @@ export class CipherSuite extends TLSStruct {
 		return this._mac;
 	}
 	private createMAC(): GenericMacDelegate {
-		// TODO: detect special cases
 		switch (this.cipherType) {
 			case null:
 			case "aead":

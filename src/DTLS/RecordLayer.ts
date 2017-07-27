@@ -53,7 +53,7 @@ export class RecordLayer {
 		);
 
 		// compress packet
-		const compressor = (identity) => identity; // TODO: implement compression algorithms
+		const compressor = (identity) => identity; // TODO: only valid for NULL compression, check it!
 		packet = DTLSCompressed.compress(packet, compressor);
 
 		if (epoch.connectionState.cipherSuite.cipherType != null) {
@@ -125,7 +125,7 @@ export class RecordLayer {
 			});
 
 		// decompress and decrypt packets
-		const decompressor = (identity) => identity; // TODO implement actual compression methods
+		const decompressor = (identity) => identity; // TODO: only valid for NULL compression, check it!
 
 		packets = packets
 			.map((p: DTLSCiphertext) => {
