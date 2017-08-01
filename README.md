@@ -61,7 +61,7 @@ The events are defined as follows:
 
 ## Changelog
 
-#### 0.0.2 (2015-07-XX)
+#### 0.0.2 (2015-08-01)
 * (AlCalzone) improved error and timeout handling in the socket wrapper.
 
 #### 0.0.1
