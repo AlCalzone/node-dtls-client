@@ -24,7 +24,7 @@ exports.define = {
     Number: function (size) { return ({ type: "number", size: size }); },
     Struct: function (structType) { return ({
         type: "struct",
-        structType: structType
+        structType: structType,
     }); },
     Vector: function (itemSpec, minLength, maxLength, optional) {
         if (minLength === void 0) { minLength = 0; }
@@ -34,7 +34,7 @@ exports.define = {
             type: "vector",
             itemSpec: itemSpec,
             minLength: minLength, maxLength: maxLength,
-            optional: optional
+            optional: optional,
         });
     },
     Buffer: function (minLength, maxLength) {
@@ -42,9 +42,9 @@ exports.define = {
         if (maxLength === void 0) { maxLength = minLength; }
         return ({
             type: "buffer",
-            minLength: minLength, maxLength: maxLength
+            minLength: minLength, maxLength: maxLength,
         });
-    }
+    },
 };
 exports.uint8 = Object.freeze(exports.define.Number("uint8"));
 exports.uint16 = Object.freeze(exports.define.Number("uint16"));

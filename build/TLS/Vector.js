@@ -1,14 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var TypeSpecs = require("./TypeSpecs");
-var util_1 = require("../lib/util");
 var BitConverter_1 = require("../lib/BitConverter");
+var util_1 = require("../lib/util");
+var TypeSpecs = require("./TypeSpecs");
 var Vector = (function () {
-    // TODO: this has to be possible without the spec param
-    // maybe pass it when serializing?
-    function Vector(
-        //public spec: TypeSpecs.Vector, 
-        items) {
+    function Vector(items) {
         if (items === void 0) { items = []; }
         this.items = items;
     }
@@ -18,8 +14,8 @@ var Vector = (function () {
             return Buffer.allocUnsafe(0);
         }
         // serialize all the items into single buffers
-        var serializedItems, bitSize;
-        ;
+        var serializedItems;
+        var bitSize;
         switch (spec.itemSpec.type) {
             case "number":
             case "enum":
@@ -35,7 +31,7 @@ var Vector = (function () {
             var lengthBits = (8 * util_1.fitToWholeBytes(spec.maxLength));
             ret = Buffer.concat([
                 BitConverter_1.numberToBuffer(ret.length, lengthBits),
-                ret
+                ret,
             ]);
         }
         return ret;
@@ -50,17 +46,18 @@ var Vector = (function () {
             length = BitConverter_1.bufferToNumber(buf, lengthBits, offset);
             delta += lengthBits / 8;
         }
+        var i;
         switch (spec.itemSpec.type) {
             case "number":
             case "enum":
                 var bitSize = TypeSpecs.getPrimitiveSize(spec.itemSpec);
-                for (var i_1 = 0; i_1 < length; i_1 += bitSize / 8) {
+                for (i = 0; i < length; i += bitSize / 8) {
                     this.items.push(BitConverter_1.bufferToNumber(buf, bitSize, offset + delta)); // we know this is a number!
                     delta += bitSize / 8;
                 }
                 break;
             case "struct":
-                var i = 0;
+                i = 0;
                 while (i < length) {
                     var item = spec.itemSpec.structType.from(spec.itemSpec, buf, offset + delta);
                     i += item.readBytes;

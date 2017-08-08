@@ -1,6 +1,6 @@
 /// <reference types="node" />
-import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
+import * as TypeSpecs from "./TypeSpecs";
 export declare class Random extends TLSStruct {
     gmt_unix_time: number;
     random_bytes: Buffer;

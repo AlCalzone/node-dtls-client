@@ -1,7 +1,7 @@
 /// <reference types="node" />
-import { EventEmitter } from "events";
 import * as dgram from "dgram";
-export declare module dtls {
+import { EventEmitter } from "events";
+export declare namespace dtls {
     /**
      * Creates a DTLS-secured socket.
      * @param options - The options used to create the socket
@@ -19,6 +19,9 @@ export declare module dtls {
         constructor(options: Options);
         private recordLayer;
         private handshakeHandler;
+        private _handshakeFinished;
+        private _udpConnected;
+        private _connectionTimeout;
         /**
          * Send the given data. It is automatically compressed and encrypted.
          */
@@ -27,19 +30,30 @@ export declare module dtls {
         private bufferedMessages;
         private udp;
         private udp_onListening();
+        private expectConnection();
+        private expectHandshake();
         private udp_onMessage(udpMsg, rinfo);
         private _isClosed;
         private udp_onClose();
         private udp_onError(exception);
+        /** Kills the underlying UDP connection and emits an error if neccessary */
+        private killConnection(err?);
     }
     interface Options {
+        /** the type of the underlying socket */
         type: "udp4" | "udp6";
+        /** ?? see NodeJS docs */
         reuseAddr?: boolean;
+        /** The remote address to connect to */
         address: string;
+        /** The remote port to connect to */
         port: number;
+        /** Pre shared key information as a table <identity> => <psk> */
         psk: {
             [identity: string]: string;
         };
+        /** Time after which a connection should successfully established */
+        timeout?: number;
     }
     type ListeningEventHandler = () => void;
     type MessageEventHandler = (msg: Buffer, rinfo: dgram.RemoteInfo) => void;

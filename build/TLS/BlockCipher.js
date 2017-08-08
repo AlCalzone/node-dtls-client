@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var crypto = require("crypto");
-var DTLSCompressed_1 = require("../DTLS/DTLSCompressed");
 var DTLSCiphertext_1 = require("../DTLS/DTLSCiphertext");
+var DTLSCompressed_1 = require("../DTLS/DTLSCompressed");
 var BlockCipherParameters = {
     "aes-128-cbc": { keyLength: 16, blockSize: 16, recordIvLength: 16 },
     "aes-256-cbc": { keyLength: 32, blockSize: 16, recordIvLength: 16 },
@@ -19,12 +19,12 @@ function createCipher(algorithm, mac) {
         // compute the MAC for this packet
         var MAC = mac(Buffer.concat([
             packet.computeMACHeader(),
-            packet.fragment
+            packet.fragment,
         ]), keyMaterial, connEnd);
         // combine that with the MAC to form the plaintext and encrypt it
         var plaintext = Buffer.concat([
             packet.fragment,
-            MAC
+            MAC,
         ]);
         // figure out how much padding we need
         var overflow = ((plaintext.length + 1) % cipherParams.blockSize);
@@ -39,12 +39,12 @@ function createCipher(algorithm, mac) {
         var ciphertext = Buffer.concat([
             cipher.update(plaintext),
             cipher.update(padding),
-            cipher.final()
+            cipher.final(),
         ]);
         // prepend it with the iv
         var fragment = Buffer.concat([
             record_iv,
-            ciphertext
+            ciphertext,
         ]);
         // and return the packet
         return new DTLSCiphertext_1.DTLSCiphertext(packet.type, packet.version, packet.epoch, packet.sequence_number, fragment);
@@ -69,7 +69,7 @@ function createDecipher(algorithm, mac) {
             // This allows to prevent a CBC timing attack
             return {
                 err: new Error("invalid MAC detected in DTLS packet"),
-                result: deciphered
+                result: deciphered,
             };
         }
         var ciphertext = packet.fragment;
@@ -84,7 +84,7 @@ function createDecipher(algorithm, mac) {
             var ciphered = ciphertext.slice(decipherParams.blockSize);
             var deciphered = Buffer.concat([
                 decipher.update(ciphered),
-                decipher.final()
+                decipher.final(),
             ]);
             // check the padding
             var len = deciphered.length;
@@ -99,6 +99,7 @@ function createDecipher(algorithm, mac) {
                     return invalidMAC(deciphered);
             }
             // strip off padding
+            // tslint:disable-next-line:no-shadowed-variable
             var plaintext = Buffer.from(deciphered.slice(0, -1 - paddingLength));
             // contains fragment + MAC
             return { result: plaintext };
@@ -113,7 +114,8 @@ function createDecipher(algorithm, mac) {
         }
         // split the plaintext into content and MAC
         var plaintext = decipherResult.result;
-        var content, receivedMAC;
+        var content;
+        var receivedMAC;
         if (mac.keyAndHashLength > 0) {
             content = plaintext.slice(0, -mac.keyAndHashLength);
             receivedMAC = plaintext.slice(-mac.keyAndHashLength);
@@ -123,17 +125,17 @@ function createDecipher(algorithm, mac) {
             receivedMAC = Buffer.from([]);
         }
         // Create the compressed packet to return after verifying
-        var ret = new DTLSCompressed_1.DTLSCompressed(packet.type, packet.version, packet.epoch, packet.sequence_number, content);
+        var result = new DTLSCompressed_1.DTLSCompressed(packet.type, packet.version, packet.epoch, packet.sequence_number, content);
         // compute the expected MAC for this packet
         var expectedMAC = mac(Buffer.concat([
-            ret.computeMACHeader(),
-            ret.fragment
+            result.computeMACHeader(),
+            result.fragment,
         ]), keyMaterial, sourceConnEnd);
         // and check if it matches the actual one
         if (!expectedMAC.equals(receivedMAC)) {
             throw invalidMAC().err;
         }
-        return ret;
+        return result;
     });
     // append key length information
     ret.keyLength = decipherParams.keyLength;

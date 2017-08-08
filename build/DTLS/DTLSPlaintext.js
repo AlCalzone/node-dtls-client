@@ -10,10 +10,10 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TypeSpecs = require("../TLS/TypeSpecs");
-var TLSStruct_1 = require("../TLS/TLSStruct");
-var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var ContentType_1 = require("../TLS/ContentType");
+var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
+var TLSStruct_1 = require("../TLS/TLSStruct");
+var TypeSpecs = require("../TLS/TypeSpecs");
 var DTLSPlaintext = (function (_super) {
     __extends(DTLSPlaintext, _super);
     function DTLSPlaintext(type, version, epoch, sequence_number, fragment) {
@@ -37,7 +37,7 @@ DTLSPlaintext.__spec = {
     epoch: TypeSpecs.uint16,
     sequence_number: TypeSpecs.uint48,
     // length field is implied in the variable length vector
-    fragment: TypeSpecs.define.Buffer(0, Math.pow(2, 14))
+    fragment: TypeSpecs.define.Buffer(0, Math.pow(2, 14)),
 };
 DTLSPlaintext.spec = TypeSpecs.define.Struct(DTLSPlaintext);
 exports.DTLSPlaintext = DTLSPlaintext;

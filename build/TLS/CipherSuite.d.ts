@@ -1,11 +1,11 @@
 /// <reference types="node" />
-import * as TypeSpecs from "./TypeSpecs";
-import { TLSStruct } from "./TLSStruct";
-import { ConnectionEnd } from "./ConnectionState";
-import * as BlockCipher from "./BlockCipher";
-import * as AEADCipher from "./AEADCipher";
-import { DTLSCompressed } from "../DTLS/DTLSCompressed";
 import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
+import { DTLSCompressed } from "../DTLS/DTLSCompressed";
+import * as AEADCipher from "./AEADCipher";
+import * as BlockCipher from "./BlockCipher";
+import { ConnectionEnd } from "./ConnectionState";
+import { TLSStruct } from "./TLSStruct";
+import * as TypeSpecs from "./TypeSpecs";
 export declare type HashAlgorithm = "md5" | "sha1" | "sha256" | "sha384" | "sha512";
 export declare type CipherType = "block" | "aead";
 export declare type KeyExchangeAlgorithm = "dhe_dss" | "dhe_rsa" | "rsa" | "dh_dss" | "dh_rsa" | "psk" | "dhe_psk" | "rsa_psk";

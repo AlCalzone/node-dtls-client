@@ -10,11 +10,11 @@ function entries(obj) {
 }
 exports.entries = entries;
 // ES6-Generator-Version
-//export function* entries(obj) {
-//	for (let key of Object.keys(obj)) {
-//		yield [key, obj[key]];
-//	}
-//}
+// export function* entries(obj) {
+// 	for (let key of Object.keys(obj)) {
+// 		yield [key, obj[key]];
+// 	}
+// }
 /**
  * Stellt einen Polyfill für Object.entries bereit
  * @param obj - Ein Objekt über dessen Werte iteriert werden soll
@@ -74,7 +74,7 @@ exports.dig = dig;
  * @param value - Der abzulegende Eigenschaftswert
  */
 function bury(object, path, value) {
-    function _bury(obj, pathArr, value) {
+    function _bury(obj, pathArr) {
         // are we there yet? then return obj
         if (pathArr.length === 1) {
             obj[pathArr[0]] = value;
@@ -86,9 +86,9 @@ function bury(object, path, value) {
             // this is an array index
             propName = +propName.slice(1, -1);
         }
-        _bury(obj[propName], pathArr, value);
+        _bury(obj[propName], pathArr);
     }
-    _bury(object, path.split("."), value);
+    _bury(object, path.split("."));
 }
 exports.bury = bury;
 /**

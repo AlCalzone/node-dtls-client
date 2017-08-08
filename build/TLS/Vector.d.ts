@@ -1,6 +1,6 @@
 /// <reference types="node" />
+import { DeserializationResult, ISerializable } from "./Serializable";
 import * as TypeSpecs from "./TypeSpecs";
-import { ISerializable, DeserializationResult } from "./Serializable";
 export declare class Vector<T extends number | ISerializable> {
     items: T[];
     constructor(items?: T[]);

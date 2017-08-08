@@ -1,10 +1,10 @@
 /// <reference types="node" />
 import * as dgram from "dgram";
 import { dtls } from "../dtls";
+import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
 import { ConnectionState } from "../TLS/ConnectionState";
 import { Message } from "../TLS/Message";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
 export interface Epoch {
     index: number;
     connectionState: ConnectionState;

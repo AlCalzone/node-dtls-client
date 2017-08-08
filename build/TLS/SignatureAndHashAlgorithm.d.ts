@@ -1,5 +1,5 @@
-import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
+import * as TypeSpecs from "./TypeSpecs";
 export declare enum HashAlgorithm {
     none = 0,
     md5 = 1,

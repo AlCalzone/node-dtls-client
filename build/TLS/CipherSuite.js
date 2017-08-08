@@ -10,19 +10,19 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TypeSpecs = require("./TypeSpecs");
-var TLSStruct_1 = require("./TLSStruct");
-var BlockCipher = require("./BlockCipher");
-var AEADCipher = require("./AEADCipher");
-var PRF_1 = require("./PRF");
-var DTLSCompressed_1 = require("../DTLS/DTLSCompressed");
 var DTLSCiphertext_1 = require("../DTLS/DTLSCiphertext");
+var DTLSCompressed_1 = require("../DTLS/DTLSCompressed");
+var AEADCipher = require("./AEADCipher");
+var BlockCipher = require("./BlockCipher");
+var PRF_1 = require("./PRF");
+var TLSStruct_1 = require("./TLSStruct");
+var TypeSpecs = require("./TypeSpecs");
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used
  */
 function createMAC(algorithm) {
-    //const keyLength = MACKeyLengths[algorithm];
+    // const keyLength = MACKeyLengths[algorithm];
     var MAC = PRF_1.HMAC[algorithm];
     var ret = (function (data, keyMaterial, sourceConnEnd) {
         // find the right hash params
@@ -35,6 +35,7 @@ function createMAC(algorithm) {
     return ret;
 }
 exports.createMAC = createMAC;
+/** Creates a dummy cipher which is just an identity operation */
 function createNullCipher() {
     var ret = (function (packet, _1, _2) { return new DTLSCiphertext_1.DTLSCiphertext(packet.type, packet.version, packet.epoch, packet.sequence_number, packet.fragment); });
     ret.keyLength = 0;
@@ -42,6 +43,7 @@ function createNullCipher() {
     ret.recordIvLength = 0;
     return ret;
 }
+/** Creates a dummy decipher which is just an identity operation */
 function createNullDecipher() {
     var ret = (function (packet, _1, _2) { return new DTLSCompressed_1.DTLSCompressed(packet.type, packet.version, packet.epoch, packet.sequence_number, packet.fragment); });
     ret.keyLength = 0;
@@ -49,11 +51,13 @@ function createNullDecipher() {
     ret.recordIvLength = 0;
     return ret;
 }
+/** Creates a dummy MAC which just returns an empty Buffer */
 function createNullMAC() {
     var ret = (function (data, _1, _2) { return Buffer.from([]); });
     ret.keyAndHashLength = 0;
     return ret;
 }
+// TODO: Documentation
 var CipherSuite = (function (_super) {
     __extends(CipherSuite, _super);
     function CipherSuite(id, keyExchange, macAlgorithm, prfAlgorithm, cipherType, algorithm, verify_data_length) {
@@ -73,8 +77,9 @@ var CipherSuite = (function (_super) {
     };
     Object.defineProperty(CipherSuite.prototype, "Cipher", {
         get: function () {
-            if (this._cipher == undefined)
+            if (this._cipher == undefined) {
                 this._cipher = this.createCipher();
+            }
             return this._cipher;
         },
         enumerable: true,
@@ -110,8 +115,9 @@ var CipherSuite = (function (_super) {
     };
     Object.defineProperty(CipherSuite.prototype, "Decipher", {
         get: function () {
-            if (this._decipher == undefined)
+            if (this._decipher == undefined) {
                 this._decipher = this.createDecipher();
+            }
             return this._decipher;
         },
         enumerable: true,
@@ -147,22 +153,23 @@ var CipherSuite = (function (_super) {
     };
     Object.defineProperty(CipherSuite.prototype, "MAC", {
         get: function () {
-            if (this._mac == undefined)
+            if (this._mac == undefined) {
                 this._mac = this.createMAC();
+            }
             return this._mac;
         },
         enumerable: true,
         configurable: true
     });
     CipherSuite.prototype.createMAC = function () {
-        // TODO: detect special cases
         switch (this.cipherType) {
             case null:
             case "aead":
                 return createNullMAC();
             case "block":
-                if (this.macAlgorithm == null)
+                if (this.macAlgorithm == null) {
                     return createNullMAC();
+                }
                 return createMAC(this.macAlgorithm);
             default:
                 throw new Error("createMAC not implemented for " + this.cipherType + " cipher");
@@ -171,7 +178,7 @@ var CipherSuite = (function (_super) {
     return CipherSuite;
 }(TLSStruct_1.TLSStruct));
 CipherSuite.__spec = {
-    id: TypeSpecs.uint16
+    id: TypeSpecs.uint16,
 };
 CipherSuite.spec = TypeSpecs.define.Struct(CipherSuite);
 exports.CipherSuite = CipherSuite;

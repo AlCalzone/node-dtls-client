@@ -11,21 +11,21 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var crypto = require("crypto");
-var DTLSCompressed_1 = require("../DTLS/DTLSCompressed");
 var DTLSCiphertext_1 = require("../DTLS/DTLSCiphertext");
-var TypeSpecs = require("./TypeSpecs");
-var TLSStruct_1 = require("./TLSStruct");
-var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
+var DTLSCompressed_1 = require("../DTLS/DTLSCompressed");
 var ContentType_1 = require("../TLS/ContentType");
-var gcm = require("node-aes-gcm");
+var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
+var TLSStruct_1 = require("./TLSStruct");
+var TypeSpecs = require("./TypeSpecs");
 var ccm = require("node-aes-ccm");
+var gcm = require("node-aes-gcm");
 var AEADCipherParameters = {
     "aes-128-ccm": { interface: ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
     "aes-128-ccm8": { interface: ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
     "aes-256-ccm": { interface: ccm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
     "aes-256-ccm8": { interface: ccm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
     "aes-128-gcm": { interface: gcm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
-    "aes-256-gcm": { interface: gcm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 }
+    "aes-256-gcm": { interface: gcm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
 };
 var AdditionalData = (function (_super) {
     __extends(AdditionalData, _super);
@@ -48,7 +48,7 @@ AdditionalData.__spec = {
     sequence_number: TypeSpecs.uint48,
     type: ContentType_1.ContentType.__spec,
     version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    fragment_length: TypeSpecs.uint16
+    fragment_length: TypeSpecs.uint16,
 };
 /**
  * Creates an AEAD cipher delegate used to encrypt packet fragments.
@@ -62,10 +62,10 @@ function createCipher(algorithm) {
         var salt = (connEnd === "server") ? keyMaterial.server_write_IV : keyMaterial.client_write_IV;
         var nonce_explicit = crypto.pseudoRandomBytes(cipherParams.recordIvLength);
         // alternatively:
-        //const nonce_explicit = Buffer.concat([
-        //	BitConverter.numberToBuffer(packet.epoch, 16),
-        //	BitConverter.numberToBuffer(packet.sequence_number, 48)
-        //]);
+        // const nonce_explicit = Buffer.concat([
+        // 	BitConverter.numberToBuffer(packet.epoch, 16),
+        // 	BitConverter.numberToBuffer(packet.sequence_number, 48)
+        // ]);
         var nonce = Buffer.concat([salt, nonce_explicit]);
         var additionalData = new AdditionalData(packet.epoch, packet.sequence_number, packet.type, packet.version, packet.fragment.length).serialize();
         var cipher_key = (connEnd === "server") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
@@ -76,7 +76,7 @@ function createCipher(algorithm) {
         var fragment = Buffer.concat([
             nonce_explicit,
             encryptionResult.ciphertext,
-            encryptionResult.auth_tag
+            encryptionResult.auth_tag,
         ]);
         // and return the packet
         return new DTLSCiphertext_1.DTLSCiphertext(packet.type, packet.version, packet.epoch, packet.sequence_number, fragment);

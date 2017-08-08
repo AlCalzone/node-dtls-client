@@ -10,10 +10,10 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TypeSpecs = require("../TLS/TypeSpecs");
-var TLSStruct_1 = require("../TLS/TLSStruct");
-var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var ContentType_1 = require("../TLS/ContentType");
+var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
+var TLSStruct_1 = require("../TLS/TLSStruct");
+var TypeSpecs = require("../TLS/TypeSpecs");
 var DTLSPlaintext_1 = require("./DTLSPlaintext");
 var DTLSCompressed = (function (_super) {
     __extends(DTLSCompressed, _super);
@@ -43,8 +43,7 @@ var DTLSCompressed = (function (_super) {
      * @param decompressor - The decompressor function used to decompress this packet
      */
     DTLSCompressed.prototype.decompress = function (decompressor) {
-        return new DTLSPlaintext_1.DTLSPlaintext(this.type, this.version, this.epoch, this.sequence_number, decompressor(this.fragment) // TODO: handle decompression errors (like too large fragments)
-        );
+        return new DTLSPlaintext_1.DTLSPlaintext(this.type, this.version, this.epoch, this.sequence_number, decompressor(this.fragment));
     };
     /**
      * Computes the MAC header representing this packet. The MAC header is the input buffer of the MAC calculation minus the actual fragment buffer.
@@ -60,7 +59,7 @@ DTLSCompressed.__spec = {
     epoch: TypeSpecs.uint16,
     sequence_number: TypeSpecs.uint48,
     // length field is implied in the variable length vector
-    fragment: TypeSpecs.define.Buffer(0, 1024 + Math.pow(2, 14))
+    fragment: TypeSpecs.define.Buffer(0, 1024 + Math.pow(2, 14)),
 };
 DTLSCompressed.spec = TypeSpecs.define.Struct(DTLSCompressed);
 exports.DTLSCompressed = DTLSCompressed;
@@ -85,7 +84,7 @@ MACHeader.__spec = {
     sequence_number: TypeSpecs.uint48,
     type: ContentType_1.ContentType.__spec,
     version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    fragment_length: TypeSpecs.uint16
+    fragment_length: TypeSpecs.uint16,
 };
 exports.MACHeader = MACHeader;
 //# sourceMappingURL=DTLSCompressed.js.map

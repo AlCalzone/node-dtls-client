@@ -10,21 +10,20 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TypeSpecs = require("../TLS/TypeSpecs");
-var TLSStruct_1 = require("../TLS/TLSStruct");
-var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var ContentType_1 = require("../TLS/ContentType");
+var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
+var TLSStruct_1 = require("../TLS/TLSStruct");
+var TypeSpecs = require("../TLS/TypeSpecs");
 var DTLSCiphertext = (function (_super) {
     __extends(DTLSCiphertext, _super);
-    function DTLSCiphertext(type, version, epoch, sequence_number, fragment // <XXX>Ciphertext
-    ) {
+    function DTLSCiphertext(type, version, epoch, sequence_number, fragment) {
         if (version === void 0) { version = new ProtocolVersion_1.ProtocolVersion(); }
         var _this = _super.call(this, DTLSCiphertext.__spec) || this;
         _this.type = type;
         _this.version = version;
         _this.epoch = epoch;
         _this.sequence_number = sequence_number;
-        _this.fragment = fragment; // <XXX>Ciphertext
+        _this.fragment = fragment;
         return _this;
     }
     DTLSCiphertext.createEmpty = function () {
@@ -38,7 +37,7 @@ DTLSCiphertext.__spec = {
     epoch: TypeSpecs.uint16,
     sequence_number: TypeSpecs.uint48,
     // length field is implied in the variable length vector
-    fragment: TypeSpecs.define.Buffer(0, 2048 + Math.pow(2, 14))
+    fragment: TypeSpecs.define.Buffer(0, 2048 + Math.pow(2, 14)),
 };
 DTLSCiphertext.spec = TypeSpecs.define.Struct(DTLSCiphertext);
 exports.DTLSCiphertext = DTLSCiphertext;

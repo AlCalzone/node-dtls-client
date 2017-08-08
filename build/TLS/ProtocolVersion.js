@@ -35,7 +35,7 @@ var ProtocolVersion = (function (_super) {
 }(TLSStruct_1.TLSStruct));
 ProtocolVersion.__spec = {
     major: TypeSpecs.uint8,
-    minor: TypeSpecs.uint8
+    minor: TypeSpecs.uint8,
 };
 exports.ProtocolVersion = ProtocolVersion;
 //# sourceMappingURL=ProtocolVersion.js.map

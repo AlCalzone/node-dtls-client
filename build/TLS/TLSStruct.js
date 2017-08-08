@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var object_polyfill_1 = require("../lib/object-polyfill");
 var BitConverter_1 = require("../lib/BitConverter");
-var TypeSpecs = require("./TypeSpecs");
+var object_polyfill_1 = require("../lib/object-polyfill");
 var util = require("../lib/util");
+var TypeSpecs = require("./TypeSpecs");
 var Vector_1 = require("./Vector");
 /**
  * Basisklasse für TLS-Objekte
@@ -17,7 +17,7 @@ var TLSStruct = (function () {
             var _b = _a[_i], key = _b[0], value = _b[1];
             this.propertyDefinitions.push({
                 name: key,
-                type: value
+                type: value,
             });
             if (initial != undefined && initial.hasOwnProperty(key)) {
                 // sonst evtl. die Eigenschaft initialisieren
@@ -36,7 +36,9 @@ var TLSStruct = (function () {
         for (var _i = 0, _a = this.propertyDefinitions; _i < _a.length; _i++) {
             var def = _a[_i];
             // Welche Eigenschaft wird ausgelesen?
-            var propName = def.name, type = def.type, result = void 0;
+            var propName = def.name;
+            var type = def.type;
+            var result = void 0;
             switch (type.type) {
                 case "number":
                 case "enum":
@@ -97,7 +99,9 @@ var TLSStruct = (function () {
         var ret = this.propertyDefinitions
             .map(function (def) {
             // Welche Eigenschaft wird ausgelesen?
-            var propName = def.name, type = def.type, propValue = _this[propName];
+            var propName = def.name;
+            var type = def.type;
+            var propValue = _this[propName];
             switch (type.type) {
                 case "number":
                 case "enum":
@@ -110,16 +114,16 @@ var TLSStruct = (function () {
                     return propValue.serialize();
                 case "buffer":
                     // just return a copy of the buffer
-                    var ret_1 = Buffer.from(propValue);
+                    var result = Buffer.from(propValue);
                     // for variable length buffers prepend the length
                     if (TypeSpecs.Buffer.isVariableLength(type)) {
                         var lengthBits = (8 * util.fitToWholeBytes(type.maxLength));
-                        ret_1 = Buffer.concat([
-                            BitConverter_1.numberToBuffer(ret_1.length, lengthBits),
-                            ret_1
+                        result = Buffer.concat([
+                            BitConverter_1.numberToBuffer(result.length, lengthBits),
+                            result,
                         ]);
                     }
-                    return ret_1;
+                    return result;
             }
         });
         return Buffer.concat(ret);

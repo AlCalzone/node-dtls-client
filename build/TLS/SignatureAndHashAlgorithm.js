@@ -10,8 +10,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
+var TypeSpecs = require("./TypeSpecs");
 var HashAlgorithm;
 (function (HashAlgorithm) {
     HashAlgorithm[HashAlgorithm["none"] = 0] = "none";
@@ -50,7 +50,7 @@ var SignatureAndHashAlgorithm = (function (_super) {
 }(TLSStruct_1.TLSStruct));
 SignatureAndHashAlgorithm.__spec = {
     hash: HashAlgorithm.__spec,
-    signature: SignatureAlgorithm.__spec
+    signature: SignatureAlgorithm.__spec,
 };
 exports.default = SignatureAndHashAlgorithm;
 //# sourceMappingURL=SignatureAndHashAlgorithm.js.map

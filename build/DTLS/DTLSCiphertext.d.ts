@@ -1,8 +1,8 @@
 /// <reference types="node" />
-import * as TypeSpecs from "../TLS/TypeSpecs";
-import { TLSStruct } from "../TLS/TLSStruct";
-import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
+import { ProtocolVersion } from "../TLS/ProtocolVersion";
+import { TLSStruct } from "../TLS/TLSStruct";
+import * as TypeSpecs from "../TLS/TypeSpecs";
 import { DTLSPacket } from "./DTLSPacket";
 export declare class DTLSCiphertext extends TLSStruct implements DTLSPacket {
     type: ContentType;

@@ -1,15 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var Handshake = require("./Handshake");
 var CipherSuites_1 = require("../DTLS/CipherSuites");
 var ChangeCipherSpec_1 = require("../TLS/ChangeCipherSpec");
+var ConnectionState_1 = require("../TLS/ConnectionState");
 var ContentType_1 = require("../TLS/ContentType");
+var PreMasterSecret_1 = require("../TLS/PreMasterSecret");
+var PRF_1 = require("../TLS/PRF");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var Random_1 = require("../TLS/Random");
 var Vector_1 = require("../TLS/Vector");
-var ConnectionState_1 = require("../TLS/ConnectionState");
-var PRF_1 = require("../TLS/PRF");
-var PreMasterSecret_1 = require("../TLS/PreMasterSecret");
+var Handshake = require("./Handshake");
 var ClientHandshakeHandler = (function () {
     function ClientHandshakeHandler(recordLayer, options, finishedCallback) {
         var _this = this;
@@ -24,7 +24,7 @@ var ClientHandshakeHandler = (function () {
         this.handle = (_a = {},
             /** Handles a HelloVerifyRequest message */
             _a[Handshake.HandshakeType.hello_verify_request] = function (messages) {
-                // this flight should only contain a single message, 
+                // this flight should only contain a single message,
                 // but to be sure extract the last one
                 var hvr = messages[messages.length - 1];
                 // add the cookie to the client hello and send it again
@@ -136,7 +136,7 @@ var ClientHandshakeHandler = (function () {
      */
     ClientHandshakeHandler.prototype.renegotiate = function () {
         // reset variables
-        //this._state = HandshakeStates.preparing;
+        // this._state = HandshakeStates.preparing;
         this._isHandshaking = true;
         this.lastProcessedSeqNum = -1;
         this.lastSentSeqNum = -1;
@@ -144,8 +144,8 @@ var ClientHandshakeHandler = (function () {
         this.completeMessages = {};
         this.expectedResponses = [];
         this.allHandshakeData = [];
-        //this.cscReceived = false;
-        //this.serverFinishedPending = false;
+        // this.cscReceived = false;
+        // this.serverFinishedPending = false;
         // ==============================
         // start by sending a ClientHello
         var hello = Handshake.ClientHello.createEmpty();
@@ -167,19 +167,19 @@ var ClientHandshakeHandler = (function () {
             CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CCM,
             CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_256_CCM,
             CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CCM_8,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_256_CCM_8
+            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_256_CCM_8,
         ].map(function (cs) { return cs.id; }));
         hello.compression_methods = new Vector_1.Vector([ConnectionState_1.CompressionMethod.null]);
         hello.extensions = new Vector_1.Vector();
         this.sendFlight([hello], [
             Handshake.HandshakeType.server_hello_done,
-            Handshake.HandshakeType.hello_verify_request
+            Handshake.HandshakeType.hello_verify_request,
         ]);
     };
     // special cases for reordering of "Finished" flights
     // TODO: add these special cases to general handling functions
-    //private cscReceived: boolean;
-    //private serverFinishedPending: boolean;
+    // private cscReceived: boolean;
+    // private serverFinishedPending: boolean;
     /**
      * Processes a received handshake message
      */
@@ -277,15 +277,16 @@ var ClientHandshakeHandler = (function () {
     ClientHandshakeHandler.prototype.sendFlight_processPartial = function (flight, retransmit) {
         var _this = this;
         if (retransmit === void 0) { retransmit = false; }
-        if (!this.sendFlight_begin_wasCalled)
+        if (!this.sendFlight_begin_wasCalled) {
             throw new Error("Need to call sendFlight_beginPartial() before using this function");
+        }
         (_a = this.lastFlight).push.apply(_a, flight);
         flight.forEach(function (handshake) {
             if (handshake.msg_type === Handshake.HandshakeType.finished) {
                 // before finished messages, ALWAYS send a ChangeCipherSpec
                 _this.bufferedOutgoingMessages.push({
                     type: ContentType_1.ContentType.change_cipher_spec,
-                    data: (ChangeCipherSpec_1.ChangeCipherSpec.createEmpty()).serialize()
+                    data: (ChangeCipherSpec_1.ChangeCipherSpec.createEmpty()).serialize(),
                 });
                 // TODO: how do we handle retransmission here?
             }
@@ -296,15 +297,16 @@ var ClientHandshakeHandler = (function () {
             var fragment = handshake.toFragment();
             if (!retransmit) {
                 // for first-time messages, buffer the data for verification purposes
-                if (_this.needsToHashMessage(handshake))
+                if (_this.needsToHashMessage(handshake)) {
                     _this.bufferHandshakeData(fragment);
+                }
             }
             // fragment the messages (TODO: make this dependent on previous messages in this flight)
             var fragments = fragment
                 .split()
-                .map(function (fragment) { return ({
+                .map(function (f) { return ({
                 type: ContentType_1.ContentType.handshake,
-                data: fragment.serialize()
+                data: f.serialize(),
             }); });
             (_a = _this.bufferedOutgoingMessages).push.apply(_a, fragments);
             var _a;
@@ -424,5 +426,5 @@ exports.ClientHandshakeHandler = ClientHandshakeHandler;
 
          Figure 2. Message Flights for Session-Resuming Handshake
                            (No Cookie Exchange)
-*/ 
+*/
 //# sourceMappingURL=HandshakeHandler.js.map

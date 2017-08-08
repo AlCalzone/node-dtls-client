@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var ConnectionState_1 = require("../TLS/ConnectionState");
-var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
-var DTLSPlaintext_1 = require("./DTLSPlaintext");
-var DTLSCompressed_1 = require("./DTLSCompressed");
-var DTLSCiphertext_1 = require("./DTLSCiphertext");
 var AntiReplayWindow_1 = require("../TLS/AntiReplayWindow");
+var ConnectionState_1 = require("../TLS/ConnectionState");
 var ContentType_1 = require("../TLS/ContentType");
+var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
+var DTLSCiphertext_1 = require("./DTLSCiphertext");
+var DTLSCompressed_1 = require("./DTLSCompressed");
+var DTLSPlaintext_1 = require("./DTLSPlaintext");
 var RecordLayer = (function () {
     // TODO: specify connection end
     function RecordLayer(udpSocket, options) {
@@ -42,7 +42,7 @@ var RecordLayer = (function () {
         var packet = new DTLSPlaintext_1.DTLSPlaintext(msg.type, epoch.connectionState.protocolVersion || RecordLayer.DTLSVersion, this._writeEpochNr, ++epoch.writeSequenceNumber, // sequence number increased by 1
         msg.data);
         // compress packet
-        var compressor = function (identity) { return identity; }; // TODO: implement compression algorithms
+        var compressor = function (identity) { return identity; }; // TODO: only valid for NULL compression, check it!
         packet = DTLSCompressed_1.DTLSCompressed.compress(packet, compressor);
         if (epoch.connectionState.cipherSuite.cipherType != null) {
             // encrypt packet
@@ -62,7 +62,6 @@ var RecordLayer = (function () {
      */
     RecordLayer.prototype.sendFlight = function (messages, callback) {
         var _this = this;
-        //messages.forEach(m => this.send(m));
         var buf = Buffer.concat(messages.map(function (msg) { return _this.processOutgoingMessage(msg); }));
         this.udpSocket.send(buf, 0, buf.length, this.options.port, this.options.address, callback);
     };
@@ -106,7 +105,7 @@ var RecordLayer = (function () {
             return true;
         });
         // decompress and decrypt packets
-        var decompressor = function (identity) { return identity; }; // TODO implement actual compression methods
+        var decompressor = function (identity) { return identity; }; // TODO: only valid for NULL compression, check it!
         packets = packets
             .map(function (p) {
             var connectionState = _this.epochs[p.epoch].connectionState;
@@ -123,7 +122,7 @@ var RecordLayer = (function () {
             .map(function (p) { return p.decompress(decompressor); });
         return packets.map(function (p) { return ({
             type: p.type,
-            data: p.fragment
+            data: p.fragment,
         }); });
     };
     Object.defineProperty(RecordLayer.prototype, "readEpochNr", {
@@ -169,7 +168,6 @@ var RecordLayer = (function () {
         enumerable: true,
         configurable: true
     });
-    ;
     Object.defineProperty(RecordLayer.prototype, "nextEpoch", {
         /**
          * The next read and write epoch that will be used.
@@ -209,7 +207,6 @@ var RecordLayer = (function () {
         enumerable: true,
         configurable: true
     });
-    ;
     return RecordLayer;
 }());
 /**

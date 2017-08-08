@@ -10,13 +10,12 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
+var TypeSpecs = require("./TypeSpecs");
 var ExtensionType;
 (function (ExtensionType) {
     ExtensionType[ExtensionType["signature_algorithms"] = 13] = "signature_algorithms";
 })(ExtensionType = exports.ExtensionType || (exports.ExtensionType = {}));
-;
 (function (ExtensionType) {
     ExtensionType.spec = TypeSpecs.define.Enum("uint16", ExtensionType);
 })(ExtensionType = exports.ExtensionType || (exports.ExtensionType = {}));
@@ -35,7 +34,7 @@ var Extension = (function (_super) {
 }(TLSStruct_1.TLSStruct));
 Extension.__spec = {
     extension_type: ExtensionType.spec,
-    extension_data: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1)
+    extension_data: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
 };
 Extension.spec = TypeSpecs.define.Struct(Extension);
 exports.Extension = Extension;

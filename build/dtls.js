@@ -10,12 +10,12 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var events_1 = require("events");
 var dgram = require("dgram");
+var events_1 = require("events");
+var Handshake_1 = require("./DTLS/Handshake");
+var HandshakeHandler_1 = require("./DTLS/HandshakeHandler");
 var RecordLayer_1 = require("./DTLS/RecordLayer");
 var ContentType_1 = require("./TLS/ContentType");
-var HandshakeHandler_1 = require("./DTLS/HandshakeHandler");
-var Handshake_1 = require("./DTLS/Handshake");
 var TLSStruct_1 = require("./TLS/TLSStruct");
 var dtls;
 (function (dtls) {
@@ -28,7 +28,7 @@ var dtls;
         var ret = new Socket(options);
         // bind "message" event after the handshake is finished
         if (callback != null) {
-            ret.on("connected", function () {
+            ret.once("connected", function () {
                 ret.on("message", callback);
             });
         }
@@ -46,6 +46,7 @@ var dtls;
         function Socket(options) {
             var _this = _super.call(this) || this;
             _this.options = options;
+            _this._handshakeFinished = false;
             // buffer messages while handshaking
             _this.bufferedMessages = [];
             _this._isClosed = false;
@@ -56,6 +57,11 @@ var dtls;
                 .on("message", _this.udp_onMessage.bind(_this))
                 .on("close", _this.udp_onClose.bind(_this))
                 .on("error", _this.udp_onError.bind(_this));
+            // setup a timeout watcher. Default: 1000ms timeout, minimum: 100ms
+            _this.options.timeout = Math.max(100, _this.options.timeout || 1000);
+            _this._udpConnected = false;
+            _this._connectionTimeout = setTimeout(_this.expectConnection, _this.options.timeout);
+            // start the connection
             _this.udp.bind();
             return _this;
         }
@@ -64,34 +70,67 @@ var dtls;
          */
         Socket.prototype.send = function (data, callback) {
             if (this._isClosed) {
-                throw new Error("the socket is closed. cannot send data.");
+                throw new Error("The socket is closed. Cannot send data.");
+            }
+            if (!this._handshakeFinished) {
+                throw new Error("DTLS handshake is not finished yet. Cannot send data.");
             }
             // send finished data over UDP
             var packet = {
                 type: ContentType_1.ContentType.application_data,
-                data: data
+                data: data,
             };
             this.recordLayer.send(packet, callback);
         };
         Socket.prototype.close = function (callback) {
             if (callback)
-                this.on("close", callback);
+                this.once("close", callback);
             this.udp.close();
         };
         Socket.prototype.udp_onListening = function () {
             var _this = this;
+            // connection successful
+            this._udpConnected = true;
+            if (this._connectionTimeout != null)
+                clearTimeout(this._connectionTimeout);
             // initialize record layer
             this.recordLayer = new RecordLayer_1.RecordLayer(this.udp, this.options);
+            // reuse the connection timeout for handshake timeout watching
+            this._connectionTimeout = setTimeout(this.expectHandshake, this.options.timeout);
             // also start handshake
-            this.handshakeHandler = new HandshakeHandler_1.ClientHandshakeHandler(this.recordLayer, this.options, function () {
-                // when done, emit "connected" event
-                _this.emit("connected");
-                // also emit all buffered messages
-                while (_this.bufferedMessages.length > 0) {
-                    var _a = _this.bufferedMessages.shift(), msg = _a.msg, rinfo = _a.rinfo;
-                    _this.emit("message", msg.data, rinfo);
+            this.handshakeHandler = new HandshakeHandler_1.ClientHandshakeHandler(this.recordLayer, this.options, function (err) {
+                if (err) {
+                    // something happened on the way to heaven
+                    _this.emit("error", err);
+                    _this.udp.close();
+                }
+                else {
+                    // when done, emit "connected" event
+                    _this._handshakeFinished = true;
+                    if (_this._connectionTimeout != null)
+                        clearTimeout(_this._connectionTimeout);
+                    _this.emit("connected");
+                    // also emit all buffered messages
+                    while (_this.bufferedMessages.length > 0) {
+                        var _a = _this.bufferedMessages.shift(), msg = _a.msg, rinfo = _a.rinfo;
+                        _this.emit("message", msg.data, rinfo);
+                    }
                 }
             });
+        };
+        // is called after the connection timeout expired.
+        // Check the connection and throws if it is not established yet
+        Socket.prototype.expectConnection = function () {
+            if (!this._udpConnected) {
+                // connection timed out
+                this.killConnection(new Error("The connection timed out"));
+            }
+        };
+        Socket.prototype.expectHandshake = function () {
+            if (!this._handshakeFinished) {
+                // handshake timed out
+                this.killConnection(new Error("The DTLS handshake timed out"));
+            }
         };
         Socket.prototype.udp_onMessage = function (udpMsg, rinfo) {
             // decode the messages
@@ -111,7 +150,7 @@ var dtls;
                         // TODO: read spec to see how we handle this
                         break;
                     case ContentType_1.ContentType.application_data:
-                        if (this.handshakeHandler.isHandshaking) {
+                        if (!this._handshakeFinished) {
                             // if we are still shaking hands, buffer the message until we're done
                             this.bufferedMessages.push({ msg: msg, rinfo: rinfo });
                         }
@@ -127,10 +166,20 @@ var dtls;
         };
         Socket.prototype.udp_onClose = function () {
             this._isClosed = true;
+            // we no longer want to receive events
+            this.udp.removeAllListeners();
             this.emit("close");
         };
         Socket.prototype.udp_onError = function (exception) {
             this.emit("error", exception);
+        };
+        /** Kills the underlying UDP connection and emits an error if neccessary */
+        Socket.prototype.killConnection = function (err) {
+            this._isClosed = true;
+            this.udp.removeAllListeners();
+            this.udp.close();
+            if (err != null)
+                this.emit("error", err);
         };
         return Socket;
     }(events_1.EventEmitter));
