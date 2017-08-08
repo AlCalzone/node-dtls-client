@@ -1,6 +1,6 @@
 /// <reference types="node" />
-import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
+import { ProtocolVersion } from "../TLS/ProtocolVersion";
 export interface DTLSPacket {
     type: ContentType;
     version: ProtocolVersion;

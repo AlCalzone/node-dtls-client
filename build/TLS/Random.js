@@ -11,12 +11,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var crypto = require("crypto");
-var TypeSpecs = require("./TypeSpecs");
 var TLSStruct_1 = require("./TLSStruct");
-//function getRandomArray(length: number): number[] {
-//	const random = crypto.randomBytes(length);
-//	return Array.prototype.slice.apply(random);
-//}
+var TypeSpecs = require("./TypeSpecs");
 var Random = (function (_super) {
     __extends(Random, _super);
     function Random(gmt_unix_time, random_bytes) {
@@ -38,7 +34,7 @@ var Random = (function (_super) {
 }(TLSStruct_1.TLSStruct));
 Random.__spec = {
     gmt_unix_time: TypeSpecs.uint32,
-    random_bytes: TypeSpecs.define.Buffer(28)
+    random_bytes: TypeSpecs.define.Buffer(28),
 };
 exports.Random = Random;
 //# sourceMappingURL=Random.js.map

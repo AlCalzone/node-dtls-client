@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var crypto = require("crypto");
-;
 function HMAC_factory(algorithm, length) {
     var ret = (function (secret, data) {
         var hmac = crypto.createHmac(algorithm, secret);
@@ -13,13 +12,12 @@ function HMAC_factory(algorithm, length) {
     return ret;
 }
 exports.HMAC = {
-    "md5": HMAC_factory("md5", 16),
-    "sha1": HMAC_factory("sha1", 20),
-    "sha256": HMAC_factory("sha256", 32),
-    "sha384": HMAC_factory("sha384", 48),
-    "sha512": HMAC_factory("sha512", 64),
+    md5: HMAC_factory("md5", 16),
+    sha1: HMAC_factory("sha1", 20),
+    sha256: HMAC_factory("sha256", 32),
+    sha384: HMAC_factory("sha384", 48),
+    sha512: HMAC_factory("sha512", 64),
 };
-;
 function Hash_factory(algorithm, length) {
     var ret = (function (data) {
         var hash = crypto.createHash(algorithm);
@@ -31,11 +29,11 @@ function Hash_factory(algorithm, length) {
     return ret;
 }
 var Hash = {
-    "md5": Hash_factory("md5", 16),
-    "sha1": Hash_factory("sha1", 20),
-    "sha256": Hash_factory("sha256", 32),
-    "sha384": Hash_factory("sha384", 48),
-    "sha512": Hash_factory("sha512", 64),
+    md5: Hash_factory("md5", 16),
+    sha1: Hash_factory("sha1", 20),
+    sha256: Hash_factory("sha256", 32),
+    sha384: Hash_factory("sha384", 48),
+    sha512: Hash_factory("sha512", 64),
 };
 /**
  * Data expansion function: Turns a secret into an arbitrary quantity of output using a hash function and a seed.
@@ -68,16 +66,16 @@ function P(algorithm, secret, seed, length) {
     return Buffer.concat(hashes, length);
 }
 exports.PRF = {
-    "md5": PRF_factory("md5"),
-    "sha1": PRF_factory("sha1"),
-    "sha256": PRF_factory("sha256"),
-    "sha384": PRF_factory("sha384"),
-    "sha512": PRF_factory("sha512"),
+    md5: PRF_factory("md5"),
+    sha1: PRF_factory("sha1"),
+    sha256: PRF_factory("sha256"),
+    sha384: PRF_factory("sha384"),
+    sha512: PRF_factory("sha512"),
 };
 function PRF_factory(algorithm) {
     var ret = (function (secret, label, seed, length) {
         if (length === void 0) { length = 32; }
-        return P(algorithm, secret, Buffer.concat([Buffer.from(label, 'ascii'), seed]), length);
+        return P(algorithm, secret, Buffer.concat([Buffer.from(label, "ascii"), seed]), length);
     });
     ret.hashFunction = Hash[algorithm];
     return ret;

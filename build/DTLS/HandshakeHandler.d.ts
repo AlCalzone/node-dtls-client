@@ -1,6 +1,6 @@
 import { dtls } from "../dtls";
-import { RecordLayer } from "./RecordLayer";
 import * as Handshake from "./Handshake";
+import { RecordLayer } from "./RecordLayer";
 export declare type HandshakeFinishedCallback = (err?: Error) => void;
 export declare class ClientHandshakeHandler {
     private recordLayer;

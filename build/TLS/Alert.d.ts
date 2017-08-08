@@ -1,5 +1,5 @@
-import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
+import * as TypeSpecs from "./TypeSpecs";
 export declare enum AlertLevel {
     warning = 1,
     fatal = 2,

@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var TypeSpecs = require("./TypeSpecs");
+var CipherSuites_1 = require("../DTLS/CipherSuites");
 var object_polyfill_1 = require("../lib/object-polyfill");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var PRF_1 = require("./PRF");
-var CipherSuites_1 = require("../DTLS/CipherSuites");
+var TypeSpecs = require("./TypeSpecs");
 var CompressionMethod;
 (function (CompressionMethod) {
     CompressionMethod[CompressionMethod["null"] = 0] = "null";
@@ -31,8 +31,9 @@ var ConnectionState = (function () {
     }
     Object.defineProperty(ConnectionState.prototype, "Cipher", {
         get: function () {
-            if (this._cipher == undefined)
+            if (this._cipher == undefined) {
                 this._cipher = this.cipherSuite.specifyCipher(this.key_material, this.entity);
+            }
             return this._cipher;
         },
         enumerable: true,
@@ -40,8 +41,9 @@ var ConnectionState = (function () {
     });
     Object.defineProperty(ConnectionState.prototype, "Decipher", {
         get: function () {
-            if (this._decipher == undefined)
+            if (this._decipher == undefined) {
                 this._decipher = this.cipherSuite.specifyDecipher(this.key_material, this.entity);
+            }
             return this._decipher;
         },
         enumerable: true,
@@ -75,7 +77,7 @@ var ConnectionState = (function () {
             client_write_key: read(this.cipherSuite.Cipher.keyLength),
             server_write_key: read(this.cipherSuite.Cipher.keyLength),
             client_write_IV: read(this.cipherSuite.Cipher.fixedIvLength),
-            server_write_IV: read(this.cipherSuite.Cipher.fixedIvLength)
+            server_write_IV: read(this.cipherSuite.Cipher.fixedIvLength),
         };
     };
     return ConnectionState;

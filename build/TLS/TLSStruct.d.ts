@@ -1,10 +1,10 @@
 /// <reference types="node" />
-import * as TypeSpecs from "./TypeSpecs";
 import { DeserializationResult } from "./Serializable";
-export declare type PropertyDefinition = {
+import * as TypeSpecs from "./TypeSpecs";
+export interface PropertyDefinition {
     name: string;
     type: TypeSpecs.All;
-};
+}
 /**
  * Basisklasse für TLS-Objekte
  */

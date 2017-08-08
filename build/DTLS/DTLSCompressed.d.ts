@@ -1,10 +1,10 @@
 /// <reference types="node" />
-import * as TypeSpecs from "../TLS/TypeSpecs";
-import { TLSStruct } from "../TLS/TLSStruct";
-import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { ContentType } from "../TLS/ContentType";
-import { DTLSPlaintext } from "./DTLSPlaintext";
+import { ProtocolVersion } from "../TLS/ProtocolVersion";
+import { TLSStruct } from "../TLS/TLSStruct";
+import * as TypeSpecs from "../TLS/TypeSpecs";
 import { DTLSPacket } from "./DTLSPacket";
+import { DTLSPlaintext } from "./DTLSPlaintext";
 export declare class DTLSCompressed extends TLSStruct implements DTLSPacket {
     type: ContentType;
     version: ProtocolVersion;

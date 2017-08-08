@@ -1,6 +1,6 @@
 /// <reference types="node" />
-import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
+import * as TypeSpecs from "./TypeSpecs";
 export declare enum ExtensionType {
     signature_algorithms = 13,
 }

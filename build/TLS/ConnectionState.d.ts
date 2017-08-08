@@ -1,8 +1,8 @@
 /// <reference types="node" />
-import * as TypeSpecs from "./TypeSpecs";
-import { PreMasterSecret } from "./PreMasterSecret";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import { KeyMaterial, CipherSuite, CipherDelegate, DecipherDelegate } from "./CipherSuite";
+import { CipherDelegate, CipherSuite, DecipherDelegate, KeyMaterial } from "./CipherSuite";
+import { PreMasterSecret } from "./PreMasterSecret";
+import * as TypeSpecs from "./TypeSpecs";
 export declare enum CompressionMethod {
     null = 0,
 }

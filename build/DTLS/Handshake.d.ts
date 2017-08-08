@@ -1,10 +1,10 @@
 /// <reference types="node" />
-import * as TypeSpecs from "../TLS/TypeSpecs";
-import { TLSStruct } from "../TLS/TLSStruct";
-import { Random } from "../TLS/Random";
 import { CompressionMethod } from "../TLS/ConnectionState";
-import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { Extension } from "../TLS/Extension";
+import { ProtocolVersion } from "../TLS/ProtocolVersion";
+import { Random } from "../TLS/Random";
+import { TLSStruct } from "../TLS/TLSStruct";
+import * as TypeSpecs from "../TLS/TypeSpecs";
 import { Vector } from "../TLS/Vector";
 export declare enum HandshakeType {
     hello_request = 0,
@@ -59,7 +59,7 @@ export declare class FragmentedHandshake extends TLSStruct {
     isFragmented(): boolean;
     /**
      * Enforces an array of fragments to belong to a single message
-     * @throws Error
+     * @throws Throws an error if the fragements belong to multiple messages. Passes otherwise.
      */
     private static enforceSingleMessage(fragments);
     /**

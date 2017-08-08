@@ -1,6 +1,6 @@
 /// <reference types="node" />
-import * as TypeSpecs from "./TypeSpecs";
 import { TLSStruct } from "./TLSStruct";
+import * as TypeSpecs from "./TypeSpecs";
 export declare class PreMasterSecret extends TLSStruct {
     other_secret: Buffer;
     psk: Buffer;

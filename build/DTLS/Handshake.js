@@ -10,15 +10,15 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TypeSpecs = require("../TLS/TypeSpecs");
-var TLSStruct_1 = require("../TLS/TLSStruct");
-var Random_1 = require("../TLS/Random");
-var SessionID_1 = require("../TLS/SessionID");
-var Cookie_1 = require("./Cookie");
 var CipherSuite_1 = require("../TLS/CipherSuite");
 var ConnectionState_1 = require("../TLS/ConnectionState");
-var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var Extension_1 = require("../TLS/Extension");
+var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
+var Random_1 = require("../TLS/Random");
+var SessionID_1 = require("../TLS/SessionID");
+var TLSStruct_1 = require("../TLS/TLSStruct");
+var TypeSpecs = require("../TLS/TypeSpecs");
+var Cookie_1 = require("./Cookie");
 var RecordLayer_1 = require("./RecordLayer");
 var HandshakeType;
 (function (HandshakeType) {
@@ -54,8 +54,9 @@ var Handshake = (function (_super) {
      * @param assembled - the re-assembled (or never-fragmented) message
      */
     Handshake.fromFragment = function (assembled) {
-        if (assembled.isFragmented())
+        if (assembled.isFragmented()) {
             throw new Error("the message to be parsed MUST NOT be fragmented");
+        }
         if (exports.HandshakeMessages[assembled.msg_type] != undefined) {
             // find the right type for the body object
             var msgClass = exports.HandshakeMessages[assembled.msg_type];
@@ -95,9 +96,8 @@ var FragmentedHandshake = (function (_super) {
     };
     /**
      * Enforces an array of fragments to belong to a single message
-     * @throws Error
+     * @throws Throws an error if the fragements belong to multiple messages. Passes otherwise.
      */
-    // TODO: error Documentation
     FragmentedHandshake.enforceSingleMessage = function (fragments) {
         // check if we are looking at a single message, i.e. compare type, seq_num and length
         var singleMessage = fragments.every(function (val, i, arr) {
@@ -108,8 +108,9 @@ var FragmentedHandshake = (function (_super) {
             }
             return true;
         });
-        if (!singleMessage)
-            throw new Error('this series of fragments belongs to multiple messages'); // TODO: better type?		
+        if (!singleMessage) {
+            throw new Error("this series of fragments belongs to multiple messages");
+        }
     };
     /**
      * In the given array of fragments, find all that belong to the reference fragment
@@ -167,17 +168,19 @@ var FragmentedHandshake = (function (_super) {
      * @returns An array of fragmented handshake messages - or a single one if it is small enough.
      */
     FragmentedHandshake.prototype.split = function (maxFragmentLength) {
-        var start = 0, totalLength = this.fragment.length;
+        var start = 0;
+        var totalLength = this.fragment.length;
         var fragments = [];
-        if (maxFragmentLength == null)
+        if (maxFragmentLength == null) {
             maxFragmentLength = RecordLayer_1.RecordLayer.MAX_PAYLOAD_SIZE - FragmentedHandshake.headerLength;
+        }
         // loop through the message and fragment it
         while (!fragments.length && start < totalLength) {
             // calculate maximum length, limited by MTU - IP/UDP headers - handshake overhead
             var fragmentLength = Math.min(maxFragmentLength, totalLength - start);
             // slice and dice
             var data = Buffer.from(this.fragment.slice(start, start + fragmentLength));
-            //create the message
+            // create the message
             fragments.push(new FragmentedHandshake(this.msg_type, totalLength, this.message_seq, start, data));
             // step forward by the actual fragment length
             start += data.length;
@@ -190,8 +193,9 @@ var FragmentedHandshake = (function (_super) {
      */
     FragmentedHandshake.reassemble = function (messages) {
         // cannot reassemble empty arrays
-        if (!(messages && messages.length))
-            throw new Error("cannot reassemble handshake from empty array"); // TODO: Better type?
+        if (!(messages && messages.length)) {
+            throw new Error("cannot reassemble handshake from empty array");
+        }
         // sort by fragment start
         messages = messages.sort(function (a, b) { return a.fragment_offset - b.fragment_offset; });
         // combine into a single buffer
@@ -210,7 +214,7 @@ FragmentedHandshake.__spec = {
     total_length: TypeSpecs.uint24,
     message_seq: TypeSpecs.uint16,
     fragment_offset: TypeSpecs.uint24,
-    fragment: TypeSpecs.define.Buffer(0, Math.pow(2, 24) - 1)
+    fragment: TypeSpecs.define.Buffer(0, Math.pow(2, 24) - 1),
 };
 FragmentedHandshake.spec = TypeSpecs.define.Struct(FragmentedHandshake);
 /**
@@ -300,7 +304,7 @@ var HelloVerifyRequest = (function (_super) {
 }(Handshake));
 HelloVerifyRequest.__spec = {
     server_version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    cookie: Cookie_1.Cookie.spec
+    cookie: Cookie_1.Cookie.spec,
 };
 exports.HelloVerifyRequest = HelloVerifyRequest;
 var ServerKeyExchange = (function (_super) {
@@ -314,7 +318,7 @@ var ServerKeyExchange = (function (_super) {
     return ServerKeyExchange;
 }(Handshake));
 ServerKeyExchange.__spec = {
-    raw_data: TypeSpecs.define.Buffer() // the entire fragment
+    raw_data: TypeSpecs.define.Buffer(),
 };
 exports.ServerKeyExchange = ServerKeyExchange;
 var ServerKeyExchange_PSK = (function (_super) {
@@ -330,7 +334,7 @@ var ServerKeyExchange_PSK = (function (_super) {
     return ServerKeyExchange_PSK;
 }(TLSStruct_1.TLSStruct));
 ServerKeyExchange_PSK.__spec = {
-    psk_identity_hint: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1)
+    psk_identity_hint: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
 };
 ServerKeyExchange_PSK.spec = TypeSpecs.define.Struct(ServerKeyExchange_PSK);
 exports.ServerKeyExchange_PSK = ServerKeyExchange_PSK;
@@ -345,7 +349,7 @@ var ClientKeyExchange = (function (_super) {
     return ClientKeyExchange;
 }(Handshake));
 ClientKeyExchange.__spec = {
-    raw_data: TypeSpecs.define.Buffer() // the entire fragment
+    raw_data: TypeSpecs.define.Buffer(),
 };
 exports.ClientKeyExchange = ClientKeyExchange;
 var ClientKeyExchange_PSK = (function (_super) {
@@ -361,7 +365,7 @@ var ClientKeyExchange_PSK = (function (_super) {
     return ClientKeyExchange_PSK;
 }(TLSStruct_1.TLSStruct));
 ClientKeyExchange_PSK.__spec = {
-    psk_identity: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1)
+    psk_identity: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
 };
 ClientKeyExchange_PSK.spec = TypeSpecs.define.Struct(ClientKeyExchange_PSK);
 exports.ClientKeyExchange_PSK = ClientKeyExchange_PSK;
@@ -390,7 +394,7 @@ var Finished = (function (_super) {
     return Finished;
 }(Handshake));
 Finished.__spec = {
-    verify_data: TypeSpecs.define.Buffer() // full-length
+    verify_data: TypeSpecs.define.Buffer(),
 };
 exports.Finished = Finished;
 // define handshake messages for lookup
