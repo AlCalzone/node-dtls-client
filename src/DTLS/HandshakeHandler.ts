@@ -1,36 +1,35 @@
 ﻿import { dtls } from "../dtls";
-import { ConnectionEnd } from "../TLS/ConnectionState";
-import { RecordLayer } from "./RecordLayer";
-import * as Handshake from "./Handshake";
-import { CipherSuite } from "../TLS/CipherSuite";
 import { CipherSuites } from "../DTLS/CipherSuites";
-import { ChangeCipherSpec } from "../TLS/ChangeCipherSpec";
-import { Message } from "../TLS/Message";
-import { ContentType } from "../TLS/ContentType";
-import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import { SessionID } from "../TLS/SessionID";
-import { Random } from "../TLS/Random";
 import { Cookie } from "../DTLS/Cookie";
-import { Vector } from "../TLS/Vector";
-import { CompressionMethod } from "../TLS/ConnectionState";
-import { Extension } from "../TLS/Extension";
 import { bufferToByteArray/*, buffersEqual*/ } from "../lib/BitConverter";
-import { PRF } from "../TLS/PRF";
+import { ChangeCipherSpec } from "../TLS/ChangeCipherSpec";
+import { CipherSuite } from "../TLS/CipherSuite";
+import { ConnectionEnd } from "../TLS/ConnectionState";
+import { CompressionMethod } from "../TLS/ConnectionState";
+import { ContentType } from "../TLS/ContentType";
+import { Extension } from "../TLS/Extension";
+import { Message } from "../TLS/Message";
 import { PreMasterSecret } from "../TLS/PreMasterSecret";
-
+import { PRF } from "../TLS/PRF";
+import { ProtocolVersion } from "../TLS/ProtocolVersion";
+import { Random } from "../TLS/Random";
+import { SessionID } from "../TLS/SessionID";
+import { Vector } from "../TLS/Vector";
+import * as Handshake from "./Handshake";
+import { RecordLayer } from "./RecordLayer";
 
 // TODO
-/////**
-////* DTLS Timeout and retransmission state machine for the handshake protocol
-////* according to https://tools.ietf.org/html/rfc6347#section-4.2.4
-////*/
+///// **
+//// * DTLS Timeout and retransmission state machine for the handshake protocol
+//// * according to https://tools.ietf.org/html/rfc6347#section-4.2.4
+//// */
 
-//export enum HandshakeStates {
-//	preparing,
-//	sending,
-//	waiting,
-//	finished
-//}
+// export enum HandshakeStates {
+// 	preparing,
+// 	sending,
+// 	waiting,
+// 	finished
+// }
 
 export type HandshakeFinishedCallback = (err?: Error) => void;
 
@@ -42,10 +41,10 @@ export class ClientHandshakeHandler {
 		this.renegotiate();
 	}
 
-	//private _state;
-	//public get state(): HandshakeStates {
-	//	return this._state;
-	//}
+	// private _state;
+	// public get state(): HandshakeStates {
+	// 	return this._state;
+	// }
 
 	private _isHandshaking: boolean;
 	public get isHandshaking(): boolean {
@@ -57,7 +56,7 @@ export class ClientHandshakeHandler {
 	 */
 	public renegotiate() {
 		// reset variables
-		//this._state = HandshakeStates.preparing;
+		// this._state = HandshakeStates.preparing;
 		this._isHandshaking = true;
 		this.lastProcessedSeqNum = -1;
 		this.lastSentSeqNum = -1;
@@ -65,8 +64,8 @@ export class ClientHandshakeHandler {
 		this.completeMessages = {};
 		this.expectedResponses = [];
 		this.allHandshakeData = [];
-		//this.cscReceived = false;
-		//this.serverFinishedPending = false;
+		// this.cscReceived = false;
+		// this.serverFinishedPending = false;
 
 		// ==============================
 		// start by sending a ClientHello
@@ -90,19 +89,19 @@ export class ClientHandshakeHandler {
 				CipherSuites.TLS_PSK_WITH_AES_128_CCM,
 				CipherSuites.TLS_PSK_WITH_AES_256_CCM,
 				CipherSuites.TLS_PSK_WITH_AES_128_CCM_8,
-				CipherSuites.TLS_PSK_WITH_AES_256_CCM_8
-			].map(cs => cs.id)
+				CipherSuites.TLS_PSK_WITH_AES_256_CCM_8,
+			].map(cs => cs.id),
 		);
 		hello.compression_methods = new Vector<CompressionMethod>(
-			[CompressionMethod.null]
+			[CompressionMethod.null],
 		);
 		hello.extensions = new Vector<Extension>();
 		this.sendFlight(
 			[hello],
 			[
 				Handshake.HandshakeType.server_hello_done,
-				Handshake.HandshakeType.hello_verify_request
-			]
+				Handshake.HandshakeType.hello_verify_request,
+			],
 		);
 	}
 
@@ -122,9 +121,8 @@ export class ClientHandshakeHandler {
 
 	// special cases for reordering of "Finished" flights
 	// TODO: add these special cases to general handling functions
-	//private cscReceived: boolean;
-	//private serverFinishedPending: boolean;
-
+	// private cscReceived: boolean;
+	// private serverFinishedPending: boolean;
 
 	/**
 	 * Processes a received handshake message
@@ -145,7 +143,7 @@ export class ClientHandshakeHandler {
 			const completeMsgIndizes = Object.keys(this.completeMessages).map(k => +k);
 			// a flight is complete if it forms a non-interrupted sequence of seq-nums
 			const isComplete = [this.lastProcessedSeqNum].concat(completeMsgIndizes).every(
-				(val, i, arr) => (i === 0) || (val === arr[i - 1] + 1)
+				(val, i, arr) => (i === 0) || (val === arr[i - 1] + 1),
 				);
 			if (!isComplete) return;
 
@@ -199,7 +197,7 @@ export class ClientHandshakeHandler {
 	private tryAssembleFragments(reference: Handshake.FragmentedHandshake): boolean {
 		// find all matching fragments
 		const allFragments = Handshake.FragmentedHandshake.findAllFragments(
-			this.incompleteMessages, reference
+			this.incompleteMessages, reference,
 		);
 		if (Handshake.FragmentedHandshake.isComplete(allFragments)) {
 			// if we found all, reassemble them
@@ -208,13 +206,12 @@ export class ClientHandshakeHandler {
 			this.completeMessages[reassembled.message_seq] = Handshake.Handshake.fromFragment(reassembled);
 			// and remove the other ones from the list of incomplete ones
 			this.incompleteMessages = this.incompleteMessages.filter(
-				fragment => allFragments.indexOf(fragment) === -1
+				fragment => allFragments.indexOf(fragment) === -1,
 				);
 			return true;
 		}
 		return false;
 	}
-
 
 	private bufferedOutgoingMessages: Message[] = [];
 	private sendFlight_begin_wasCalled = false;
@@ -229,8 +226,9 @@ export class ClientHandshakeHandler {
 	 * @param retransmit - If the flight is retransmitted, i.e. no sequence numbers are increased
 	 */
 	private sendFlight_processPartial(flight: Handshake.Handshake[], retransmit = false) {
-		if (!this.sendFlight_begin_wasCalled)
+		if (!this.sendFlight_begin_wasCalled) {
 			throw new Error("Need to call sendFlight_beginPartial() before using this function");
+		}
 		this.lastFlight.push(...flight);
 
 		flight.forEach(handshake => {
@@ -238,8 +236,8 @@ export class ClientHandshakeHandler {
 				// before finished messages, ALWAYS send a ChangeCipherSpec
 				this.bufferedOutgoingMessages.push({
 					type: ContentType.change_cipher_spec,
-					data: (ChangeCipherSpec.createEmpty()).serialize()
-				})
+					data: (ChangeCipherSpec.createEmpty()).serialize(),
+				});
 				// TODO: how do we handle retransmission here?
 			}
 
@@ -252,16 +250,17 @@ export class ClientHandshakeHandler {
 
 			if (!retransmit) {
 				// for first-time messages, buffer the data for verification purposes
-				if (this.needsToHashMessage(handshake))
+				if (this.needsToHashMessage(handshake)) {
 					this.bufferHandshakeData(fragment);
+				}
 			}
 
 			// fragment the messages (TODO: make this dependent on previous messages in this flight)
 			const fragments = fragment
 				.split()
-				.map(fragment => ({
+				.map(f => ({
 					type: ContentType.handshake,
-					data: fragment.serialize()
+					data: f.serialize(),
 				}))
 				;
 			this.bufferedOutgoingMessages.push(...fragments);
@@ -290,7 +289,7 @@ export class ClientHandshakeHandler {
 	 */
 	private sendFlight(flight: Handshake.Handshake[], expectedResponses: Handshake.HandshakeType[], retransmit = false) {
 		// this is actually just a convenience function for sending complete flights
-		this.sendFlight_begin()
+		this.sendFlight_begin();
 		this.sendFlight_processPartial(flight, retransmit);
 		this.sendFlight_finish(expectedResponses);
 	}
@@ -306,11 +305,11 @@ export class ClientHandshakeHandler {
 	/**
 	 * For a given message, check if it needs to be hashed
 	 */
-	private needsToHashMessage(message: Handshake.Handshake): Boolean {
+	private needsToHashMessage(message: Handshake.Handshake): boolean {
 		switch (message.msg_type) {
 			// hello (verify) requests
-			case Handshake.HandshakeType.hello_verify_request: return false
-			case Handshake.HandshakeType.hello_request: return false
+			case Handshake.HandshakeType.hello_verify_request: return false;
+			case Handshake.HandshakeType.hello_request: return false;
 			// client hello without cookie (TODO only if verify request is used)
 			case Handshake.HandshakeType.client_hello:
 				const cookie = (message as Handshake.ClientHello).cookie;
@@ -344,22 +343,22 @@ export class ClientHandshakeHandler {
 
 		/** Handles a HelloVerifyRequest message */
 		[Handshake.HandshakeType.hello_verify_request]: (messages: Handshake.Handshake[]) => {
-			// this flight should only contain a single message, 
+			// this flight should only contain a single message,
 			// but to be sure extract the last one
-			const hvr = messages[messages.length-1] as Handshake.HelloVerifyRequest;
+			const hvr = messages[messages.length - 1] as Handshake.HelloVerifyRequest;
 			// add the cookie to the client hello and send it again
 			const hello = this.lastFlight[0] as Handshake.ClientHello;
 			hello.cookie = hvr.cookie;
 			// TODO: do something with session id?
 			this.sendFlight(
 				[hello],
-				[Handshake.HandshakeType.server_hello_done]
+				[Handshake.HandshakeType.server_hello_done],
 			);
 		},
 
 		/** Handles a ServerHelloDone flight */
 		[Handshake.HandshakeType.server_hello_done]: (messages: Handshake.Handshake[]) => {
-			for (let msg of messages) {
+			for (const msg of messages) {
 				switch (msg.msg_type) {
 					case Handshake.HandshakeType.server_hello:
 						const hello = msg as Handshake.ServerHello;
@@ -379,7 +378,7 @@ export class ClientHandshakeHandler {
 						// parse the content depending on the key exchange algorithm
 						switch (this.recordLayer.nextEpoch.connectionState.cipherSuite.keyExchange) {
 							case "psk":
-								const keyExchange_PSK = Handshake.ServerKeyExchange_PSK.from(Handshake.ServerKeyExchange_PSK.spec, keyExchange.raw_data).result
+								const keyExchange_PSK = Handshake.ServerKeyExchange_PSK.from(Handshake.ServerKeyExchange_PSK.spec, keyExchange.raw_data).result;
 								// TODO: do something with the identity hint
 								break;
 							// TODO: support other algorithms
@@ -399,7 +398,7 @@ export class ClientHandshakeHandler {
 								// for PSK, build the key exchange message
 								const keyExchange = Handshake.ClientKeyExchange.createEmpty();
 								const keyExchange_PSK = new Handshake.ClientKeyExchange_PSK(
-									Buffer.from(psk_identity, "ascii")
+									Buffer.from(psk_identity, "ascii"),
 								);
 								keyExchange.raw_data = keyExchange_PSK.serialize();
 								// and add it to the flight
@@ -461,7 +460,6 @@ export class ClientHandshakeHandler {
 		},
 
 	};
-		
 
 }
 

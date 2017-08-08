@@ -1,8 +1,8 @@
 ﻿import * as crypto from "crypto";
-import { GenericCipherDelegate, CipherDelegate, GenericDecipherDelegate, DecipherDelegate, GenericMacDelegate, KeyMaterial } from "./CipherSuite";
-import { ConnectionEnd } from "./ConnectionState";
-import { DTLSCompressed } from "../DTLS/DTLSCompressed";
 import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
+import { DTLSCompressed } from "../DTLS/DTLSCompressed";
+import { CipherDelegate, DecipherDelegate, GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial } from "./CipherSuite";
+import { ConnectionEnd } from "./ConnectionState";
 
 export type BlockCipherAlgorithm =
 	"aes-128-cbc" | "aes-256-cbc" |
@@ -23,9 +23,9 @@ export interface BlockDecipherDelegate extends GenericDecipherDelegate {
 }
 
 interface BlockCipherParameter {
-	keyLength: number,
-	blockSize: number,
-	recordIvLength: number
+	keyLength: number;
+	blockSize: number;
+	recordIvLength: number;
 }
 
 const BlockCipherParameters: { [algorithm in BlockCipherAlgorithm]?: BlockCipherParameter } = {
@@ -41,9 +41,9 @@ const BlockCipherParameters: { [algorithm in BlockCipherAlgorithm]?: BlockCipher
  */
 export function createCipher(
 	algorithm: BlockCipherAlgorithm,
-	mac: GenericMacDelegate
-): BlockCipherDelegate
-{
+	mac: GenericMacDelegate,
+): BlockCipherDelegate {
+
 	const cipherParams = BlockCipherParameters[algorithm];
 	const ret = ((packet: DTLSCompressed, keyMaterial: KeyMaterial, connEnd: ConnectionEnd) => {
 
@@ -51,16 +51,16 @@ export function createCipher(
 		const MAC = mac(
 			Buffer.concat([
 				packet.computeMACHeader(),
-				packet.fragment
+				packet.fragment,
 			]),
-			keyMaterial, connEnd
+			keyMaterial, connEnd,
 		);
 
 		// combine that with the MAC to form the plaintext and encrypt it
 		const plaintext = Buffer.concat([
 			packet.fragment,
-			MAC
-		]);		
+			MAC,
+		]);
 
 		// figure out how much padding we need
 		const overflow = ((plaintext.length + 1) % cipherParams.blockSize);
@@ -77,13 +77,13 @@ export function createCipher(
 		const ciphertext = Buffer.concat([
 			cipher.update(plaintext),
 			cipher.update(padding),
-			cipher.final()
+			cipher.final(),
 		]);
 
 		// prepend it with the iv
 		const fragment = Buffer.concat([
 			record_iv,
-			ciphertext
+			ciphertext,
 		]);
 
 		// and return the packet
@@ -92,7 +92,7 @@ export function createCipher(
 			packet.version,
 			packet.epoch,
 			packet.sequence_number,
-			fragment
+			fragment,
 		);
 	}) as BlockCipherDelegate;
 	// append key length information
@@ -109,9 +109,9 @@ export function createCipher(
  */
 export function createDecipher(
 	algorithm: BlockCipherAlgorithm,
-	mac: GenericMacDelegate	
-): BlockDecipherDelegate
-{
+	mac: GenericMacDelegate,
+): BlockDecipherDelegate {
+
 	const decipherParams = BlockCipherParameters[algorithm];
 	const ret = ((packet: DTLSCiphertext, keyMaterial: KeyMaterial, connEnd: ConnectionEnd) => {
 
@@ -120,7 +120,7 @@ export function createDecipher(
 			// This allows to prevent a CBC timing attack
 			return {
 				err: new Error("invalid MAC detected in DTLS packet"),
-				result: deciphered
+				result: deciphered,
 			};
 		}
 
@@ -138,7 +138,7 @@ export function createDecipher(
 			const ciphered = ciphertext.slice(decipherParams.blockSize);
 			const deciphered = Buffer.concat([
 				decipher.update(ciphered),
-				decipher.final()
+				decipher.final(),
 			]);
 
 			// check the padding
@@ -152,15 +152,16 @@ export function createDecipher(
 			}
 
 			// strip off padding
+			// tslint:disable-next-line:no-shadowed-variable
 			const plaintext = Buffer.from(
-				deciphered.slice(0, -1 - paddingLength)
+				deciphered.slice(0, -1 - paddingLength),
 			);
 
 			// contains fragment + MAC
 			return { result: plaintext };
 		})();
 
-		const sourceConnEnd : ConnectionEnd = (connEnd === "client") ? "server" : "client";
+		const sourceConnEnd: ConnectionEnd = (connEnd === "client") ? "server" : "client";
 
 		// then verify the result/MAC
 		if (decipherResult.err) {
@@ -172,7 +173,8 @@ export function createDecipher(
 
 		// split the plaintext into content and MAC
 		const plaintext = decipherResult.result;
-		let content: Buffer, receivedMAC: Buffer;
+		let content: Buffer;
+		let receivedMAC: Buffer;
 		if (mac.keyAndHashLength > 0) {
 			content = plaintext.slice(0, -mac.keyAndHashLength);
 			receivedMAC = plaintext.slice(-mac.keyAndHashLength);
@@ -182,21 +184,21 @@ export function createDecipher(
 		}
 
 		// Create the compressed packet to return after verifying
-		const ret = new DTLSCompressed(
+		const result = new DTLSCompressed(
 			packet.type,
 			packet.version,
 			packet.epoch,
 			packet.sequence_number,
-			content
+			content,
 		);
 
 		// compute the expected MAC for this packet
 		const expectedMAC = mac(
 			Buffer.concat([
-				ret.computeMACHeader(),
-				ret.fragment
+				result.computeMACHeader(),
+				result.fragment,
 			]),
-			keyMaterial, sourceConnEnd
+			keyMaterial, sourceConnEnd,
 		);
 
 		// and check if it matches the actual one
@@ -204,7 +206,7 @@ export function createDecipher(
 			throw invalidMAC().err;
 		}
 
-		return ret;
+		return result;
 
 	}) as BlockDecipherDelegate;
 
@@ -214,5 +216,3 @@ export function createDecipher(
 	ret.blockSize = decipherParams.blockSize;
 	return ret;
 }
-
-

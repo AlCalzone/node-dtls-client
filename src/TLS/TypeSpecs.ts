@@ -1,4 +1,5 @@
-﻿import { ISerializable, ISerializableConstructor } from "./Serializable";
+﻿// tslint:disable:ban-types
+import { ISerializable, ISerializableConstructor } from "./Serializable";
 
 export type Numbers =
 	"uint8" |
@@ -28,7 +29,7 @@ export interface IStruct extends ISerializableConstructor {
 	readonly __spec: StructSpec;
 }
 export interface StructSpec {
-	[propName: string]: All
+	[propName: string]: All;
 }
 export interface Struct {
 	type: "struct";
@@ -70,18 +71,18 @@ export const define = {
 	Number: (size: Numbers): Number => ({ type: "number", size }),
 	Struct: (structType: any): Struct => ({
 		type: "struct",
-		structType: (structType as ISerializableConstructor)
+		structType: (structType as ISerializableConstructor),
 	}),
 	Vector: (itemSpec: Complex, minLength = 0, maxLength = minLength, optional = false): Vector => ({
 		type: "vector",
 		itemSpec,
 		minLength, maxLength,
-		optional
+		optional,
 	}),
 	Buffer: (minLength = Number.POSITIVE_INFINITY, maxLength = minLength): Buffer => ({
 		type: "buffer",
-		minLength, maxLength
-	})
+		minLength, maxLength,
+	}),
 };
 export const uint8 = Object.freeze(define.Number("uint8"));
 export const uint16 = Object.freeze(define.Number("uint16"));
