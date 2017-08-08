@@ -19,6 +19,6 @@ export function bufferToNumber(buf: Buffer, size: BitSizes, offset = 0) {
 	return ret;
 }
 
-export function bufferToByteArray(buf: Buffer, offset = 0) : number[] {
+export function bufferToByteArray(buf: Buffer, offset = 0): number[] {
 	return Array.prototype.slice.apply(buf, [offset]);
 }

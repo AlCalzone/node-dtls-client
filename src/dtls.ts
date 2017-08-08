@@ -1,14 +1,14 @@
-﻿import { EventEmitter } from "events";
-import * as dgram from "dgram";
-import { RecordLayer } from "./DTLS/RecordLayer";
-import { Message } from "./TLS/Message";
-import { ContentType } from "./TLS/ContentType";
-import { ClientHandshakeHandler } from "./DTLS/HandshakeHandler";
+﻿import * as dgram from "dgram";
+import { EventEmitter } from "events";
 import { FragmentedHandshake } from "./DTLS/Handshake";
+import { ClientHandshakeHandler } from "./DTLS/HandshakeHandler";
+import { RecordLayer } from "./DTLS/RecordLayer";
 import { ChangeCipherSpec } from "./TLS/ChangeCipherSpec";
+import { ContentType } from "./TLS/ContentType";
+import { Message } from "./TLS/Message";
 import { TLSStruct } from "./TLS/TLSStruct";
 
-export module dtls {
+export namespace dtls {
 
 	/**
 	 * Creates a DTLS-secured socket.
@@ -64,7 +64,7 @@ export module dtls {
 		/**
 		 * Send the given data. It is automatically compressed and encrypted.
 		 */
-		send(data: Buffer, callback?: SendCallback) {
+		public send(data: Buffer, callback?: SendCallback) {
 
 			if (this._isClosed) {
 				throw new Error("The socket is closed. Cannot send data.");
@@ -76,13 +76,13 @@ export module dtls {
 			// send finished data over UDP
 			const packet: Message = {
 				type: ContentType.application_data,
-				data: data
+				data: data,
 			};
 
 			this.recordLayer.send(packet, callback);
 		}
 
-		close(callback?: CloseEventHandler) {
+		public close(callback?: CloseEventHandler) {
 			if (callback) this.once("close", callback);
 			this.udp.close();
 		}
@@ -116,13 +116,13 @@ export module dtls {
 					this.emit("connected");
 					// also emit all buffered messages
 					while (this.bufferedMessages.length > 0) {
-						let {msg, rinfo} = this.bufferedMessages.shift();
+						const {msg, rinfo} = this.bufferedMessages.shift();
 						this.emit("message", msg.data, rinfo);
 					}
 				}
 			});
 		}
-		// is called after the connection timeout expired. 
+		// is called after the connection timeout expired.
 		// Check the connection and throws if it is not established yet
 		private expectConnection() {
 			if (!this._udpConnected) {
@@ -142,7 +142,7 @@ export module dtls {
 			const messages = this.recordLayer.receive(udpMsg);
 
 			// TODO: implement retransmission.
-			for (let msg of messages) {
+			for (const msg of messages) {
 				switch (msg.type) {
 					case ContentType.handshake:
 						const handshake = TLSStruct.from(FragmentedHandshake.spec, msg.data).result as FragmentedHandshake;
@@ -188,7 +188,7 @@ export module dtls {
 			this.udp.close();
 			if (err != null) this.emit("error", err);
 		}
-		
+
 	}
 
 	export interface Options {
@@ -204,7 +204,7 @@ export module dtls {
 		psk: { [identity: string]: string };
 		/** Time after which a connection should successfully established */
 		timeout?: number;
-		//keyContext?: any; // TODO: DTLS-security options
+		// keyContext?: any; // TODO: DTLS-security options
 	}
 
 	export type ListeningEventHandler = () => void;
@@ -213,4 +213,3 @@ export module dtls {
 	export type ErrorEventHandler = (exception: Error) => void;
 	export type SendCallback = (error: Error, bytes: number) => void;
 }
-

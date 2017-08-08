@@ -1,25 +1,23 @@
-﻿import * as TypeSpecs from "./TypeSpecs";
-import { ISerializable, ISerializableConstructor, DeserializationResult } from "./Serializable";
-import { TLSStruct } from "./TLSStruct";
+﻿import { BitSizes, bufferToByteArray, bufferToNumber, numberToBuffer } from "../lib/BitConverter";
 import { fitToWholeBytes } from "../lib/util";
-import { BitSizes, numberToBuffer, bufferToNumber, bufferToByteArray } from "../lib/BitConverter";
+import { DeserializationResult, ISerializable, ISerializableConstructor } from "./Serializable";
+import { TLSStruct } from "./TLSStruct";
+import * as TypeSpecs from "./TypeSpecs";
 
 export class Vector<T extends number | ISerializable> {
 
 	constructor(
-		public items: T[] = []
+		public items: T[] = [],
 	) { }
 
-	serialize(spec: TypeSpecs.Vector): Buffer {
+	public serialize(spec: TypeSpecs.Vector): Buffer {
 		// optional, empty vectors resolve to empty buffers
 		if (this.items.length === 0 && spec.optional) {
 			return Buffer.allocUnsafe(0);
 		}
 		// serialize all the items into single buffers
-		let
-			serializedItems: Buffer[],
-			bitSize: BitSizes;
-			;
+		let serializedItems: Buffer[];
+		let bitSize: BitSizes;
 		switch (spec.itemSpec.type) {
 			case "number":
 			case "enum":
@@ -36,7 +34,7 @@ export class Vector<T extends number | ISerializable> {
 			const lengthBits = (8 * fitToWholeBytes(spec.maxLength)) as BitSizes;
 			ret = Buffer.concat([
 				numberToBuffer(ret.length, lengthBits),
-				ret
+				ret,
 			]);
 		}
 		return ret;
@@ -51,19 +49,20 @@ export class Vector<T extends number | ISerializable> {
 			length = bufferToNumber(buf, lengthBits, offset);
 			delta += lengthBits / 8;
 		}
+		let i: number;
 		switch (spec.itemSpec.type) {
 			case "number":
 			case "enum":
 				const bitSize = TypeSpecs.getPrimitiveSize(spec.itemSpec) as BitSizes;
-				for (let i = 0; i < length; i += bitSize / 8) {
+				for (i = 0; i < length; i += bitSize / 8) {
 					this.items.push(bufferToNumber(buf, bitSize, offset + delta) as any as T); // we know this is a number!
 					delta += bitSize / 8;
 				}
 				break;
 			case "struct":
-				let i = 0;
+				i = 0;
 				while (i < length) {
-					let item = spec.itemSpec.structType.from(spec.itemSpec, buf, offset + delta);
+					const item = spec.itemSpec.structType.from(spec.itemSpec, buf, offset + delta);
 					i += item.readBytes;
 					delta += item.readBytes;
 					this.items.push(item.result as any as T); // we know this is a struct/ISerializable
@@ -72,7 +71,7 @@ export class Vector<T extends number | ISerializable> {
 		return delta;
 	}
 
-	static from<T extends number | ISerializable>(spec: TypeSpecs.Vector, buf: Buffer, offset?: number): DeserializationResult<Vector<T>> {
+	public static from<T extends number | ISerializable>(spec: TypeSpecs.Vector, buf: Buffer, offset?: number): DeserializationResult<Vector<T>> {
 		const ret = new Vector<T>();
 		if (buf.length === 0) {
 			if (spec.optional) return { result: ret, readBytes: 0 };

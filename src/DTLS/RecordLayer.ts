@@ -1,14 +1,14 @@
 import * as dgram from "dgram";
 import { dtls } from "../dtls";
-import { ConnectionState, CompressionMethod } from "../TLS/ConnectionState";
+import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
+import { CompressionMethod, ConnectionState } from "../TLS/ConnectionState";
+import { ContentType } from "../TLS/ContentType";
 import { Message } from "../TLS/Message";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { TLSStruct } from "../TLS/TLSStruct";
-import { DTLSPlaintext } from "./DTLSPlaintext";
-import { DTLSCompressed } from "./DTLSCompressed";
 import { DTLSCiphertext } from "./DTLSCiphertext";
-import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
-import { ContentType } from "../TLS/ContentType";
+import { DTLSCompressed } from "./DTLSCompressed";
+import { DTLSPlaintext } from "./DTLSPlaintext";
 
 export interface Epoch {
 	index: number;
@@ -49,7 +49,7 @@ export class RecordLayer {
 			epoch.connectionState.protocolVersion || RecordLayer.DTLSVersion,
 			this._writeEpochNr,
 			++epoch.writeSequenceNumber, // sequence number increased by 1
-			msg.data
+			msg.data,
 		);
 
 		// compress packet
@@ -77,9 +77,8 @@ export class RecordLayer {
 	 * @param messages - The messages to be sent
 	 */
 	public sendFlight(messages: Message[], callback?: dtls.SendCallback) {
-		//messages.forEach(m => this.send(m));
 		const buf = Buffer.concat(
-			messages.map(msg => this.processOutgoingMessage(msg))
+			messages.map(msg => this.processOutgoingMessage(msg)),
 			);
 		this.udpSocket.send(buf, 0, buf.length, this.options.port, this.options.address, callback);
 	}
@@ -93,7 +92,7 @@ export class RecordLayer {
 		let packets: (DTLSCiphertext | DTLSCompressed | DTLSPlaintext)[] = [];
 		while (offset < buf.length) {
 			try {
-				let packet = DTLSCiphertext.from(DTLSCiphertext.spec, buf, offset);
+				const packet = DTLSCiphertext.from(DTLSCiphertext.spec, buf, offset);
 				packets.push(packet.result as DTLSCiphertext);
 				offset += packet.readBytes;
 			} catch (e) {
@@ -113,7 +112,7 @@ export class RecordLayer {
 				} else if (p.epoch < this.readEpochNr) {
 					// discard old packets
 					return false;
-				} 
+				}
 
 				// discard packets that are not supposed to be received
 				if (!this.epochs[p.epoch].antiReplayWindow.mayReceive(p.sequence_number)) {
@@ -144,9 +143,9 @@ export class RecordLayer {
 
 		return packets.map(p => ({
 			type: p.type,
-			data: p.fragment
+			data: p.fragment,
 		}));
-		
+
 	}
 
 	/**
@@ -159,21 +158,21 @@ export class RecordLayer {
 	 * The current epoch used for reading data
 	 */
 	public get currentReadEpoch(): Epoch { return this.epochs[this._readEpochNr]; }
-	public get nextReadEpoch(): Epoch { return this.epochs[this._readEpochNr+1]; }
-	
+	public get nextReadEpoch(): Epoch { return this.epochs[this._readEpochNr + 1]; }
+
 	private _writeEpochNr: number = 0;
 	public get writeEpochNr(): number { return this._writeEpochNr; }
 	/**
 	 * The current epoch used for writing data
 	 */
 	public get currentWriteEpoch(): Epoch { return this.epochs[this._writeEpochNr]; }
-	public get nextWriteEpoch(): Epoch { return this.epochs[this._writeEpochNr+1]; }
+	public get nextWriteEpoch(): Epoch { return this.epochs[this._writeEpochNr + 1]; }
 
 	public get nextEpochNr(): number {
 		return Math.max(this.readEpochNr, this.writeEpochNr) + 1;
-	};
+	}
 	/**
-	 * The next read and write epoch that will be used. 
+	 * The next read and write epoch that will be used.
 	 * Be careful as this might point to the wrong epoch between ChangeCipherSpec messages
 	 */
 	public get nextEpoch(): Epoch { return this.epochs[this.nextEpochNr]; }
@@ -205,14 +204,13 @@ export class RecordLayer {
 		this.ensureNextEpoch();
 	}
 
-
 	/**
 	 * Maximum transfer unit of the underlying connection.
 	 * Note: Ethernet supports up to 1500 bytes, of which 20 bytes are reserved for the IP header and 8 for the UDP header
 	 */
 	public static MTU: number = 1280;
-	public static readonly MTU_OVERHEAD = 20+8;
-	public static get MAX_PAYLOAD_SIZE() { return RecordLayer.MTU - RecordLayer.MTU_OVERHEAD };
+	public static readonly MTU_OVERHEAD = 20 + 8;
+	public static get MAX_PAYLOAD_SIZE() { return RecordLayer.MTU - RecordLayer.MTU_OVERHEAD; }
 
 	// Default to DTLSv1.2
 	public static DTLSVersion = new ProtocolVersion(~1, ~2);

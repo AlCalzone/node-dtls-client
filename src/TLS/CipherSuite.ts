@@ -1,27 +1,27 @@
 ﻿import * as crypto from "crypto";
-import * as TypeSpecs from "./TypeSpecs";
-import { TLSStruct } from "./TLSStruct";
-import { ConnectionState, ConnectionEnd } from "./ConnectionState";
-import * as BlockCipher from "./BlockCipher";
-import * as AEADCipher from "./AEADCipher";
-import { HMAC } from "./PRF";
-import { extend } from "../lib/object-polyfill";
-import { DTLSCompressed } from "../DTLS/DTLSCompressed";
 import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
+import { DTLSCompressed } from "../DTLS/DTLSCompressed";
+import { extend } from "../lib/object-polyfill";
+import * as AEADCipher from "./AEADCipher";
+import * as BlockCipher from "./BlockCipher";
+import { ConnectionEnd, ConnectionState } from "./ConnectionState";
+import { HMAC } from "./PRF";
+import { TLSStruct } from "./TLSStruct";
+import * as TypeSpecs from "./TypeSpecs";
 
 export type HashAlgorithm =
 	"md5" |
 	"sha1" | "sha256" | "sha384" | "sha512"
 	;
 
-export type CipherType = 
+export type CipherType =
 	/* forbidden "stream" | */
 	"block" | "aead"
 	;
 
 export type KeyExchangeAlgorithm =
 	"dhe_dss" | "dhe_rsa" |
-	// forbidden: dh_anon, 
+	// forbidden: dh_anon,
 	"rsa" | "dh_dss" | "dh_rsa" |
 	"psk" | "dhe_psk" | "rsa_psk"// Server/Client|KeyExchange: see https://tools.ietf.org/html/rfc4279#page-4
 	;
@@ -40,16 +40,15 @@ export interface GenericMacDelegate {
 	keyAndHashLength: number;
 }
 
-
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used
  */
 export function createMAC(
-	algorithm: HashAlgorithm
+	algorithm: HashAlgorithm,
 ): GenericMacDelegate {
 
-	//const keyLength = MACKeyLengths[algorithm];
+	// const keyLength = MACKeyLengths[algorithm];
 	const MAC = HMAC[algorithm];
 
 	const ret = ((data: Buffer, keyMaterial: KeyMaterial, sourceConnEnd: ConnectionEnd) => {
@@ -104,7 +103,6 @@ export interface GenericCipherDelegate {
 	MAC: GenericMacDelegate;
 }
 
-
 export interface DecipherDelegate {
 	/**
 	 * Decrypts the given ciphertext packet using previously defined parameters
@@ -143,7 +141,7 @@ export interface GenericDecipherDelegate {
 	 * The MAC delegate used to authenticate packets.
 	 * May be null for certain ciphers.
 	 */
-	MAC: GenericMacDelegate;	
+	MAC: GenericMacDelegate;
 }
 
 export interface KeyMaterial {
@@ -162,8 +160,8 @@ function createNullCipher(): GenericCipherDelegate {
 		packet.version,
 		packet.epoch,
 		packet.sequence_number,
-		packet.fragment
-	)) as GenericCipherDelegate;	
+		packet.fragment,
+	)) as GenericCipherDelegate;
 	ret.keyLength = 0;
 	ret.fixedIvLength = 0;
 	ret.recordIvLength = 0;
@@ -176,7 +174,7 @@ function createNullDecipher(): GenericDecipherDelegate {
 		packet.version,
 		packet.epoch,
 		packet.sequence_number,
-		packet.fragment
+		packet.fragment,
 	)) as GenericDecipherDelegate;
 	ret.keyLength = 0;
 	ret.fixedIvLength = 0;
@@ -193,10 +191,10 @@ function createNullMAC(): GenericMacDelegate {
 // TODO: Documentation
 export class CipherSuite extends TLSStruct {
 
-	static readonly __spec = {
-		id: TypeSpecs.uint16
+	public static readonly __spec = {
+		id: TypeSpecs.uint16,
 	};
-	static readonly spec = TypeSpecs.define.Struct(CipherSuite);
+	public static readonly spec = TypeSpecs.define.Struct(CipherSuite);
 
 	constructor(
 		public readonly id: number,
@@ -205,19 +203,20 @@ export class CipherSuite extends TLSStruct {
 		public readonly prfAlgorithm: HashAlgorithm,
 		public readonly cipherType: CipherType,
 		public readonly algorithm?: (BlockCipher.BlockCipherAlgorithm | AEADCipher.AEADCipherAlgorithm),
-		public readonly verify_data_length: number = 12
+		public readonly verify_data_length: number = 12,
 	) {
 		super(CipherSuite.__spec);
 	}
 
-	static createEmpty(): CipherSuite {
+	public static createEmpty(): CipherSuite {
 		return new CipherSuite(null, null, null, null, null);
 	}
 
 	private _cipher: GenericCipherDelegate;
 	public get Cipher(): GenericCipherDelegate {
-		if (this._cipher == undefined)
+		if (this._cipher == undefined) {
 			this._cipher = this.createCipher();
+		}
 		return this._cipher;
 	}
 	private createCipher(): GenericCipherDelegate {
@@ -228,11 +227,11 @@ export class CipherSuite extends TLSStruct {
 				case "block":
 					return BlockCipher.createCipher(
 						this.algorithm as BlockCipher.BlockCipherAlgorithm,
-						this.MAC
+						this.MAC,
 					);
 				case "aead":
 					return AEADCipher.createCipher(
-						this.algorithm as AEADCipher.AEADCipherAlgorithm
+						this.algorithm as AEADCipher.AEADCipherAlgorithm,
 					);
 				default:
 					throw new Error(`createCipher not implemented for ${this.cipherType} cipher`);
@@ -253,11 +252,12 @@ export class CipherSuite extends TLSStruct {
 
 	private _decipher: GenericDecipherDelegate;
 	public get Decipher(): GenericDecipherDelegate {
-		if (this._decipher == undefined)
+		if (this._decipher == undefined) {
 			this._decipher = this.createDecipher();
+		}
 		return this._decipher;
 	}
-	private createDecipher() : GenericDecipherDelegate {
+	private createDecipher(): GenericDecipherDelegate {
 		const ret = (() => {
 			switch (this.cipherType) {
 				case null:
@@ -265,11 +265,11 @@ export class CipherSuite extends TLSStruct {
 				case "block":
 					return BlockCipher.createDecipher(
 						this.algorithm as BlockCipher.BlockCipherAlgorithm,
-						this.MAC
+						this.MAC,
 					);
 				case "aead":
 					return AEADCipher.createDecipher(
-						this.algorithm as AEADCipher.AEADCipherAlgorithm
+						this.algorithm as AEADCipher.AEADCipherAlgorithm,
 					);
 				default:
 					throw new Error(`createDecipher not implemented for ${this.cipherType} cipher`);
@@ -290,8 +290,9 @@ export class CipherSuite extends TLSStruct {
 
 	private _mac: GenericMacDelegate;
 	public get MAC(): GenericMacDelegate {
-		if (this._mac == undefined)
+		if (this._mac == undefined) {
 			this._mac = this.createMAC();
+		}
 		return this._mac;
 	}
 	private createMAC(): GenericMacDelegate {
@@ -300,8 +301,9 @@ export class CipherSuite extends TLSStruct {
 			case "aead":
 				return createNullMAC();
 			case "block":
-				if (this.macAlgorithm == null)
+				if (this.macAlgorithm == null) {
 					return createNullMAC();
+				}
 				return createMAC(this.macAlgorithm);
 			default:
 				throw new Error(`createMAC not implemented for ${this.cipherType} cipher`);

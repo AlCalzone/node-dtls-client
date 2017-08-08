@@ -5,13 +5,13 @@ import * as TypeSpecs from "./TypeSpecs";
 
 export class ProtocolVersion extends TLSStruct {
 
-	static readonly __spec = {
+	public static readonly __spec = {
 		major: TypeSpecs.uint8,
-		minor: TypeSpecs.uint8
+		minor: TypeSpecs.uint8,
 	};
 
 	/**
-	 * 
+	 *
 	 * @param major - Hauptversionsnummer
 	 * @param minor - Nebenversionsnummer
 	 */
@@ -19,8 +19,8 @@ export class ProtocolVersion extends TLSStruct {
 		super(ProtocolVersion.__spec);
 	}
 
-	static createEmpty(): ProtocolVersion {
+	public static createEmpty(): ProtocolVersion {
 		return new ProtocolVersion();
-	}	
+	}
 
-} 
+}

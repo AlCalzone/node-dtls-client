@@ -7,12 +7,12 @@ export interface HMACDelegate {
 	 * @param secret - The secret used to hash the data
 	 * @param data - The data to be hashed
 	 */
-	(secret: Buffer, data: Buffer): Buffer,
+	(secret: Buffer, data: Buffer): Buffer;
 	/**
 	 * The key and hash output length of this hash function
 	 */
-	keyAndHashLenth: number
-};
+	keyAndHashLenth: number;
+}
 
 function HMAC_factory(algorithm: HashAlgorithm, length: number): HMACDelegate {
 
@@ -25,31 +25,30 @@ function HMAC_factory(algorithm: HashAlgorithm, length: number): HMACDelegate {
 	// add length information
 	ret.keyAndHashLenth = length;
 
-	return ret
+	return ret;
 }
 
 export const HMAC: {
 	[algorithm in HashAlgorithm]: HMACDelegate
 } = {
-	"md5": HMAC_factory("md5", 16),
-	"sha1": HMAC_factory("sha1", 20),
-	"sha256": HMAC_factory("sha256", 32),
-	"sha384": HMAC_factory("sha384", 48),
-	"sha512": HMAC_factory("sha512", 64),
+	md5: HMAC_factory("md5", 16),
+	sha1: HMAC_factory("sha1", 20),
+	sha256: HMAC_factory("sha256", 32),
+	sha384: HMAC_factory("sha384", 48),
+	sha512: HMAC_factory("sha512", 64),
 };
-
 
 export interface HashDelegate {
 	/**
 	 * Generates a Hash hash from the given data.
 	 * @param data - The data to be hashed
 	 */
-	(data: Buffer): Buffer,
+	(data: Buffer): Buffer;
 	/**
 	 * The hash output length of this hash function
 	 */
-	hashLength: number
-};
+	hashLength: number;
+}
 
 function Hash_factory(algorithm: HashAlgorithm, length: number): HashDelegate {
 
@@ -68,11 +67,11 @@ function Hash_factory(algorithm: HashAlgorithm, length: number): HashDelegate {
 const Hash: {
 	[algorithm in HashAlgorithm]: HashDelegate
 } = {
-	"md5": Hash_factory("md5", 16),
-	"sha1": Hash_factory("sha1", 20),
-	"sha256": Hash_factory("sha256", 32),
-	"sha384": Hash_factory("sha384", 48),
-	"sha512": Hash_factory("sha512", 64),
+	md5: Hash_factory("md5", 16),
+	sha1: Hash_factory("sha1", 20),
+	sha256: Hash_factory("sha256", 32),
+	sha384: Hash_factory("sha384", 48),
+	sha512: Hash_factory("sha512", 64),
 };
 
 /**
@@ -84,34 +83,32 @@ const Hash: {
  * @see https://tools.ietf.org/html/rfc5246#section-5
  */
 function P(algorithm: HashAlgorithm, secret: Buffer, seed: Buffer, length: number = 32) {
-	
+
 	const _HMAC = HMAC[algorithm];
-	
+
 	const _A = [seed];
 	function A(i) {
 		if (i >= _A.length) {
 			// need to generate the value first
-			_A.push(_HMAC(secret, A(i-1)));
+			_A.push(_HMAC(secret, A(i - 1)));
 		}
 		return _A[i];
 	}
-	
+
 	const hashes = [];
 	let hashesLength = 0;
-	
+
 	// iterate through the hash function
 	for (let i = 1; hashesLength < length; i++) {
-		let newHash = _HMAC(secret, Buffer.concat([A(i), seed]));
+		const newHash = _HMAC(secret, Buffer.concat([A(i), seed]));
 		hashes.push(newHash);
 		hashesLength += newHash.length;
 	}
 
 	// concatenate the individual hashes and trim it to the desired length
 	return Buffer.concat(hashes, length);
-	
+
 }
-
-
 
 export interface PRFDelegate {
 	/**
@@ -121,22 +118,22 @@ export interface PRFDelegate {
 	 * @param seed - used together with label to generate a hash from secret
 	 * @param length - the desired length of the output
 	 */
-	(secret: Buffer, label: string, seed: Buffer, length?: number): Buffer,
+	(secret: Buffer, label: string, seed: Buffer, length?: number): Buffer;
 
 	/**
 	 * The underlying hash function
 	 */
-	hashFunction: HashDelegate
+	hashFunction: HashDelegate;
 }
 
 export const PRF: {
 	[algorithm in HashAlgorithm]: PRFDelegate
 } = {
-	"md5": PRF_factory("md5"),
-	"sha1": PRF_factory("sha1"),
-	"sha256": PRF_factory("sha256"),
-	"sha384": PRF_factory("sha384"),
-	"sha512": PRF_factory("sha512"),
+	md5: PRF_factory("md5"),
+	sha1: PRF_factory("sha1"),
+	sha256: PRF_factory("sha256"),
+	sha384: PRF_factory("sha384"),
+	sha512: PRF_factory("sha512"),
 };
 
 function PRF_factory(algorithm: HashAlgorithm): PRFDelegate {
@@ -145,11 +142,10 @@ function PRF_factory(algorithm: HashAlgorithm): PRFDelegate {
 		return P(
 			algorithm,
 			secret,
-			Buffer.concat([Buffer.from(label, 'ascii'), seed]),
-			length
-		)
+			Buffer.concat([Buffer.from(label, "ascii"), seed]),
+			length,
+		);
 	}) as PRFDelegate;
 	ret.hashFunction = Hash[algorithm];
 	return ret;
 }
-

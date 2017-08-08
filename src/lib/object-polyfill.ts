@@ -9,11 +9,11 @@ export function entries(obj): KeyValuePair[] {
 }
 export type KeyValuePair = [string, any];
 // ES6-Generator-Version
-//export function* entries(obj) {
-//	for (let key of Object.keys(obj)) {
-//		yield [key, obj[key]];
-//	}
-//}
+// export function* entries(obj) {
+// 	for (let key of Object.keys(obj)) {
+// 		yield [key, obj[key]];
+// 	}
+// }
 
 /**
  * Stellt einen Polyfill für Object.entries bereit
@@ -25,11 +25,11 @@ export function values(obj): any[] {
 		;
 }
 // ES6-Version:
-//export function* values(obj) {
-//	for (let key of Object.keys(obj)) {
-//		yield obj[key];
-//	}
-//}
+// export function* values(obj) {
+// 	for (let key of Object.keys(obj)) {
+// 		yield obj[key];
+// 	}
+// }
 
 /**
  * Filtert die Eigenschaften eines Objekts anhand der übergebenen Filterfunktion
@@ -39,7 +39,7 @@ export function values(obj): any[] {
 export type predicateFunction = (any, string?) => boolean;
 export function filter(obj: any, predicate: predicateFunction): any {
 	const ret = {};
-	for (let [key, val] of entries(obj)) {
+	for (const [key, val] of entries(obj)) {
 		if (predicate(val, key)) ret[key] = val;
 	}
 	return ret;
@@ -66,10 +66,10 @@ export function dig(object: any, path: string): any {
 		// are we there yet? then return obj
 		if (!pathArr.length) return obj;
 		// go deeper
-		let propName : (string|number) = pathArr.shift();
+		let propName: (string|number) = pathArr.shift();
 		if (/\[\d+\]/.test(propName)) {
 			// this is an array index
-			propName = +propName.slice(1,-1);
+			propName = +propName.slice(1, -1);
 		}
 		return _dig(obj[propName], pathArr);
 	}
@@ -82,8 +82,8 @@ export function dig(object: any, path: string): any {
  * @param path - Der Eigenschaftspfad der Form propName.propName.[arrayIndex].propName
  * @param value - Der abzulegende Eigenschaftswert
  */
-export function bury(object: any, path: string, value: any) : void {
-	function _bury(obj, pathArr: string[], value) {
+export function bury(object: any, path: string, value: any): void {
+	function _bury(obj, pathArr: string[]) {
 		// are we there yet? then return obj
 		if (pathArr.length === 1) {
 			obj[pathArr[0]] = value;
@@ -95,11 +95,10 @@ export function bury(object: any, path: string, value: any) : void {
 			// this is an array index
 			propName = +propName.slice(1, -1);
 		}
-		_bury(obj[propName], pathArr, value);
+		_bury(obj[propName], pathArr);
 	}
-	_bury(object, path.split("."), value);
+	_bury(object, path.split("."));
 }
-
 
 /**
  * Kopiert Eigenschaften rekursiv von einem Objekt auf ein anderes
@@ -108,7 +107,7 @@ export function bury(object: any, path: string, value: any) : void {
  */
 export function extend(target, source) {
 	target = target || {};
-	for (let [prop, val] of entries(source)) {
+	for (const [prop, val] of entries(source)) {
 		if (val instanceof Object) {
 			target[prop] = extend(target[prop], val);
 		} else {
