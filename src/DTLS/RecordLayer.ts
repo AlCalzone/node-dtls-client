@@ -139,7 +139,12 @@ export class RecordLayer {
 			})
 			.filter(p => p != null) // filter out packets that couldn't be decrypted
 			.map(p => p.decompress(decompressor))
-		;
+			;
+
+		// update the anti replay window
+		for (let p of packets) {
+			this.epochs[p.epoch].antiReplayWindow.markAsReceived(p.sequence_number);
+		}
 
 		return packets.map(p => ({
 			type: p.type,

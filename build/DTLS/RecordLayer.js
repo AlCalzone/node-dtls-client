@@ -120,6 +120,11 @@ var RecordLayer = (function () {
         })
             .filter(function (p) { return p != null; }) // filter out packets that couldn't be decrypted
             .map(function (p) { return p.decompress(decompressor); });
+        // update the anti replay window
+        for (var _i = 0, packets_1 = packets; _i < packets_1.length; _i++) {
+            var p = packets_1[_i];
+            this.epochs[p.epoch].antiReplayWindow.markAsReceived(p.sequence_number);
+        }
         return packets.map(function (p) { return ({
             type: p.type,
             data: p.fragment,
