@@ -49,7 +49,7 @@ export namespace dtls {
 			// setup a timeout watcher. Default: 1000ms timeout, minimum: 100ms
 			this.options.timeout = Math.max(100, this.options.timeout || 1000);
 			this._udpConnected = false;
-			this._connectionTimeout = setTimeout(this.expectConnection, this.options.timeout);
+			this._connectionTimeout = setTimeout(() => this.expectConnection(), this.options.timeout);
 
 			// start the connection
 			this.udp.bind();
@@ -102,7 +102,7 @@ export namespace dtls {
 			// initialize record layer
 			this.recordLayer = new RecordLayer(this.udp, this.options);
 			// reuse the connection timeout for handshake timeout watching
-			this._connectionTimeout = setTimeout(this.expectHandshake, this.options.timeout);
+			this._connectionTimeout = setTimeout(() => this.expectHandshake(), this.options.timeout);
 			// also start handshake
 			this.handshakeHandler = new ClientHandshakeHandler(this.recordLayer, this.options, (err?: Error) => {
 				if (err) {

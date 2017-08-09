@@ -60,7 +60,7 @@ var dtls;
             // setup a timeout watcher. Default: 1000ms timeout, minimum: 100ms
             _this.options.timeout = Math.max(100, _this.options.timeout || 1000);
             _this._udpConnected = false;
-            _this._connectionTimeout = setTimeout(_this.expectConnection, _this.options.timeout);
+            _this._connectionTimeout = setTimeout(function () { return _this.expectConnection(); }, _this.options.timeout);
             // start the connection
             _this.udp.bind();
             return _this;
@@ -96,7 +96,7 @@ var dtls;
             // initialize record layer
             this.recordLayer = new RecordLayer_1.RecordLayer(this.udp, this.options);
             // reuse the connection timeout for handshake timeout watching
-            this._connectionTimeout = setTimeout(this.expectHandshake, this.options.timeout);
+            this._connectionTimeout = setTimeout(function () { return _this.expectHandshake(); }, this.options.timeout);
             // also start handshake
             this.handshakeHandler = new HandshakeHandler_1.ClientHandshakeHandler(this.recordLayer, this.options, function (err) {
                 if (err) {
