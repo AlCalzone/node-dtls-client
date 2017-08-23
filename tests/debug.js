@@ -1,7 +1,7 @@
 ﻿const PRF = require("../build/TLS/PRF").PRF;
 const PreMasterSecret = require("../build/TLS/PreMasterSecret").PreMasterSecret;
 
-var dtls = require("../");
+var dtls = require("../").dtls;
 
 const socket = dtls.createSocket({
 	type: "udp4",

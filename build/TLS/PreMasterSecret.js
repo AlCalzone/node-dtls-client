@@ -27,11 +27,11 @@ var PreMasterSecret = (function (_super) {
     PreMasterSecret.createEmpty = function () {
         return new PreMasterSecret(null, null);
     };
-    PreMasterSecret.__spec = {
-        other_secret: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
-        psk: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
-    };
     return PreMasterSecret;
 }(TLSStruct_1.TLSStruct));
+PreMasterSecret.__spec = {
+    other_secret: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
+    psk: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
+};
 exports.PreMasterSecret = PreMasterSecret;
 //# sourceMappingURL=PreMasterSecret.js.map

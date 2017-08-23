@@ -29,10 +29,10 @@ var ChangeCipherSpec = (function (_super) {
     ChangeCipherSpec.createEmpty = function () {
         return new ChangeCipherSpec(ChangeCipherSpecTypes.change_cipher_spec);
     };
-    ChangeCipherSpec.__spec = {
-        type: TypeSpecs.define.Enum("uint8", ChangeCipherSpec),
-    };
     return ChangeCipherSpec;
 }(TLSStruct_1.TLSStruct));
+ChangeCipherSpec.__spec = {
+    type: TypeSpecs.define.Enum("uint8", ChangeCipherSpec),
+};
 exports.ChangeCipherSpec = ChangeCipherSpec;
 //# sourceMappingURL=ChangeCipherSpec.js.map
