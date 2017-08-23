@@ -23,8 +23,7 @@
     "typescript": "^2.3.4"
   },
   "dependencies": {
-    "node-aes-ccm": "git+https://github.com/AlCalzone/node-aes-ccm.git",
-    "node-aes-gcm": "git+https://github.com/AlCalzone/node-aes-gcm.git"
+    "node-aead-crypto": "^1.0.0"
   },
   "repository": {
     "type": "git",

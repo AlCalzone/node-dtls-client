@@ -10,8 +10,7 @@ import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
 import { Vector } from "./Vector";
 
-import * as ccm from "node-aes-ccm";
-import * as gcm from "node-aes-gcm";
+// TODO: import from new package
 
 export type AEADCipherAlgorithm =
 	"aes-128-ccm" | "aes-256-ccm" |
