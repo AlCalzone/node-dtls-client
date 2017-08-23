@@ -1,5 +1,5 @@
 .git*
-*.njsproj
+*.njsproj*
 *.sln
 tsconfig.json
 tslint.json
@@ -7,3 +7,9 @@ tests/
 src/
 build/**/*.map
 node-dtls-client-*.tgz
+coverage/
+.vs*/
+.nyc_output/
+rfc/
+bin/
+obj/

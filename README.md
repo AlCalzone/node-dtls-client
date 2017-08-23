@@ -61,6 +61,9 @@ The events are defined as follows:
 
 ## Changelog
 
+#### 0.1.0 (2015-08-23)
+* (AlCalzone) publish to npm
+
 #### 0.0.3 (2015-08-09)
 * (AlCalzone) bugfixes
 
