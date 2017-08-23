@@ -23,7 +23,7 @@
     "typescript": "^2.3.4"
   },
   "dependencies": {
-    "node-aead-crypto": "^1.0.0"
+    "node-aead-crypto": "^1.0.1"
   },
   "repository": {
     "type": "git",

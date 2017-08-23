@@ -30,11 +30,11 @@ var Random = (function (_super) {
     Random.createEmpty = function () {
         return new Random(null, null);
     };
+    Random.__spec = {
+        gmt_unix_time: TypeSpecs.uint32,
+        random_bytes: TypeSpecs.define.Buffer(28),
+    };
     return Random;
 }(TLSStruct_1.TLSStruct));
-Random.__spec = {
-    gmt_unix_time: TypeSpecs.uint32,
-    random_bytes: TypeSpecs.define.Buffer(28),
-};
 exports.Random = Random;
 //# sourceMappingURL=Random.js.map
