@@ -3,6 +3,7 @@
     "compilerOptions": {
         "declaration": true,
         "module": "commonjs",
+        "moduleResolution": "node",
         "noEmitOnError": false,
         "noImplicitAny": false,
         "outDir": "build/",

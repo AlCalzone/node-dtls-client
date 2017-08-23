@@ -17,15 +17,14 @@ var ContentType_1 = require("../TLS/ContentType");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var TLSStruct_1 = require("./TLSStruct");
 var TypeSpecs = require("./TypeSpecs");
-var ccm = require("node-aes-ccm");
-var gcm = require("node-aes-gcm");
+var node_aead_crypto_1 = require("node-aead-crypto");
 var AEADCipherParameters = {
-    "aes-128-ccm": { interface: ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
-    "aes-128-ccm8": { interface: ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
-    "aes-256-ccm": { interface: ccm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
-    "aes-256-ccm8": { interface: ccm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
-    "aes-128-gcm": { interface: gcm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
-    "aes-256-gcm": { interface: gcm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
+    "aes-128-ccm": { interface: node_aead_crypto_1.ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
+    "aes-128-ccm8": { interface: node_aead_crypto_1.ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
+    "aes-256-ccm": { interface: node_aead_crypto_1.ccm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
+    "aes-256-ccm8": { interface: node_aead_crypto_1.ccm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
+    "aes-128-gcm": { interface: node_aead_crypto_1.gcm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
+    "aes-256-gcm": { interface: node_aead_crypto_1.gcm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
 };
 var AdditionalData = (function (_super) {
     __extends(AdditionalData, _super);
