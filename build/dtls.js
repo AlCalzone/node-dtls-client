@@ -15,8 +15,12 @@ var events_1 = require("events");
 var Handshake_1 = require("./DTLS/Handshake");
 var HandshakeHandler_1 = require("./DTLS/HandshakeHandler");
 var RecordLayer_1 = require("./DTLS/RecordLayer");
+var Alert_1 = require("./TLS/Alert");
 var ContentType_1 = require("./TLS/ContentType");
 var TLSStruct_1 = require("./TLS/TLSStruct");
+// enable debug output
+var debugPackage = require("debug");
+var debug = debugPackage("node-dtls-client");
 var dtls;
 (function (dtls) {
     /**
@@ -82,10 +86,14 @@ var dtls;
             };
             this.recordLayer.send(packet, callback);
         };
+        /**
+         * Closes the connection
+         */
         Socket.prototype.close = function (callback) {
+            this.sendAlert(new Alert_1.Alert(Alert_1.AlertLevel.warning, Alert_1.AlertDescription.close_notify));
+            this.udp.close(); // close() should flush the send queue
             if (callback)
                 this.once("close", callback);
-            this.udp.close();
         };
         Socket.prototype.udp_onListening = function () {
             var _this = this;
@@ -98,11 +106,15 @@ var dtls;
             // reuse the connection timeout for handshake timeout watching
             this._connectionTimeout = setTimeout(function () { return _this.expectHandshake(); }, this.options.timeout);
             // also start handshake
-            this.handshakeHandler = new HandshakeHandler_1.ClientHandshakeHandler(this.recordLayer, this.options, function (err) {
+            this.handshakeHandler = new HandshakeHandler_1.ClientHandshakeHandler(this.recordLayer, this.options, function (alert, err) {
+                // if we have an alert, send it to the other party
+                if (alert) {
+                    _this.sendAlert(alert);
+                }
+                // if we have an error, terminate the connection
                 if (err) {
                     // something happened on the way to heaven
-                    _this.emit("error", err);
-                    _this.udp.close();
+                    _this.killConnection(err);
                 }
                 else {
                     // when done, emit "connected" event
@@ -132,6 +144,14 @@ var dtls;
                 this.killConnection(new Error("The DTLS handshake timed out"));
             }
         };
+        Socket.prototype.sendAlert = function (alert, callback) {
+            // send alert to the other party
+            var packet = {
+                type: ContentType_1.ContentType.alert,
+                data: alert.serialize(),
+            };
+            this.recordLayer.send(packet, callback);
+        };
         Socket.prototype.udp_onMessage = function (udpMsg, rinfo) {
             // decode the messages
             var messages = this.recordLayer.receive(udpMsg);
@@ -147,7 +167,22 @@ var dtls;
                         this.recordLayer.advanceReadEpoch();
                         break;
                     case ContentType_1.ContentType.alert:
-                        // TODO: read spec to see how we handle this
+                        var alert_1 = TLSStruct_1.TLSStruct.from(Alert_1.Alert.spec, msg.data).result;
+                        if (alert_1.level === Alert_1.AlertLevel.fatal) {
+                            // terminate the connection when receiving a fatal alert
+                            var errorMessage = "received fatal alert: " + Alert_1.AlertDescription[alert_1.description];
+                            debug(errorMessage);
+                            this.killConnection(new Error(errorMessage));
+                        }
+                        else if (alert_1.level === Alert_1.AlertLevel.warning) {
+                            // not sure what to do with most warning alerts
+                            switch (alert_1.description) {
+                                case Alert_1.AlertDescription.close_notify:
+                                    // except close_notify, which means we should terminate the connection
+                                    this.close();
+                                    break;
+                            }
+                        }
                         break;
                     case ContentType_1.ContentType.application_data:
                         if (!this._handshakeFinished) {

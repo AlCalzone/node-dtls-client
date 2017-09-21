@@ -40,6 +40,7 @@ export class Alert extends TLSStruct {
 		level: TypeSpecs.define.Enum("uint8", AlertLevel),
 		description: TypeSpecs.define.Enum("uint8", AlertDescription),
 	};
+	public static readonly spec = TypeSpecs.define.Struct(Alert);
 
 	constructor(public level: AlertLevel, public description: AlertDescription) {
 		super(Alert.__spec);

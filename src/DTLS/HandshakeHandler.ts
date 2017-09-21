@@ -2,6 +2,7 @@
 import { CipherSuites } from "../DTLS/CipherSuites";
 import { Cookie } from "../DTLS/Cookie";
 import { bufferToByteArray/*, buffersEqual*/ } from "../lib/BitConverter";
+import { Alert, AlertDescription, AlertLevel } from "../TLS/Alert";
 import { ChangeCipherSpec } from "../TLS/ChangeCipherSpec";
 import { CipherSuite } from "../TLS/CipherSuite";
 import { ConnectionEnd } from "../TLS/ConnectionState";
@@ -31,13 +32,17 @@ import { RecordLayer } from "./RecordLayer";
 // 	finished
 // }
 
-export type HandshakeFinishedCallback = (err?: Error) => void;
+export type HandshakeFinishedCallback = (alert?: Alert, err?: Error) => void;
 
 type FlightHandler = (flight: Handshake.Handshake[]) => void;
 
 export class ClientHandshakeHandler {
 
-	constructor(private recordLayer: RecordLayer, private options: dtls.Options, private finishedCallback: HandshakeFinishedCallback) {
+	constructor(
+		private recordLayer: RecordLayer,
+		private options: dtls.Options,
+		private finishedCallback: HandshakeFinishedCallback,
+	) {
 		this.renegotiate();
 	}
 
@@ -176,7 +181,7 @@ export class ClientHandshakeHandler {
 						this.handle[lastMsg.msg_type](messages);
 					} catch (e) {
 						this._isHandshaking = false;
-						this.finishedCallback(e);
+						this.finishedCallback(null, e as Error);
 						return;
 					}
 					if (lastMsg.msg_type === Handshake.HandshakeType.finished) {
@@ -410,7 +415,11 @@ export class ClientHandshakeHandler {
 								break;
 
 							default:
-								throw new Error(`${connState.cipherSuite.keyExchange} key exchange not implemented`);
+								this.finishedCallback(
+									new Alert(AlertLevel.fatal, AlertDescription.handshake_failure),
+									new Error(`${connState.cipherSuite.keyExchange} key exchange not implemented`),
+								);
+								return;
 						}
 
 						// we now have everything to compute the master secret
@@ -452,10 +461,12 @@ export class ClientHandshakeHandler {
 				this._isHandshaking = false;
 				this.finishedCallback();
 			} else {
-				// TODO: send alert
 				this._isHandshaking = false;
-				this.finishedCallback(new Error("DTLS handshake failed"));
-				// TODO: cancel connection
+				this.finishedCallback(
+					new Alert(AlertLevel.fatal, AlertDescription.decrypt_error),
+					new Error("DTLS handshake failed"),
+				);
+				// connection is automatically canceled by the callback
 			}
 		},
 

@@ -1,6 +1,7 @@
 /// <reference types="node" />
 import * as dgram from "dgram";
 import { EventEmitter } from "events";
+import { Alert } from "./TLS/Alert";
 export declare namespace dtls {
     /**
      * Creates a DTLS-secured socket.
@@ -26,12 +27,16 @@ export declare namespace dtls {
          * Send the given data. It is automatically compressed and encrypted.
          */
         send(data: Buffer, callback?: SendCallback): void;
+        /**
+         * Closes the connection
+         */
         close(callback?: CloseEventHandler): void;
         private bufferedMessages;
         private udp;
         private udp_onListening();
         private expectConnection();
         private expectHandshake();
+        sendAlert(alert: Alert, callback?: SendCallback): void;
         private udp_onMessage(udpMsg, rinfo);
         private _isClosed;
         private udp_onClose();

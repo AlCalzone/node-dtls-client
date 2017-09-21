@@ -3,10 +3,15 @@ import { EventEmitter } from "events";
 import { FragmentedHandshake } from "./DTLS/Handshake";
 import { ClientHandshakeHandler } from "./DTLS/HandshakeHandler";
 import { RecordLayer } from "./DTLS/RecordLayer";
+import { Alert, AlertDescription, AlertLevel } from "./TLS/Alert";
 import { ChangeCipherSpec } from "./TLS/ChangeCipherSpec";
 import { ContentType } from "./TLS/ContentType";
 import { Message } from "./TLS/Message";
 import { TLSStruct } from "./TLS/TLSStruct";
+
+// enable debug output
+import * as debugPackage from "debug";
+const debug = debugPackage("node-dtls-client");
 
 export namespace dtls {
 
@@ -82,9 +87,13 @@ export namespace dtls {
 			this.recordLayer.send(packet, callback);
 		}
 
+		/**
+		 * Closes the connection
+		 */
 		public close(callback?: CloseEventHandler) {
+			this.sendAlert(new Alert(AlertLevel.warning, AlertDescription.close_notify));
+			this.udp.close(); // close() should flush the send queue
 			if (callback) this.once("close", callback);
-			this.udp.close();
 		}
 
 		// buffer messages while handshaking
@@ -104,23 +113,29 @@ export namespace dtls {
 			// reuse the connection timeout for handshake timeout watching
 			this._connectionTimeout = setTimeout(() => this.expectHandshake(), this.options.timeout);
 			// also start handshake
-			this.handshakeHandler = new ClientHandshakeHandler(this.recordLayer, this.options, (err?: Error) => {
-				if (err) {
-					// something happened on the way to heaven
-					this.emit("error", err);
-					this.udp.close();
-				} else {
-					// when done, emit "connected" event
-					this._handshakeFinished = true;
-					if (this._connectionTimeout != null) clearTimeout(this._connectionTimeout);
-					this.emit("connected");
-					// also emit all buffered messages
-					while (this.bufferedMessages.length > 0) {
-						const {msg, rinfo} = this.bufferedMessages.shift();
-						this.emit("message", msg.data, rinfo);
+			this.handshakeHandler = new ClientHandshakeHandler(this.recordLayer, this.options,
+				(alert?: Alert, err?: Error) => {
+					// if we have an alert, send it to the other party
+					if (alert) {
+						this.sendAlert(alert);
 					}
-				}
-			});
+					// if we have an error, terminate the connection
+					if (err) {
+						// something happened on the way to heaven
+						this.killConnection(err);
+					} else {
+						// when done, emit "connected" event
+						this._handshakeFinished = true;
+						if (this._connectionTimeout != null) clearTimeout(this._connectionTimeout);
+						this.emit("connected");
+						// also emit all buffered messages
+						while (this.bufferedMessages.length > 0) {
+							const {msg, rinfo} = this.bufferedMessages.shift();
+							this.emit("message", msg.data, rinfo);
+						}
+					}
+				},
+			);
 		}
 		// is called after the connection timeout expired.
 		// Check the connection and throws if it is not established yet
@@ -135,6 +150,15 @@ export namespace dtls {
 				// handshake timed out
 				this.killConnection(new Error("The DTLS handshake timed out"));
 			}
+		}
+
+		public sendAlert(alert: Alert, callback?: SendCallback): void {
+			// send alert to the other party
+			const packet: Message = {
+				type: ContentType.alert,
+				data: alert.serialize(),
+			};
+			this.recordLayer.send(packet, callback);
 		}
 
 		private udp_onMessage(udpMsg: Buffer, rinfo: dgram.RemoteInfo) {
@@ -152,7 +176,21 @@ export namespace dtls {
 						this.recordLayer.advanceReadEpoch();
 						break;
 					case ContentType.alert:
-						// TODO: read spec to see how we handle this
+						const alert = TLSStruct.from(Alert.spec, msg.data).result as Alert;
+						if (alert.level === AlertLevel.fatal) {
+							// terminate the connection when receiving a fatal alert
+							const errorMessage = `received fatal alert: ${AlertDescription[alert.description]}`;
+							debug(errorMessage);
+							this.killConnection(new Error(errorMessage));
+						} else if (alert.level === AlertLevel.warning) {
+							// not sure what to do with most warning alerts
+							switch (alert.description) {
+								case AlertDescription.close_notify:
+									// except close_notify, which means we should terminate the connection
+									this.close();
+									break;
+							}
+						}
 						break;
 
 					case ContentType.application_data:

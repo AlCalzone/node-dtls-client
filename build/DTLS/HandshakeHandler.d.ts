@@ -1,7 +1,8 @@
 import { dtls } from "../dtls";
+import { Alert } from "../TLS/Alert";
 import * as Handshake from "./Handshake";
 import { RecordLayer } from "./RecordLayer";
-export declare type HandshakeFinishedCallback = (err?: Error) => void;
+export declare type HandshakeFinishedCallback = (alert?: Alert, err?: Error) => void;
 export declare class ClientHandshakeHandler {
     private recordLayer;
     private options;

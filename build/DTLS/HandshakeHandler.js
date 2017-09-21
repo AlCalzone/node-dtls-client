@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var CipherSuites_1 = require("../DTLS/CipherSuites");
+var Alert_1 = require("../TLS/Alert");
 var ChangeCipherSpec_1 = require("../TLS/ChangeCipherSpec");
 var ConnectionState_1 = require("../TLS/ConnectionState");
 var ContentType_1 = require("../TLS/ContentType");
@@ -81,7 +82,8 @@ var ClientHandshakeHandler = (function () {
                                     preMasterSecret = new PreMasterSecret_1.PreMasterSecret(null, psk);
                                     break;
                                 default:
-                                    throw new Error(connState.cipherSuite.keyExchange + " key exchange not implemented");
+                                    _this.finishedCallback(new Alert_1.Alert(Alert_1.AlertLevel.fatal, Alert_1.AlertDescription.handshake_failure), new Error(connState.cipherSuite.keyExchange + " key exchange not implemented"));
+                                    return;
                             }
                             // we now have everything to compute the master secret
                             connState.computeMasterSecret(preMasterSecret);
@@ -114,10 +116,9 @@ var ClientHandshakeHandler = (function () {
                     _this.finishedCallback();
                 }
                 else {
-                    // TODO: send alert
                     _this._isHandshaking = false;
-                    _this.finishedCallback(new Error("DTLS handshake failed"));
-                    // TODO: cancel connection
+                    _this.finishedCallback(new Alert_1.Alert(Alert_1.AlertLevel.fatal, Alert_1.AlertDescription.decrypt_error), new Error("DTLS handshake failed"));
+                    // connection is automatically canceled by the callback
                 }
             },
             _a);
@@ -232,7 +233,7 @@ var ClientHandshakeHandler = (function () {
                     }
                     catch (e) {
                         this._isHandshaking = false;
-                        this.finishedCallback(e);
+                        this.finishedCallback(null, e);
                         return;
                     }
                     if (lastMsg.msg_type === Handshake.HandshakeType.finished) {
