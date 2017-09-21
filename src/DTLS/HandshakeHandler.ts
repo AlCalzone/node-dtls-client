@@ -374,11 +374,11 @@ export class ClientHandshakeHandler {
 						break;
 					// TODO: support more messages (certificates etc.)
 					case Handshake.HandshakeType.server_key_exchange:
-						const keyExchange = msg as Handshake.ServerKeyExchange;
+						const srvKeyExchange = msg as Handshake.ServerKeyExchange;
 						// parse the content depending on the key exchange algorithm
 						switch (this.recordLayer.nextEpoch.connectionState.cipherSuite.keyExchange) {
 							case "psk":
-								const keyExchange_PSK = Handshake.ServerKeyExchange_PSK.from(Handshake.ServerKeyExchange_PSK.spec, keyExchange.raw_data).result;
+								const srvKeyExchange_PSK = Handshake.ServerKeyExchange_PSK.from(Handshake.ServerKeyExchange_PSK.spec, srvKeyExchange.raw_data).result;
 								// TODO: do something with the identity hint
 								break;
 							// TODO: support other algorithms
@@ -396,13 +396,13 @@ export class ClientHandshakeHandler {
 						switch (connState.cipherSuite.keyExchange) {
 							case "psk":
 								// for PSK, build the key exchange message
-								const keyExchange = Handshake.ClientKeyExchange.createEmpty();
-								const keyExchange_PSK = new Handshake.ClientKeyExchange_PSK(
+								const clKeyExchange = Handshake.ClientKeyExchange.createEmpty();
+								const clKeyExchange_PSK = new Handshake.ClientKeyExchange_PSK(
 									Buffer.from(psk_identity, "ascii"),
 								);
-								keyExchange.raw_data = keyExchange_PSK.serialize();
+								clKeyExchange.raw_data = clKeyExchange_PSK.serialize();
 								// and add it to the flight
-								flight.push(keyExchange);
+								flight.push(clKeyExchange);
 
 								// now we have everything, construct the pre master secret
 								const psk = Buffer.from(this.options.psk[psk_identity], "ascii");

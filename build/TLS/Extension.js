@@ -30,12 +30,12 @@ var Extension = (function (_super) {
     Extension.createEmpty = function () {
         return new Extension(null, null);
     };
+    Extension.__spec = {
+        extension_type: ExtensionType.spec,
+        extension_data: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
+    };
+    Extension.spec = TypeSpecs.define.Struct(Extension);
     return Extension;
 }(TLSStruct_1.TLSStruct));
-Extension.__spec = {
-    extension_type: ExtensionType.spec,
-    extension_data: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
-};
-Extension.spec = TypeSpecs.define.Struct(Extension);
 exports.Extension = Extension;
 //# sourceMappingURL=Extension.js.map

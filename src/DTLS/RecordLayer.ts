@@ -142,7 +142,7 @@ export class RecordLayer {
 			;
 
 		// update the anti replay window
-		for (let p of packets) {
+		for (const p of packets) {
 			this.epochs[p.epoch].antiReplayWindow.markAsReceived(p.sequence_number);
 		}
 

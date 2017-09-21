@@ -5,8 +5,7 @@
  */
 export function fitToWholeBytes(value: number): number {
 	let ret = 0;
-	while (value !== 0)
-	{
+	while (value !== 0) {
 		ret++;
 		value >>>= 8;
 	}

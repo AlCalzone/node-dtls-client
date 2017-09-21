@@ -1,10 +1,10 @@
 ﻿import { expect } from "chai";
-
 import { AntiReplayWindow } from "./AntiReplayWindow";
+// tslint:disable:no-unused-expression
 
-describe("AntiReplayWindow =>", function () {
-	it("constructor & reset", function () {
-		var wnd = new AntiReplayWindow() as any;
+describe("AntiReplayWindow =>", () => {
+	it("constructor & reset", () => {
+		const wnd = new AntiReplayWindow() as any;
 		expect(wnd.window).to.deep.equal([0, 0]);
 		expect(wnd.ceiling).to.be.equal(63);
 		// put bullshit data in
@@ -16,8 +16,8 @@ describe("AntiReplayWindow =>", function () {
 		expect(wnd.ceiling).to.be.equal(63);
 	});
 
-	it("usage 1", function () {
-		var wnd = new AntiReplayWindow();
+	it("usage 1", () => {
+		const wnd = new AntiReplayWindow();
 		// test some seq_numbers against the default window (0..63)
 		expect(wnd.hasReceived(-1)).to.be.false;
 		expect(wnd.mayReceive(-1)).to.be.false;
@@ -38,7 +38,9 @@ describe("AntiReplayWindow =>", function () {
 		wnd.markAsReceived(5);
 		expect(wnd.hasReceived(5)).to.be.true;
 		// the window should still be the same
+		// tslint:disable-next-line:no-string-literal
 		expect(wnd["window"]).to.deep.equal([1 << 5, 0]);
+		// tslint:disable-next-line:no-string-literal
 		expect(wnd["ceiling"]).to.be.equal(63);
 
 		// now receive one outside the window

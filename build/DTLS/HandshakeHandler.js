@@ -52,11 +52,11 @@ var ClientHandshakeHandler = (function () {
                             break;
                         // TODO: support more messages (certificates etc.)
                         case Handshake.HandshakeType.server_key_exchange:
-                            var keyExchange = msg;
+                            var srvKeyExchange = msg;
                             // parse the content depending on the key exchange algorithm
                             switch (_this.recordLayer.nextEpoch.connectionState.cipherSuite.keyExchange) {
                                 case "psk":
-                                    var keyExchange_PSK = Handshake.ServerKeyExchange_PSK.from(Handshake.ServerKeyExchange_PSK.spec, keyExchange.raw_data).result;
+                                    var srvKeyExchange_PSK = Handshake.ServerKeyExchange_PSK.from(Handshake.ServerKeyExchange_PSK.spec, srvKeyExchange.raw_data).result;
                                     // TODO: do something with the identity hint
                                     break;
                             }
@@ -71,11 +71,11 @@ var ClientHandshakeHandler = (function () {
                             switch (connState.cipherSuite.keyExchange) {
                                 case "psk":
                                     // for PSK, build the key exchange message
-                                    var keyExchange_1 = Handshake.ClientKeyExchange.createEmpty();
-                                    var keyExchange_PSK = new Handshake.ClientKeyExchange_PSK(Buffer.from(psk_identity, "ascii"));
-                                    keyExchange_1.raw_data = keyExchange_PSK.serialize();
+                                    var clKeyExchange = Handshake.ClientKeyExchange.createEmpty();
+                                    var clKeyExchange_PSK = new Handshake.ClientKeyExchange_PSK(Buffer.from(psk_identity, "ascii"));
+                                    clKeyExchange.raw_data = clKeyExchange_PSK.serialize();
                                     // and add it to the flight
-                                    flight.push(keyExchange_1);
+                                    flight.push(clKeyExchange);
                                     // now we have everything, construct the pre master secret
                                     var psk = Buffer.from(_this.options.psk[psk_identity], "ascii");
                                     preMasterSecret = new PreMasterSecret_1.PreMasterSecret(null, psk);

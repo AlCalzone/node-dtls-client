@@ -46,11 +46,11 @@ var SignatureAndHashAlgorithm = (function (_super) {
     SignatureAndHashAlgorithm.createEmpty = function () {
         return new SignatureAndHashAlgorithm(null, null);
     };
+    SignatureAndHashAlgorithm.__spec = {
+        hash: HashAlgorithm.__spec,
+        signature: SignatureAlgorithm.__spec,
+    };
     return SignatureAndHashAlgorithm;
 }(TLSStruct_1.TLSStruct));
-SignatureAndHashAlgorithm.__spec = {
-    hash: HashAlgorithm.__spec,
-    signature: SignatureAlgorithm.__spec,
-};
 exports.default = SignatureAndHashAlgorithm;
 //# sourceMappingURL=SignatureAndHashAlgorithm.js.map

@@ -175,11 +175,11 @@ var CipherSuite = (function (_super) {
                 throw new Error("createMAC not implemented for " + this.cipherType + " cipher");
         }
     };
+    CipherSuite.__spec = {
+        id: TypeSpecs.uint16,
+    };
+    CipherSuite.spec = TypeSpecs.define.Struct(CipherSuite);
     return CipherSuite;
 }(TLSStruct_1.TLSStruct));
-CipherSuite.__spec = {
-    id: TypeSpecs.uint16,
-};
-CipherSuite.spec = TypeSpecs.define.Struct(CipherSuite);
 exports.CipherSuite = CipherSuite;
 //# sourceMappingURL=CipherSuite.js.map
