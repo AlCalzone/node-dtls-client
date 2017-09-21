@@ -90,10 +90,12 @@ var dtls;
          * Closes the connection
          */
         Socket.prototype.close = function (callback) {
-            this.sendAlert(new Alert_1.Alert(Alert_1.AlertLevel.warning, Alert_1.AlertDescription.close_notify));
-            this.udp.close(); // close() should flush the send queue
-            if (callback)
-                this.once("close", callback);
+            var _this = this;
+            this.sendAlert(new Alert_1.Alert(Alert_1.AlertLevel.warning, Alert_1.AlertDescription.close_notify), function (e) {
+                _this.udp.close();
+                if (callback)
+                    _this.once("close", callback);
+            });
         };
         Socket.prototype.udp_onListening = function () {
             var _this = this;
@@ -107,26 +109,31 @@ var dtls;
             this._connectionTimeout = setTimeout(function () { return _this.expectHandshake(); }, this.options.timeout);
             // also start handshake
             this.handshakeHandler = new HandshakeHandler_1.ClientHandshakeHandler(this.recordLayer, this.options, function (alert, err) {
+                var nextStep = function () {
+                    // if we have an error, terminate the connection
+                    if (err) {
+                        // something happened on the way to heaven
+                        _this.killConnection(err);
+                    }
+                    else {
+                        // when done, emit "connected" event
+                        _this._handshakeFinished = true;
+                        if (_this._connectionTimeout != null)
+                            clearTimeout(_this._connectionTimeout);
+                        _this.emit("connected");
+                        // also emit all buffered messages
+                        while (_this.bufferedMessages.length > 0) {
+                            var _a = _this.bufferedMessages.shift(), msg = _a.msg, rinfo = _a.rinfo;
+                            _this.emit("message", msg.data, rinfo);
+                        }
+                    }
+                };
                 // if we have an alert, send it to the other party
                 if (alert) {
-                    _this.sendAlert(alert);
-                }
-                // if we have an error, terminate the connection
-                if (err) {
-                    // something happened on the way to heaven
-                    _this.killConnection(err);
+                    _this.sendAlert(alert, nextStep);
                 }
                 else {
-                    // when done, emit "connected" event
-                    _this._handshakeFinished = true;
-                    if (_this._connectionTimeout != null)
-                        clearTimeout(_this._connectionTimeout);
-                    _this.emit("connected");
-                    // also emit all buffered messages
-                    while (_this.bufferedMessages.length > 0) {
-                        var _a = _this.bufferedMessages.shift(), msg = _a.msg, rinfo = _a.rinfo;
-                        _this.emit("message", msg.data, rinfo);
-                    }
+                    nextStep();
                 }
             });
         };

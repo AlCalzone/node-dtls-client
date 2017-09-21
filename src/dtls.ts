@@ -91,9 +91,13 @@ export namespace dtls {
 		 * Closes the connection
 		 */
 		public close(callback?: CloseEventHandler) {
-			this.sendAlert(new Alert(AlertLevel.warning, AlertDescription.close_notify));
-			this.udp.close(); // close() should flush the send queue
-			if (callback) this.once("close", callback);
+			this.sendAlert(
+				new Alert(AlertLevel.warning, AlertDescription.close_notify),
+				(e) => {
+					this.udp.close();
+					if (callback) this.once("close", callback);
+				}
+			);
 		}
 
 		// buffer messages while handshaking
@@ -115,24 +119,28 @@ export namespace dtls {
 			// also start handshake
 			this.handshakeHandler = new ClientHandshakeHandler(this.recordLayer, this.options,
 				(alert?: Alert, err?: Error) => {
+					const nextStep = () => {
+						// if we have an error, terminate the connection
+						if (err) {
+							// something happened on the way to heaven
+							this.killConnection(err);
+						} else {
+							// when done, emit "connected" event
+							this._handshakeFinished = true;
+							if (this._connectionTimeout != null) clearTimeout(this._connectionTimeout);
+							this.emit("connected");
+							// also emit all buffered messages
+							while (this.bufferedMessages.length > 0) {
+								const { msg, rinfo } = this.bufferedMessages.shift();
+								this.emit("message", msg.data, rinfo);
+							}
+						}
+					}
 					// if we have an alert, send it to the other party
 					if (alert) {
-						this.sendAlert(alert);
-					}
-					// if we have an error, terminate the connection
-					if (err) {
-						// something happened on the way to heaven
-						this.killConnection(err);
+						this.sendAlert(alert, nextStep);
 					} else {
-						// when done, emit "connected" event
-						this._handshakeFinished = true;
-						if (this._connectionTimeout != null) clearTimeout(this._connectionTimeout);
-						this.emit("connected");
-						// also emit all buffered messages
-						while (this.bufferedMessages.length > 0) {
-							const {msg, rinfo} = this.bufferedMessages.shift();
-							this.emit("message", msg.data, rinfo);
-						}
+						nextStep();
 					}
 				},
 			);
