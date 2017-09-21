@@ -56,11 +56,12 @@ var Alert = (function (_super) {
     Alert.createEmpty = function () {
         return new Alert(0, 0);
     };
-    Alert.__spec = {
-        level: TypeSpecs.define.Enum("uint8", AlertLevel),
-        description: TypeSpecs.define.Enum("uint8", AlertDescription),
-    };
     return Alert;
 }(TLSStruct_1.TLSStruct));
+Alert.__spec = {
+    level: TypeSpecs.define.Enum("uint8", AlertLevel),
+    description: TypeSpecs.define.Enum("uint8", AlertDescription),
+};
+Alert.spec = TypeSpecs.define.Struct(Alert);
 exports.Alert = Alert;
 //# sourceMappingURL=Alert.js.map

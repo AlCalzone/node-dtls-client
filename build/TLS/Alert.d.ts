@@ -38,6 +38,7 @@ export declare class Alert extends TLSStruct {
         level: TypeSpecs.Enum;
         description: TypeSpecs.Enum;
     };
+    static readonly spec: TypeSpecs.Struct;
     constructor(level: AlertLevel, description: AlertDescription);
     static createEmpty(): Alert;
 }

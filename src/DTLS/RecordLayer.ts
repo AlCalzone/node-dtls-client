@@ -10,6 +10,10 @@ import { DTLSCiphertext } from "./DTLSCiphertext";
 import { DTLSCompressed } from "./DTLSCompressed";
 import { DTLSPlaintext } from "./DTLSPlaintext";
 
+// enable debug output
+import * as debugPackage from "debug";
+const debug = debugPackage("node-dtls-client");
+
 export interface Epoch {
 	index: number;
 	connectionState: ConnectionState;
@@ -97,6 +101,7 @@ export class RecordLayer {
 				offset += packet.readBytes;
 			} catch (e) {
 				// TODO: cancel connection or what?
+				debug(`Error in RecordLayer.receive: ${e}`);
 				break;
 			}
 		}
