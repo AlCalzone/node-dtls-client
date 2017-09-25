@@ -52,7 +52,7 @@ The events are defined as follows:
 
 
 ## Missing features:
-- [*] alert protocol implementation (partially supported)
+- [x] alert protocol implementation (partially supported)
 - [ ] cipher suites with non-PSK key exchange algorithms: dhe_dss | dhe_rsa | rsa | dh_dss | dh_rsa | dhe_psk | rsa_psk
 - [ ] packet retransmission
 - [ ] session renegotiation
@@ -60,6 +60,9 @@ The events are defined as follows:
 
 
 ## Changelog
+
+#### 0.2.1 (2015-09-25)
+* (AlCalzone) Fix error handling while trying to connect to a non-available endpoint
 
 #### 0.2.0 (2015-09-21)
 * (AlCalzone) add partial alert protocol implementation

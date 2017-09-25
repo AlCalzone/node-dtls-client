@@ -148,13 +148,13 @@ export namespace dtls {
 		// is called after the connection timeout expired.
 		// Check the connection and throws if it is not established yet
 		private expectConnection() {
-			if (!this._udpConnected) {
+			if (!this._isClosed && !this._udpConnected) {
 				// connection timed out
 				this.killConnection(new Error("The connection timed out"));
 			}
 		}
 		private expectHandshake() {
-			if (!this._handshakeFinished) {
+			if (!this._isClosed && !this._handshakeFinished) {
 				// handshake timed out
 				this.killConnection(new Error("The DTLS handshake timed out"));
 			}
@@ -224,14 +224,17 @@ export namespace dtls {
 			this.emit("close");
 		}
 		private udp_onError(exception: Error) {
-			this.emit("error", exception);
+			this.killConnection(exception);
 		}
 
 		/** Kills the underlying UDP connection and emits an error if neccessary */
 		private killConnection(err?: Error) {
 			this._isClosed = true;
-			this.udp.removeAllListeners();
-			this.udp.close();
+			if (this._connectionTimeout != null) clearTimeout(this._connectionTimeout);
+			if (this.udp != null) {
+				this.udp.removeAllListeners();
+				this.udp.close();
+			}
 			if (err != null) this.emit("error", err);
 		}
 
