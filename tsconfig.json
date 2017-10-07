@@ -10,6 +10,7 @@
         "removeComments": false,
         "sourceMap": true,
         "sourceRoot": "src/",
-        "target": "es5"
+        "target": "es5",
+        "watch": true
     }
 }

@@ -180,6 +180,10 @@ var FragmentedHandshake = (function (_super) {
             var fragmentLength = Math.min(maxFragmentLength, totalLength - start);
             // slice and dice
             var data = Buffer.from(this.fragment.slice(start, start + fragmentLength));
+            if (data.length <= 0) {
+                // this shouldn't happen, but we don't want to introduce an infinite loop
+                throw new Error("Zero or less bytes processed while fragmenting handshake message.");
+            }
             // create the message
             fragments.push(new FragmentedHandshake(this.msg_type, totalLength, this.message_seq, start, data));
             // step forward by the actual fragment length

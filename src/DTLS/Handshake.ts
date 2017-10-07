@@ -208,6 +208,10 @@ export class FragmentedHandshake extends TLSStruct {
 			const fragmentLength = Math.min(maxFragmentLength, totalLength - start);
 			// slice and dice
 			const data = Buffer.from(this.fragment.slice(start, start + fragmentLength));
+			if (data.length <= 0) {
+				// this shouldn't happen, but we don't want to introduce an infinite loop
+				throw new Error(`Zero or less bytes processed while fragmenting handshake message.`);
+			}
 			// create the message
 			fragments.push(new FragmentedHandshake(
 				this.msg_type,

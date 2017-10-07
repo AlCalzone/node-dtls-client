@@ -61,19 +61,22 @@ The events are defined as follows:
 
 ## Changelog
 
-#### 0.2.1 (2015-09-25)
+#### 0.2.2 (2017-09-25)
+* (AlCalzone) Removed possible sources of infinite loops
+
+#### 0.2.1 (2017-09-25)
 * (AlCalzone) Fix error handling while trying to connect to a non-available endpoint
 
-#### 0.2.0 (2015-09-21)
+#### 0.2.0 (2017-09-21)
 * (AlCalzone) add partial alert protocol implementation
 
-#### 0.1.0 (2015-08-23)
+#### 0.1.0 (2017-08-23)
 * (AlCalzone) publish to npm
 
-#### 0.0.3 (2015-08-09)
+#### 0.0.3 (2017-08-09)
 * (AlCalzone) bugfixes
 
-#### 0.0.2 (2015-08-01)
+#### 0.0.2 (2017-08-01)
 * (AlCalzone) improved error and timeout handling in the socket wrapper.
 
 #### 0.0.1

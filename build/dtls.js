@@ -122,10 +122,11 @@ var dtls;
                             clearTimeout(_this._connectionTimeout);
                         _this.emit("connected");
                         // also emit all buffered messages
-                        while (_this.bufferedMessages.length > 0) {
-                            var _a = _this.bufferedMessages.shift(), msg = _a.msg, rinfo = _a.rinfo;
+                        for (var _i = 0, _a = _this.bufferedMessages; _i < _a.length; _i++) {
+                            var _b = _a[_i], msg = _b.msg, rinfo = _b.rinfo;
                             _this.emit("message", msg.data, rinfo);
                         }
+                        _this.bufferedMessages = [];
                     }
                 };
                 // if we have an alert, send it to the other party

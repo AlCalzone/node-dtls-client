@@ -60,6 +60,10 @@ var Vector = (function () {
                 i = 0;
                 while (i < length) {
                     var item = spec.itemSpec.structType.from(spec.itemSpec, buf, offset + delta);
+                    if (item.readBytes <= 0) {
+                        // this shouldn't happen, but we don't want to introduce an infinite loop
+                        throw new Error("Zero or less bytes read while parsing TLS struct.");
+                    }
                     i += item.readBytes;
                     delta += item.readBytes;
                     this.items.push(item.result); // we know this is a struct/ISerializable

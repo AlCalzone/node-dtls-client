@@ -1,6 +1,6 @@
 {
   "name": "node-dtls-client",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "DTLS protocol implementation for Node.js written in TypeScript.",
   "main": "./build/dtls.js",
   "types": "./build/dtls.d.ts",
@@ -31,6 +31,7 @@
     "url": "git+https://github.com/AlCalzone/node-dtls-client.git"
   },
   "scripts": {
+    "compile": "node_modules/.bin/tsc -p tsconfig.json",
     "test": "nyc mocha --recursive --compilers ts-node/register --require source-map-support/register --full-trace src/**/*.test.ts",
     "lint": "npm run tslint \"src/**/*.ts\"",
     "tslint": "tslint"

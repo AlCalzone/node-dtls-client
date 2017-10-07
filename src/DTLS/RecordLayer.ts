@@ -97,6 +97,10 @@ export class RecordLayer {
 		while (offset < buf.length) {
 			try {
 				const packet = DTLSCiphertext.from(DTLSCiphertext.spec, buf, offset);
+				if (packet.readBytes <= 0) {
+					// this shouldn't happen, but we don't want to introduce an infinite loop
+					throw new Error(`Zero or less bytes read while parsing DTLS packet.`);
+				}
 				packets.push(packet.result as DTLSCiphertext);
 				offset += packet.readBytes;
 			} catch (e) {

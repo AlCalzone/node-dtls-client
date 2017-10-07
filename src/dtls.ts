@@ -96,7 +96,7 @@ export namespace dtls {
 				(e) => {
 					this.udp.close();
 					if (callback) this.once("close", callback);
-				}
+				},
 			);
 		}
 
@@ -130,12 +130,12 @@ export namespace dtls {
 							if (this._connectionTimeout != null) clearTimeout(this._connectionTimeout);
 							this.emit("connected");
 							// also emit all buffered messages
-							while (this.bufferedMessages.length > 0) {
-								const { msg, rinfo } = this.bufferedMessages.shift();
+							for (const { msg, rinfo } of this.bufferedMessages) {
 								this.emit("message", msg.data, rinfo);
 							}
+							this.bufferedMessages = [];
 						}
-					}
+					};
 					// if we have an alert, send it to the other party
 					if (alert) {
 						this.sendAlert(alert, nextStep);
