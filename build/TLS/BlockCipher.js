@@ -6,7 +6,7 @@ var DTLSCompressed_1 = require("../DTLS/DTLSCompressed");
 var BlockCipherParameters = {
     "aes-128-cbc": { keyLength: 16, blockSize: 16, recordIvLength: 16 },
     "aes-256-cbc": { keyLength: 32, blockSize: 16, recordIvLength: 16 },
-    "des-ede3-cbc": { keyLength: 24, blockSize: 16, recordIvLength: 16 },
+    "des-ede3-cbc": { keyLength: 24, blockSize: 8, recordIvLength: 8 },
 };
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.

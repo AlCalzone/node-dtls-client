@@ -31,7 +31,7 @@ interface BlockCipherParameter {
 const BlockCipherParameters: { [algorithm in BlockCipherAlgorithm]?: BlockCipherParameter } = {
 	"aes-128-cbc": { keyLength: 16, blockSize: 16, recordIvLength: 16 },
 	"aes-256-cbc": { keyLength: 32, blockSize: 16, recordIvLength: 16 },
-	"des-ede3-cbc": { keyLength: 24, blockSize: 16, recordIvLength: 16 },
+	"des-ede3-cbc": { keyLength: 24, blockSize: 8, recordIvLength: 8 },
 };
 
 /**
