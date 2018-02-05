@@ -1,5 +1,6 @@
 ﻿import * as dgram from "dgram";
 import { EventEmitter } from "events";
+import { CipherSuites } from "./DTLS/CipherSuites";
 import { FragmentedHandshake } from "./DTLS/Handshake";
 import { ClientHandshakeHandler } from "./DTLS/HandshakeHandler";
 import { RecordLayer } from "./DTLS/RecordLayer";
@@ -254,6 +255,12 @@ export namespace dtls {
 		/** Time after which a connection should successfully established */
 		timeout?: number;
 		// keyContext?: any; // TODO: DTLS-security options
+		/**
+		 * The cipher suites to offer to the server.
+		 * Specify this to force certain cihper suites.
+		 * Sensible defaults are used otherwise.
+		 */
+		ciphers?: (keyof typeof CipherSuites)[];
 	}
 
 	export type ListeningEventHandler = () => void;

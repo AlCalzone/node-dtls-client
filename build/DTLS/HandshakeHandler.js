@@ -156,20 +156,21 @@ var ClientHandshakeHandler = /** @class */ (function () {
         this.recordLayer.nextEpoch.connectionState.client_random = hello.random.serialize();
         hello.session_id = Buffer.from([]);
         hello.cookie = Buffer.from([]);
-        hello.cipher_suites = new Vector_1.Vector([
-            // TODO: dynamically check which ones we can support
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_3DES_EDE_CBC_SHA,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_256_CBC_SHA,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CBC_SHA256,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_256_CBC_SHA384,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_GCM_SHA256,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_256_GCM_SHA384,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CCM,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_256_CCM,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_128_CCM_8,
-            CipherSuites_1.CipherSuites.TLS_PSK_WITH_AES_256_CCM_8,
-        ].map(function (cs) { return cs.id; }));
+        // TODO: dynamically check which ones we can support
+        var cipherSuites = this.options.ciphers || [
+            "TLS_PSK_WITH_3DES_EDE_CBC_SHA",
+            "TLS_PSK_WITH_AES_128_CBC_SHA",
+            "TLS_PSK_WITH_AES_256_CBC_SHA",
+            "TLS_PSK_WITH_AES_128_CBC_SHA256",
+            "TLS_PSK_WITH_AES_256_CBC_SHA384",
+            "TLS_PSK_WITH_AES_128_GCM_SHA256",
+            "TLS_PSK_WITH_AES_256_GCM_SHA384",
+            "TLS_PSK_WITH_AES_128_CCM",
+            "TLS_PSK_WITH_AES_256_CCM",
+            "TLS_PSK_WITH_AES_128_CCM_8",
+            "TLS_PSK_WITH_AES_256_CCM_8",
+        ];
+        hello.cipher_suites = new Vector_1.Vector(cipherSuites.map(function (cs) { return CipherSuites_1.CipherSuites[cs].id; }));
         hello.compression_methods = new Vector_1.Vector([ConnectionState_1.CompressionMethod.null]);
         hello.extensions = new Vector_1.Vector();
         this.sendFlight([hello], [
