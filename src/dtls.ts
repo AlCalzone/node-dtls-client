@@ -257,8 +257,7 @@ export namespace dtls {
 		// keyContext?: any; // TODO: DTLS-security options
 		/**
 		 * The cipher suites to offer to the server.
-		 * Specify this to force certain cihper suites.
-		 * Sensible defaults are used otherwise.
+		 * All supported cipher suites are used if not specified otherwise.
 		 */
 		ciphers?: (keyof typeof CipherSuites)[];
 	}
