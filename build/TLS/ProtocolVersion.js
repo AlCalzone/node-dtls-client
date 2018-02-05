@@ -13,7 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var TLSStruct_1 = require("./TLSStruct");
 var TypeSpecs = require("./TypeSpecs");
 // TLS -> Anpassen für DTLS!!!
-var ProtocolVersion = (function (_super) {
+var ProtocolVersion = /** @class */ (function (_super) {
     __extends(ProtocolVersion, _super);
     /**
      *
@@ -31,11 +31,10 @@ var ProtocolVersion = (function (_super) {
     ProtocolVersion.createEmpty = function () {
         return new ProtocolVersion();
     };
+    ProtocolVersion.__spec = {
+        major: TypeSpecs.uint8,
+        minor: TypeSpecs.uint8,
+    };
     return ProtocolVersion;
 }(TLSStruct_1.TLSStruct));
-ProtocolVersion.__spec = {
-    major: TypeSpecs.uint8,
-    minor: TypeSpecs.uint8,
-};
 exports.ProtocolVersion = ProtocolVersion;
-//# sourceMappingURL=ProtocolVersion.js.map

@@ -26,7 +26,7 @@ var AEADCipherParameters = {
     "aes-128-gcm": { interface: node_aead_crypto_1.gcm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
     "aes-256-gcm": { interface: node_aead_crypto_1.gcm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
 };
-var AdditionalData = (function (_super) {
+var AdditionalData = /** @class */ (function (_super) {
     __extends(AdditionalData, _super);
     function AdditionalData(epoch, sequence_number, type, version, fragment_length) {
         var _this = _super.call(this, AdditionalData.__spec) || this;
@@ -40,15 +40,15 @@ var AdditionalData = (function (_super) {
     AdditionalData.createEmpty = function () {
         return new AdditionalData(null, null, null, null, null);
     };
+    AdditionalData.__spec = {
+        epoch: TypeSpecs.uint16,
+        sequence_number: TypeSpecs.uint48,
+        type: ContentType_1.ContentType.__spec,
+        version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+        fragment_length: TypeSpecs.uint16,
+    };
     return AdditionalData;
 }(TLSStruct_1.TLSStruct));
-AdditionalData.__spec = {
-    epoch: TypeSpecs.uint16,
-    sequence_number: TypeSpecs.uint48,
-    type: ContentType_1.ContentType.__spec,
-    version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    fragment_length: TypeSpecs.uint16,
-};
 /**
  * Creates an AEAD cipher delegate used to encrypt packet fragments.
  * @param algorithm - The AEAD cipher algorithm to be used
@@ -127,4 +127,3 @@ function createDecipher(algorithm) {
     return ret;
 }
 exports.createDecipher = createDecipher;
-//# sourceMappingURL=AEADCipher.js.map

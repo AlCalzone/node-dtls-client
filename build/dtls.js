@@ -42,7 +42,7 @@ var dtls;
     /**
      * DTLS-secured UDP socket. Can be used as a drop-in replacement for dgram.Socket
      */
-    var Socket = (function (_super) {
+    var Socket = /** @class */ (function (_super) {
         __extends(Socket, _super);
         /**
          * INTERNAL USE, DON'T CALL DIRECTLY. use createSocket instead!
@@ -232,4 +232,3 @@ var dtls;
     }(events_1.EventEmitter));
     dtls.Socket = Socket;
 })(dtls = exports.dtls || (exports.dtls = {}));
-//# sourceMappingURL=dtls.js.map

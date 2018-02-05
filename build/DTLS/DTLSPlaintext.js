@@ -14,7 +14,7 @@ var ContentType_1 = require("../TLS/ContentType");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var TLSStruct_1 = require("../TLS/TLSStruct");
 var TypeSpecs = require("../TLS/TypeSpecs");
-var DTLSPlaintext = (function (_super) {
+var DTLSPlaintext = /** @class */ (function (_super) {
     __extends(DTLSPlaintext, _super);
     function DTLSPlaintext(type, version, epoch, sequence_number, fragment) {
         if (version === void 0) { version = new ProtocolVersion_1.ProtocolVersion(); }
@@ -29,16 +29,15 @@ var DTLSPlaintext = (function (_super) {
     DTLSPlaintext.createEmpty = function () {
         return new DTLSPlaintext(null, null, null, null, null);
     };
+    DTLSPlaintext.__spec = {
+        type: TypeSpecs.define.Struct(ContentType_1.ContentType),
+        version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+        epoch: TypeSpecs.uint16,
+        sequence_number: TypeSpecs.uint48,
+        // length field is implied in the variable length vector
+        fragment: TypeSpecs.define.Buffer(0, Math.pow(2, 14)),
+    };
+    DTLSPlaintext.spec = TypeSpecs.define.Struct(DTLSPlaintext);
     return DTLSPlaintext;
 }(TLSStruct_1.TLSStruct));
-DTLSPlaintext.__spec = {
-    type: TypeSpecs.define.Struct(ContentType_1.ContentType),
-    version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    epoch: TypeSpecs.uint16,
-    sequence_number: TypeSpecs.uint48,
-    // length field is implied in the variable length vector
-    fragment: TypeSpecs.define.Buffer(0, Math.pow(2, 14)),
-};
-DTLSPlaintext.spec = TypeSpecs.define.Struct(DTLSPlaintext);
 exports.DTLSPlaintext = DTLSPlaintext;
-//# sourceMappingURL=DTLSPlaintext.js.map

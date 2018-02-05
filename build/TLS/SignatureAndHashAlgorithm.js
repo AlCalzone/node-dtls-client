@@ -35,7 +35,7 @@ var SignatureAlgorithm;
 (function (SignatureAlgorithm) {
     SignatureAlgorithm.__spec = TypeSpecs.define.Enum("uint8", SignatureAlgorithm);
 })(SignatureAlgorithm = exports.SignatureAlgorithm || (exports.SignatureAlgorithm = {}));
-var SignatureAndHashAlgorithm = (function (_super) {
+var SignatureAndHashAlgorithm = /** @class */ (function (_super) {
     __extends(SignatureAndHashAlgorithm, _super);
     function SignatureAndHashAlgorithm(hash, signature) {
         var _this = _super.call(this, SignatureAndHashAlgorithm.__spec) || this;
@@ -46,11 +46,10 @@ var SignatureAndHashAlgorithm = (function (_super) {
     SignatureAndHashAlgorithm.createEmpty = function () {
         return new SignatureAndHashAlgorithm(null, null);
     };
+    SignatureAndHashAlgorithm.__spec = {
+        hash: HashAlgorithm.__spec,
+        signature: SignatureAlgorithm.__spec,
+    };
     return SignatureAndHashAlgorithm;
 }(TLSStruct_1.TLSStruct));
-SignatureAndHashAlgorithm.__spec = {
-    hash: HashAlgorithm.__spec,
-    signature: SignatureAlgorithm.__spec,
-};
 exports.default = SignatureAndHashAlgorithm;
-//# sourceMappingURL=SignatureAndHashAlgorithm.js.map

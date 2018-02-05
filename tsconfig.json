@@ -8,8 +8,8 @@
         "noImplicitAny": false,
         "outDir": "build/",
         "removeComments": false,
-        "sourceMap": true,
-        "sourceRoot": "src/",
+        //"sourceMap": false,
+        //"sourceRoot": "src/",
         "target": "es5",
         "watch": true
     }

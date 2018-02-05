@@ -5,4 +5,3 @@ var SessionID;
 (function (SessionID) {
     SessionID.spec = TypeSpecs.define.Buffer(0, 32);
 })(SessionID = exports.SessionID || (exports.SessionID = {}));
-//# sourceMappingURL=SessionID.js.map

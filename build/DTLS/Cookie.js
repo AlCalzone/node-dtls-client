@@ -5,4 +5,3 @@ var Cookie;
 (function (Cookie) {
     Cookie.spec = TypeSpecs.define.Buffer(0, Math.pow(2, 8) - 1);
 })(Cookie = exports.Cookie || (exports.Cookie = {}));
-//# sourceMappingURL=Cookie.js.map

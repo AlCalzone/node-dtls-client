@@ -80,4 +80,3 @@ function PRF_factory(algorithm) {
     ret.hashFunction = Hash[algorithm];
     return ret;
 }
-//# sourceMappingURL=PRF.js.map

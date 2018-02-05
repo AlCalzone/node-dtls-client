@@ -13,7 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var crypto = require("crypto");
 var TLSStruct_1 = require("./TLSStruct");
 var TypeSpecs = require("./TypeSpecs");
-var Random = (function (_super) {
+var Random = /** @class */ (function (_super) {
     __extends(Random, _super);
     function Random(gmt_unix_time, random_bytes) {
         var _this = _super.call(this, Random.__spec) || this;
@@ -30,11 +30,10 @@ var Random = (function (_super) {
     Random.createEmpty = function () {
         return new Random(null, null);
     };
+    Random.__spec = {
+        gmt_unix_time: TypeSpecs.uint32,
+        random_bytes: TypeSpecs.define.Buffer(28),
+    };
     return Random;
 }(TLSStruct_1.TLSStruct));
-Random.__spec = {
-    gmt_unix_time: TypeSpecs.uint32,
-    random_bytes: TypeSpecs.define.Buffer(28),
-};
 exports.Random = Random;
-//# sourceMappingURL=Random.js.map

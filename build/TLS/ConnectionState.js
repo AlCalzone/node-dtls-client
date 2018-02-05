@@ -15,7 +15,7 @@ var CompressionMethod;
 var master_secret_length = 48;
 var client_random_length = 32;
 var server_random_length = 32;
-var ConnectionState = (function () {
+var ConnectionState = /** @class */ (function () {
     function ConnectionState(values) {
         this.entity = "client";
         this.cipherSuite = CipherSuites_1.CipherSuites.TLS_NULL_WITH_NULL_NULL;
@@ -83,4 +83,3 @@ var ConnectionState = (function () {
     return ConnectionState;
 }());
 exports.ConnectionState = ConnectionState;
-//# sourceMappingURL=ConnectionState.js.map

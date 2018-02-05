@@ -15,7 +15,7 @@ var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var TLSStruct_1 = require("../TLS/TLSStruct");
 var TypeSpecs = require("../TLS/TypeSpecs");
 var DTLSPlaintext_1 = require("./DTLSPlaintext");
-var DTLSCompressed = (function (_super) {
+var DTLSCompressed = /** @class */ (function (_super) {
     __extends(DTLSCompressed, _super);
     function DTLSCompressed(type, version, epoch, sequence_number, fragment) {
         if (version === void 0) { version = new ProtocolVersion_1.ProtocolVersion(); }
@@ -51,19 +51,19 @@ var DTLSCompressed = (function (_super) {
     DTLSCompressed.prototype.computeMACHeader = function () {
         return (new MACHeader(this.epoch, this.sequence_number, this.type, this.version, this.fragment.length)).serialize();
     };
+    DTLSCompressed.__spec = {
+        type: ContentType_1.ContentType.__spec,
+        version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+        epoch: TypeSpecs.uint16,
+        sequence_number: TypeSpecs.uint48,
+        // length field is implied in the variable length vector
+        fragment: TypeSpecs.define.Buffer(0, 1024 + Math.pow(2, 14)),
+    };
+    DTLSCompressed.spec = TypeSpecs.define.Struct(DTLSCompressed);
     return DTLSCompressed;
 }(TLSStruct_1.TLSStruct));
-DTLSCompressed.__spec = {
-    type: ContentType_1.ContentType.__spec,
-    version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    epoch: TypeSpecs.uint16,
-    sequence_number: TypeSpecs.uint48,
-    // length field is implied in the variable length vector
-    fragment: TypeSpecs.define.Buffer(0, 1024 + Math.pow(2, 14)),
-};
-DTLSCompressed.spec = TypeSpecs.define.Struct(DTLSCompressed);
 exports.DTLSCompressed = DTLSCompressed;
-var MACHeader = (function (_super) {
+var MACHeader = /** @class */ (function (_super) {
     __extends(MACHeader, _super);
     function MACHeader(epoch, sequence_number, type, version, fragment_length) {
         var _this = _super.call(this, MACHeader.__spec) || this;
@@ -77,14 +77,13 @@ var MACHeader = (function (_super) {
     MACHeader.createEmpty = function () {
         return new MACHeader(null, null, null, null, null);
     };
+    MACHeader.__spec = {
+        epoch: TypeSpecs.uint16,
+        sequence_number: TypeSpecs.uint48,
+        type: ContentType_1.ContentType.__spec,
+        version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+        fragment_length: TypeSpecs.uint16,
+    };
     return MACHeader;
 }(TLSStruct_1.TLSStruct));
-MACHeader.__spec = {
-    epoch: TypeSpecs.uint16,
-    sequence_number: TypeSpecs.uint48,
-    type: ContentType_1.ContentType.__spec,
-    version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    fragment_length: TypeSpecs.uint16,
-};
 exports.MACHeader = MACHeader;
-//# sourceMappingURL=DTLSCompressed.js.map

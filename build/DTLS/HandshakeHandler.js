@@ -11,7 +11,7 @@ var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var Random_1 = require("../TLS/Random");
 var Vector_1 = require("../TLS/Vector");
 var Handshake = require("./Handshake");
-var ClientHandshakeHandler = (function () {
+var ClientHandshakeHandler = /** @class */ (function () {
     function ClientHandshakeHandler(recordLayer, options, finishedCallback) {
         var _this = this;
         this.recordLayer = recordLayer;
@@ -428,4 +428,3 @@ exports.ClientHandshakeHandler = ClientHandshakeHandler;
          Figure 2. Message Flights for Session-Resuming Handshake
                            (No Cookie Exchange)
 */
-//# sourceMappingURL=HandshakeHandler.js.map

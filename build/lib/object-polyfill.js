@@ -110,4 +110,3 @@ function extend(target, source) {
     return target;
 }
 exports.extend = extend;
-//# sourceMappingURL=object-polyfill.js.map

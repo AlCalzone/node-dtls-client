@@ -74,4 +74,3 @@ for (var _i = 0, _a = Object.keys(exports.CipherSuites); _i < _a.length; _i++) {
         exports.CipherSuites[cs.id] = cs;
     }
 }
-//# sourceMappingURL=CipherSuites.js.map

@@ -11,4 +11,3 @@ var ContentType;
 (function (ContentType) {
     ContentType.__spec = TypeSpecs.define.Enum("uint8", ContentType);
 })(ContentType = exports.ContentType || (exports.ContentType = {}));
-//# sourceMappingURL=ContentType.js.map

@@ -45,7 +45,7 @@ var AlertDescription;
     AlertDescription[AlertDescription["no_renegotiation"] = 100] = "no_renegotiation";
     AlertDescription[AlertDescription["unsupported_extension"] = 110] = "unsupported_extension";
 })(AlertDescription = exports.AlertDescription || (exports.AlertDescription = {}));
-var Alert = (function (_super) {
+var Alert = /** @class */ (function (_super) {
     __extends(Alert, _super);
     function Alert(level, description) {
         var _this = _super.call(this, Alert.__spec) || this;
@@ -56,12 +56,11 @@ var Alert = (function (_super) {
     Alert.createEmpty = function () {
         return new Alert(0, 0);
     };
+    Alert.__spec = {
+        level: TypeSpecs.define.Enum("uint8", AlertLevel),
+        description: TypeSpecs.define.Enum("uint8", AlertDescription),
+    };
+    Alert.spec = TypeSpecs.define.Struct(Alert);
     return Alert;
 }(TLSStruct_1.TLSStruct));
-Alert.__spec = {
-    level: TypeSpecs.define.Enum("uint8", AlertLevel),
-    description: TypeSpecs.define.Enum("uint8", AlertDescription),
-};
-Alert.spec = TypeSpecs.define.Struct(Alert);
 exports.Alert = Alert;
-//# sourceMappingURL=Alert.js.map

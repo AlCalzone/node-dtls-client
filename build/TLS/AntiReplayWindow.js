@@ -5,7 +5,7 @@ var INT_SIZE = 32; // in JS, bitwise operators use 32bit ints
 /**
  * Provides protection against replay attacks by remembering received packets in a sliding window
  */
-var AntiReplayWindow = (function () {
+var AntiReplayWindow = /** @class */ (function () {
     function AntiReplayWindow() {
         // window bitmap looks as follows:
         //  v- upper end                    lower end --v
@@ -100,4 +100,3 @@ var AntiReplayWindow = (function () {
     return AntiReplayWindow;
 }());
 exports.AntiReplayWindow = AntiReplayWindow;
-//# sourceMappingURL=AntiReplayWindow.js.map

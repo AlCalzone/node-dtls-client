@@ -25,4 +25,3 @@ function bufferToByteArray(buf, offset) {
     return Array.prototype.slice.apply(buf, [offset]);
 }
 exports.bufferToByteArray = bufferToByteArray;
-//# sourceMappingURL=BitConverter.js.map

@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var BitConverter_1 = require("../lib/BitConverter");
 var util_1 = require("../lib/util");
 var TypeSpecs = require("./TypeSpecs");
-var Vector = (function () {
+var Vector = /** @class */ (function () {
     function Vector(items) {
         if (items === void 0) { items = []; }
         this.items = items;
@@ -85,4 +85,3 @@ var Vector = (function () {
     return Vector;
 }());
 exports.Vector = Vector;
-//# sourceMappingURL=Vector.js.map

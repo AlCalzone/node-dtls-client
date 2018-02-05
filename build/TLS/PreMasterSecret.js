@@ -12,7 +12,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var TLSStruct_1 = require("./TLSStruct");
 var TypeSpecs = require("./TypeSpecs");
-var PreMasterSecret = (function (_super) {
+var PreMasterSecret = /** @class */ (function (_super) {
     __extends(PreMasterSecret, _super);
     function PreMasterSecret(other_secret, psk) {
         var _this = _super.call(this, PreMasterSecret.__spec) || this;
@@ -27,11 +27,10 @@ var PreMasterSecret = (function (_super) {
     PreMasterSecret.createEmpty = function () {
         return new PreMasterSecret(null, null);
     };
+    PreMasterSecret.__spec = {
+        other_secret: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
+        psk: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
+    };
     return PreMasterSecret;
 }(TLSStruct_1.TLSStruct));
-PreMasterSecret.__spec = {
-    other_secret: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
-    psk: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
-};
 exports.PreMasterSecret = PreMasterSecret;
-//# sourceMappingURL=PreMasterSecret.js.map

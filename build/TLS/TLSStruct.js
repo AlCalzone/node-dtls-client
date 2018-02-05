@@ -8,7 +8,7 @@ var Vector_1 = require("./Vector");
 /**
  * Basisklasse für TLS-Objekte
  */
-var TLSStruct = (function () {
+var TLSStruct = /** @class */ (function () {
     function TLSStruct(spec, initial) {
         this.propertyDefinitions = [];
         // Eigenschaften aus Spec kopieren
@@ -131,4 +131,3 @@ var TLSStruct = (function () {
     return TLSStruct;
 }());
 exports.TLSStruct = TLSStruct;
-//# sourceMappingURL=TLSStruct.js.map

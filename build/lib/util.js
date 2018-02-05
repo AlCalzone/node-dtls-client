@@ -16,4 +16,3 @@ function fitToWholeBytes(value) {
     return ret;
 }
 exports.fitToWholeBytes = fitToWholeBytes;
-//# sourceMappingURL=util.js.map
