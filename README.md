@@ -12,8 +12,8 @@ This libary's main goal is to allow using protocols that *require* DTLS.
 
 ## Usage
 
-Establish a secure connection:
-```
+### Establish a secure connection:
+```js
 var dtls = require("node-dtls-client");
 
 const socket = dtls
@@ -27,19 +27,35 @@ const socket = dtls
 	;
 ```
 
-The DtlsOptions object looks as follows:
-```
+The `DtlsOptions` object looks as follows:
+```js
 {
 	type: "udp4",
 	address: "ip or host",
 	port: 5684,
 	psk: { "psk_hint": "PSK" },
-	timeout: 1000 // in ms, optional, minimum 100, default 1000
+	timeout: 1000, // in ms, optional, minimum 100, default 1000
+	ciphers: [ /* ... */ ] // optional array of (D)TLS cipher suites, e.g. ["TLS_PSK_WITH_AES_128_CCM"]
 }
 ```
 
-Send some data (after the `connected` event was received):
-```
+The `ciphers` property allows specifying which cipher suites should be advertised as supported. If this property is not provided, all supported ciphers are used by default. Use this if you want to force specific cipher suites for the communication.  
+The currently supported cipher suites are limited to those with PSK key exchange:
+
+* `"TLS_PSK_WITH_3DES_EDE_CBC_SHA"`
+* `"TLS_PSK_WITH_AES_128_CBC_SHA"`
+* `"TLS_PSK_WITH_AES_256_CBC_SHA"`
+* `"TLS_PSK_WITH_AES_128_CBC_SHA256"`
+* `"TLS_PSK_WITH_AES_256_CBC_SHA384"`
+* `"TLS_PSK_WITH_AES_128_GCM_SHA256"`
+* `"TLS_PSK_WITH_AES_256_GCM_SHA384"`
+* `"TLS_PSK_WITH_AES_128_CCM_8"`
+* `"TLS_PSK_WITH_AES_256_CCM_8"`
+
+**PRs for other key exchange methods are welcome!**
+
+### Send some data (after the `connected` event was received):
+```js
 socket.send(data /* Buffer */, [callback]);
 ```
 
@@ -50,36 +66,40 @@ The events are defined as follows:
 - `close`: The connection was closed successfully.
 
 
-
 ## Missing features:
 - [x] alert protocol implementation (partially supported)
-- [ ] cipher suites with non-PSK key exchange algorithms: dhe_dss | dhe_rsa | rsa | dh_dss | dh_rsa | dhe_psk | rsa_psk
+- [ ] cipher suites with non-PSK key exchange algorithms: `dhe_dss` | `dhe_rsa` | `rsa` | `dh_dss` | `dh_rsa` | `dhe_psk` | `rsa_psk`
 - [ ] packet retransmission
 - [ ] session renegotiation
 - [ ] other compression algorithms except NULL
 
+**PRs adding support for these are welcome!**
 
 ## Changelog
 
-#### 0.2.2 (2017-09-25)
+### NEXT (2018-02-05)
+* (AlCalzone) Fixed definition of AES-256-CCM and -GCM cipher suites
+* (AlCalzone) Added the possibility to limit the cipher suites to use.
+
+### 0.2.2 (2017-09-25)
 * (AlCalzone) Removed possible sources of infinite loops
 
-#### 0.2.1 (2017-09-25)
+### 0.2.1 (2017-09-25)
 * (AlCalzone) Fix error handling while trying to connect to a non-available endpoint
 
-#### 0.2.0 (2017-09-21)
+### 0.2.0 (2017-09-21)
 * (AlCalzone) add partial alert protocol implementation
 
-#### 0.1.0 (2017-08-23)
+### 0.1.0 (2017-08-23)
 * (AlCalzone) publish to npm
 
-#### 0.0.3 (2017-08-09)
+### 0.0.3 (2017-08-09)
 * (AlCalzone) bugfixes
 
-#### 0.0.2 (2017-08-01)
+### 0.0.2 (2017-08-01)
 * (AlCalzone) improved error and timeout handling in the socket wrapper.
 
-#### 0.0.1
+### 0.0.1
 * (AlCalzone) initial release. 
 
 
