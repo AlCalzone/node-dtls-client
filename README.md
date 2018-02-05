@@ -77,9 +77,9 @@ The events are defined as follows:
 
 ## Changelog
 
-### NEXT (2018-02-05)
-* (AlCalzone) Fixed definition of AES-256-CCM and -GCM cipher suites
-* (AlCalzone) Added the possibility to limit the cipher suites to use.
+### 0.3.0 (2018-02-05)
+* (AlCalzone) Fixed cipher parameters of 3DES and 256-bit AES (AEAD) cipher suites.
+* (AlCalzone) Added the possibility to limit the cipher suites to use
 
 ### 0.2.2 (2017-09-25)
 * (AlCalzone) Removed possible sources of infinite loops
@@ -102,6 +102,8 @@ The events are defined as follows:
 ### 0.0.1
 * (AlCalzone) initial release. 
 
+## Contributors
+* https://github.com/thoukydides - Thanks for noticing the errors in the 3DES and 256-bit AES (AEAD) cipher suites.
 
 ## License
 The MIT License (MIT)
