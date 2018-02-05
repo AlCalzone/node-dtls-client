@@ -21,10 +21,10 @@ var node_aead_crypto_1 = require("node-aead-crypto");
 var AEADCipherParameters = {
     "aes-128-ccm": { interface: node_aead_crypto_1.ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
     "aes-128-ccm8": { interface: node_aead_crypto_1.ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
-    "aes-256-ccm": { interface: node_aead_crypto_1.ccm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
-    "aes-256-ccm8": { interface: node_aead_crypto_1.ccm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
+    "aes-256-ccm": { interface: node_aead_crypto_1.ccm, keyLength: 32, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
+    "aes-256-ccm8": { interface: node_aead_crypto_1.ccm, keyLength: 32, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
     "aes-128-gcm": { interface: node_aead_crypto_1.gcm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
-    "aes-256-gcm": { interface: node_aead_crypto_1.gcm, keyLength: 16, blockSize: 32, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
+    "aes-256-gcm": { interface: node_aead_crypto_1.gcm, keyLength: 32, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
 };
 var AdditionalData = /** @class */ (function (_super) {
     __extends(AdditionalData, _super);
