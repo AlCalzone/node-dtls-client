@@ -12,5 +12,14 @@
         //"sourceRoot": "src/",
         "target": "es5",
         "watch": true
-    }
+    },
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "src/**/*.test.ts",
+        "build/**",
+        "node_modules/**"
+    ]
+    
 }
