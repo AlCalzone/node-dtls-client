@@ -208,21 +208,28 @@ var dtls;
             }
         };
         Socket.prototype.udp_onClose = function () {
-            this._isClosed = true;
             // we no longer want to receive events
             this.udp.removeAllListeners();
-            this.emit("close");
+            if (!this._isClosed) {
+                this._isClosed = true;
+                this.emit("close");
+            }
         };
         Socket.prototype.udp_onError = function (exception) {
             this.killConnection(exception);
         };
         /** Kills the underlying UDP connection and emits an error if neccessary */
         Socket.prototype.killConnection = function (err) {
+            if (this._isClosed)
+                return;
             this._isClosed = true;
             if (this._connectionTimeout != null)
                 clearTimeout(this._connectionTimeout);
             if (this.udp != null) {
-                this.udp.removeAllListeners();
+                // keep the error handler around or we get spurious ENOTFOUND errors unhandled
+                this.udp.removeAllListeners("listening");
+                this.udp.removeAllListeners("message");
+                this.udp.removeAllListeners("close");
                 this.udp.close();
             }
             if (err != null)

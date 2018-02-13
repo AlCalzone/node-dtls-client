@@ -77,6 +77,9 @@ The events are defined as follows:
 
 ## Changelog
 
+### 0.3.1 (2018-02-13)
+* (AlCalzone) Suppress spurious errors from DNS lookup after the connection has already timed out
+
 ### 0.3.0 (2018-02-05)
 * (AlCalzone) Fixed cipher parameters of 3DES and 256-bit AES (AEAD) cipher suites.
 * (AlCalzone) Added the possibility to limit the cipher suites to use
