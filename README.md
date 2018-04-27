@@ -77,6 +77,9 @@ The events are defined as follows:
 
 ## Changelog
 
+### 0.3.2 (2018-04-27)
+* (AlCalzone) Support NodeJS 10
+
 ### 0.3.1 (2018-02-13)
 * (AlCalzone) Suppress spurious errors from DNS lookup after the connection has already timed out
 
