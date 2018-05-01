@@ -62,11 +62,11 @@ jobs:
           - v1-dependencies-node6-{{ checksum "package.json" }}
 
       - run:
-          name: Install Dependencies
-          command: npm install
-      - run:
           name: Remove unnecessary Dependencies
           command: npm ls || true ; npm prune
+      - run:
+          name: Install Dependencies
+          command: npm install
 
       - save_cache:
           paths:
