@@ -3,6 +3,7 @@
 *.sln
 tsconfig.json
 tslint.json
+test/
 tests/
 src/
 build/**/*.map
@@ -13,3 +14,6 @@ coverage/
 rfc/
 bin/
 obj/
+maintenance/
+.travis.yml
+.circleci/
