@@ -2,10 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const crypto = require("crypto");
 const semver = require("semver");
-let CCMInterface;
-exports.ccm = CCMInterface;
-let GCMInterface;
-exports.gcm = GCMInterface;
 function encryptNative(mode, key, iv, plaintext, additionalData, authTagLength) {
     // prepare encryption
     const algorithm = `aes-${key.length * 8}-${mode}`;
@@ -38,18 +34,24 @@ function decryptNative(mode, key, iv, ciphertext, additionalData, authTag) {
     catch (e) { /* nothing to do */ }
     return { plaintext, auth_ok };
 }
+let importedCCM;
+let importedGCM;
+let nativeCCM;
+let nativeGCM;
 if (semver.satisfies(process.version, ">=10")) {
     // We can use the native methods
-    exports.ccm = CCMInterface = {
+    nativeCCM = {
         encrypt: encryptNative.bind(undefined, "ccm"),
         decrypt: decryptNative.bind(undefined, "ccm"),
     };
-    exports.gcm = GCMInterface = {
+    nativeGCM = {
         encrypt: encryptNative.bind(undefined, "gcm"),
         decrypt: decryptNative.bind(undefined, "gcm"),
     };
 }
 else {
     // import from the node-aead-crypto module
-    ({ ccm: CCMInterface, gcm: GCMInterface } = require("node-aead-crypto"));
+    ({ ccm: importedCCM, gcm: importedGCM } = require("node-aead-crypto"));
 }
+exports.ccm = importedCCM || nativeCCM;
+exports.gcm = importedGCM || nativeGCM;

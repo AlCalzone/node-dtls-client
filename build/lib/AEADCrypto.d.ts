@@ -16,6 +16,5 @@ export interface AEADEncryptionInterface {
     encrypt: (key: Buffer, iv: Buffer, plaintext: Buffer, additionalData: Buffer, authTagLength?: number) => EncryptionResult;
     decrypt: (key: Buffer, iv: Buffer, ciphertext: Buffer, additionalData: Buffer, authTag: Buffer) => DecryptionResult;
 }
-declare let CCMInterface: AEADEncryptionInterface;
-declare let GCMInterface: AEADEncryptionInterface;
-export { CCMInterface as ccm, GCMInterface as gcm };
+export declare const ccm: AEADEncryptionInterface;
+export declare const gcm: AEADEncryptionInterface;
