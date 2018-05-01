@@ -23,7 +23,7 @@ const { spawn } = require("child_process");
 
 const npmCommand = /^win/.test(process.platform) ? "npm.cmd" : "npm";
 // @ts-ignore The last argument is available starting with NodeJS 8
-const install = spawn(npmCommand, ["i", `node-aead-crypto@${desiredVersion}`], {windowsHide: true});
+const install = spawn(npmCommand, ["i", "--save", `node-aead-crypto@${desiredVersion}`], {windowsHide: true});
 install.stdout.pipe(process.stdout);
 install.stderr.pipe(process.stderr);
 install.on("close", (code, signal) => {
