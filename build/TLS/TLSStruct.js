@@ -1,20 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var BitConverter_1 = require("../lib/BitConverter");
-var object_polyfill_1 = require("../lib/object-polyfill");
-var util = require("../lib/util");
-var TypeSpecs = require("./TypeSpecs");
-var Vector_1 = require("./Vector");
+const BitConverter_1 = require("../lib/BitConverter");
+const object_polyfill_1 = require("../lib/object-polyfill");
+const util = require("../lib/util");
+const TypeSpecs = require("./TypeSpecs");
+const Vector_1 = require("./Vector");
 /**
  * Basisklasse für TLS-Objekte
  */
-var TLSStruct = /** @class */ (function () {
-    function TLSStruct(spec, initial) {
+class TLSStruct {
+    constructor(spec, initial) {
         this.propertyDefinitions = [];
         // Eigenschaften aus Spec kopieren
         this.__spec__ = spec;
-        for (var _i = 0, _a = object_polyfill_1.entries(spec); _i < _a.length; _i++) {
-            var _b = _a[_i], key = _b[0], value = _b[1];
+        for (const [key, value] of object_polyfill_1.entries(spec)) {
             this.propertyDefinitions.push({
                 name: key,
                 type: value,
@@ -30,19 +29,17 @@ var TLSStruct = /** @class */ (function () {
      * @param buf - Der Buffer, aus dem gelesen werden soll
      * @param offset - Der Index, ab dem gelesen werden soll
      */
-    TLSStruct.prototype.deserialize = function (buf, offset) {
-        if (offset === void 0) { offset = 0; }
-        var delta = 0;
-        for (var _i = 0, _a = this.propertyDefinitions; _i < _a.length; _i++) {
-            var def = _a[_i];
+    deserialize(buf, offset = 0) {
+        let delta = 0;
+        for (const def of this.propertyDefinitions) {
             // Welche Eigenschaft wird ausgelesen?
-            var propName = def.name;
-            var type = def.type;
-            var result = void 0;
+            const propName = def.name;
+            const type = def.type;
+            let result;
             switch (type.type) {
                 case "number":
                 case "enum":
-                    var bitSize = TypeSpecs.getPrimitiveSize(type);
+                    const bitSize = TypeSpecs.getPrimitiveSize(type);
                     result = { result: BitConverter_1.bufferToNumber(buf, bitSize, offset + delta), readBytes: bitSize / 8 };
                     break;
                 case "vector":
@@ -54,24 +51,24 @@ var TLSStruct = /** @class */ (function () {
                 case "buffer":
                     if (type.maxLength === Number.POSITIVE_INFINITY) {
                         // unbound Buffer, copy the remaining bytes
-                        var ret = Buffer.allocUnsafe(buf.length - (offset + delta));
+                        const ret = Buffer.allocUnsafe(buf.length - (offset + delta));
                         buf.copy(ret, 0, offset + delta);
                         result = { result: ret, readBytes: ret.length };
                     }
                     else {
                         // normal Buffer (essentially Vector<uint8>)
-                        var length_1 = type.maxLength;
-                        var lengthBytes = 0;
+                        let length = type.maxLength;
+                        let lengthBytes = 0;
                         // for variable length Buffers, read the actual length first
                         if (TypeSpecs.Buffer.isVariableLength(type)) {
-                            var lengthBits = (8 * util.fitToWholeBytes(type.maxLength));
-                            length_1 = BitConverter_1.bufferToNumber(buf, lengthBits, offset + delta);
+                            const lengthBits = (8 * util.fitToWholeBytes(type.maxLength));
+                            length = BitConverter_1.bufferToNumber(buf, lengthBits, offset + delta);
                             lengthBytes += lengthBits / 8;
                         }
                         // copy the data into the new buffer
-                        var ret = Buffer.allocUnsafe(length_1);
-                        buf.copy(ret, 0, offset + delta + lengthBytes, offset + delta + lengthBytes + length_1);
-                        result = { result: ret, readBytes: lengthBytes + length_1 };
+                        const ret = Buffer.allocUnsafe(length);
+                        buf.copy(ret, 0, offset + delta + lengthBytes, offset + delta + lengthBytes + length);
+                        result = { result: ret, readBytes: lengthBytes + length };
                     }
                     break;
             }
@@ -80,32 +77,31 @@ var TLSStruct = /** @class */ (function () {
             delta += result.readBytes;
         }
         return delta;
-    };
+    }
     /**
      * Erzeugt eine TLSStruct der angegebenen Definition aus einem Byte-Array
      * @param spec - Definiert, wie das deserialisierte Objekt aufgebaut ist
      * @param arr - Das Array, aus dem gelesen werden soll
      * @param offset - Der Index, ab dem gelesen werden soll
      */
-    TLSStruct.from = function (spec, buf, offset) {
-        var ret = spec.structType.createEmpty();
+    static from(spec, buf, offset) {
+        const ret = spec.structType.createEmpty();
         return { result: ret, readBytes: ret.deserialize(buf, offset) };
-    };
+    }
     /**
      * Serialisiert das Objekt in ein ein Byte-Array
      */
-    TLSStruct.prototype.serialize = function () {
-        var _this = this;
-        var ret = this.propertyDefinitions
-            .map(function (def) {
+    serialize() {
+        const ret = this.propertyDefinitions
+            .map(def => {
             // Welche Eigenschaft wird ausgelesen?
-            var propName = def.name;
-            var type = def.type;
-            var propValue = _this[propName];
+            const propName = def.name;
+            const type = def.type;
+            const propValue = this[propName];
             switch (type.type) {
                 case "number":
                 case "enum":
-                    var bitSize = TypeSpecs.getPrimitiveSize(type);
+                    const bitSize = TypeSpecs.getPrimitiveSize(type);
                     return BitConverter_1.numberToBuffer(propValue, bitSize);
                 case "vector":
                     // we know propValue is a Vector<T> but we don't know or care about T
@@ -114,10 +110,10 @@ var TLSStruct = /** @class */ (function () {
                     return propValue.serialize();
                 case "buffer":
                     // just return a copy of the buffer
-                    var result = Buffer.from(propValue);
+                    let result = Buffer.from(propValue);
                     // for variable length buffers prepend the length
                     if (TypeSpecs.Buffer.isVariableLength(type)) {
-                        var lengthBits = (8 * util.fitToWholeBytes(type.maxLength));
+                        const lengthBits = (8 * util.fitToWholeBytes(type.maxLength));
                         result = Buffer.concat([
                             BitConverter_1.numberToBuffer(result.length, lengthBits),
                             result,
@@ -127,7 +123,6 @@ var TLSStruct = /** @class */ (function () {
             }
         });
         return Buffer.concat(ret);
-    };
-    return TLSStruct;
-}());
+    }
+}
 exports.TLSStruct = TLSStruct;

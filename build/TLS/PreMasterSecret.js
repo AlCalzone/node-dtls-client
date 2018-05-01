@@ -1,36 +1,23 @@
 "use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
-var TLSStruct_1 = require("./TLSStruct");
-var TypeSpecs = require("./TypeSpecs");
-var PreMasterSecret = /** @class */ (function (_super) {
-    __extends(PreMasterSecret, _super);
-    function PreMasterSecret(other_secret, psk) {
-        var _this = _super.call(this, PreMasterSecret.__spec) || this;
-        _this.other_secret = other_secret;
-        _this.psk = psk;
-        if (_this.other_secret == null) {
+const TLSStruct_1 = require("./TLSStruct");
+const TypeSpecs = require("./TypeSpecs");
+class PreMasterSecret extends TLSStruct_1.TLSStruct {
+    constructor(other_secret, psk) {
+        super(PreMasterSecret.__spec);
+        this.other_secret = other_secret;
+        this.psk = psk;
+        if (this.other_secret == null) {
             // create fake contents
-            _this.other_secret = Buffer.alloc(_this.psk.length, 0);
+            this.other_secret = Buffer.alloc(this.psk.length, 0);
         }
-        return _this;
     }
-    PreMasterSecret.createEmpty = function () {
+    static createEmpty() {
         return new PreMasterSecret(null, null);
-    };
-    PreMasterSecret.__spec = {
-        other_secret: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
-        psk: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
-    };
-    return PreMasterSecret;
-}(TLSStruct_1.TLSStruct));
+    }
+}
+PreMasterSecret.__spec = {
+    other_secret: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
+    psk: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
+};
 exports.PreMasterSecret = PreMasterSecret;

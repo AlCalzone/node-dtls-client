@@ -20,31 +20,22 @@ var Buffer;
 })(Buffer = exports.Buffer || (exports.Buffer = {}));
 // Shortcuts:
 exports.define = {
-    Enum: function (size, enumType) { return ({ type: "enum", size: size, enumType: enumType }); },
-    Number: function (size) { return ({ type: "number", size: size }); },
-    Struct: function (structType) { return ({
+    Enum: (size, enumType) => ({ type: "enum", size, enumType }),
+    Number: (size) => ({ type: "number", size }),
+    Struct: (structType) => ({
         type: "struct",
         structType: structType,
-    }); },
-    Vector: function (itemSpec, minLength, maxLength, optional) {
-        if (minLength === void 0) { minLength = 0; }
-        if (maxLength === void 0) { maxLength = minLength; }
-        if (optional === void 0) { optional = false; }
-        return ({
-            type: "vector",
-            itemSpec: itemSpec,
-            minLength: minLength, maxLength: maxLength,
-            optional: optional,
-        });
-    },
-    Buffer: function (minLength, maxLength) {
-        if (minLength === void 0) { minLength = Number.POSITIVE_INFINITY; }
-        if (maxLength === void 0) { maxLength = minLength; }
-        return ({
-            type: "buffer",
-            minLength: minLength, maxLength: maxLength,
-        });
-    },
+    }),
+    Vector: (itemSpec, minLength = 0, maxLength = minLength, optional = false) => ({
+        type: "vector",
+        itemSpec,
+        minLength, maxLength,
+        optional,
+    }),
+    Buffer: (minLength = Number.POSITIVE_INFINITY, maxLength = minLength) => ({
+        type: "buffer",
+        minLength, maxLength,
+    }),
 };
 exports.uint8 = Object.freeze(exports.define.Number("uint8"));
 exports.uint16 = Object.freeze(exports.define.Number("uint16"));

@@ -87,7 +87,7 @@ function P(algorithm: HashAlgorithm, secret: Buffer, seed: Buffer, length: numbe
 	const _HMAC = HMAC[algorithm];
 
 	const _A = [seed];
-	function A(i) {
+	function A(i: number) {
 		if (i >= _A.length) {
 			// need to generate the value first
 			_A.push(_HMAC(secret, A(i - 1)));

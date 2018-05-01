@@ -18,6 +18,7 @@
         "no-bitwise": false,
         "max-classes-per-file": [false],
         "quotemark": [true, "double", "avoid-escape"],
-        "no-console": [true, "log", "error"]
+        "no-console": [true, "log", "error"],
+        "no-namespace": false
     }
 }
