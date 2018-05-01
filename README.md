@@ -1,7 +1,11 @@
 # node-dtls-client
 
-USE AT YOUR OWN RISK!
+[![node](https://img.shields.io/node/v/node-dtls-client.svg) ![npm](https://img.shields.io/npm/v/node-dtls-client.svg)](https://www.npmjs.com/package/node-dtls-client)
 
+[![Build Status](https://img.shields.io/circleci/project/github/AlCalzone/node-dtls-client.svg)](https://circleci.com/gh/AlCalzone/node-dtls-client)
+[![Coverage Status](https://img.shields.io/coveralls/github/AlCalzone/node-dtls-client.svg)](https://coveralls.io/github/AlCalzone/node-dtls-client)
+
+USE AT YOUR OWN RISK!
 
 [DTLS](https://en.wikipedia.org/wiki/Datagram_Transport_Layer_Security) protocol implementation for Node.js written in TypeScript. 
 This library provides the missing native DTLS support for Node.js client-side applications. It contains no server-side implementation.
