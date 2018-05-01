@@ -41,7 +41,7 @@ var AntiReplayWindow = /** @class */ (function () {
             // if so, don't accept
             return !this.hasReceived(seq_num);
         }
-        else {
+        else /* seq_num <= this.ceiling - width */ {
             // too old, don't accept
             return false;
         }
