@@ -72,7 +72,7 @@ function decryptNative(
 	// prepare decryption
 	const algorithm = `aes-${key.length * 8}-${mode}`;
 	// @ts-ignore The 4th parameter is available starting in NodeJS 10+
-	const decipher = crypto.createDecipheriv(algorithm, key, iv, { authTagLength });
+	const decipher = crypto.createDecipheriv(algorithm, key, iv, { authTagLength: authTag.length });
 	decipher.setAuthTag(authTag);
 	// @ts-ignore The 2nd parameter is available starting in NodeJS 10+
 	decipher.setAAD(additionalData, { plaintextLength: ciphertext.length });
