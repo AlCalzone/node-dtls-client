@@ -12,7 +12,7 @@ export interface PropertyDefinition { name: string; type: TypeSpecs.All; }
  */
 export class TLSStruct {
 
-	constructor(spec: TypeSpecs.StructSpec, initial?) {
+	constructor(spec: TypeSpecs.StructSpec, initial?: Record<string, any>) {
 		// Eigenschaften aus Spec kopieren
 		this.__spec__ = spec;
 		for (const [key, value] of entries(spec)) {
@@ -23,7 +23,7 @@ export class TLSStruct {
 
 			if (initial != undefined && initial.hasOwnProperty(key)) {
 				// sonst evtl. die Eigenschaft initialisieren
-				this[key] = initial[key];
+				(this as any)[key] = initial[key];
 			}
 		}
 	}
@@ -80,7 +80,7 @@ export class TLSStruct {
 			}
 
 			// Wert merken und im Array voranschreiten
-			this[propName] = result.result;
+			(this as any)[propName] = result.result;
 			delta += result.readBytes;
 		}
 		return delta;
@@ -106,7 +106,7 @@ export class TLSStruct {
 				// Welche Eigenschaft wird ausgelesen?
 				const propName = def.name;
 				const type = def.type;
-				const propValue = this[propName];
+				const propValue = (this as any)[propName];
 				switch (type.type) {
 					case "number":
 					case "enum":

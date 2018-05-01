@@ -15,13 +15,25 @@
     "@types/debug": "0.0.30",
     "@types/mocha": "^2.2.43",
     "@types/node": "^6.0.88",
+    "@types/sinon": "^4.3.1",
+    "@types/sinon-chai": "^2.7.29",
+    "@types/yargs": "^11.0.0",
     "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "colors": "^1.2.3",
+    "coveralls": "^3.0.0",
     "mocha": "^3.5.3",
-    "nyc": "^11.2.1",
+    "nyc": "^11.7.1",
+    "proxyquire": "^2.0.1",
+    "rimraf": "^2.6.2",
+    "semver": "^5.5.0",
+    "sinon": "^5.0.1",
+    "sinon-chai": "^3.0.0",
     "source-map-support": "^0.4.18",
     "ts-node": "^3.3.0",
     "tslint": "^5.7.0",
-    "typescript": "^2.5.2"
+    "typescript": "^2.5.2",
+    "yargs": "^11.0.0"
   },
   "dependencies": {
     "debug": "^3.0.1",
@@ -32,24 +44,38 @@
     "url": "git+https://github.com/AlCalzone/node-dtls-client.git"
   },
   "scripts": {
-    "compile": "node_modules/.bin/tsc -p tsconfig.json",
-    "test": "nyc mocha --recursive --compilers ts-node/register --require source-map-support/register --full-trace src/**/*.test.ts",
-    "lint": "npm run tslint \"src/**/*.ts\"",
-    "tslint": "tslint"
+    "build": "tsc",
+    "prebuild": "rimraf ./build",
+    "watch": "tsc --watch",
+    "test:ts": "node_modules/.bin/mocha",
+    "test": "npm run test:ts",
+    "coverage": "node_modules/.bin/nyc npm test",
+    "coveralls": "node_modules/.bin/nyc report --reporter=text-lcov | coveralls -v",
+    "show-coverage": "npm run coverage && start ./coverage/index.html",
+    "lint:ts": "tslint",
+    "lint": "npm run lint:ts \"src/**/*.ts\"",
+    "release": "node --require ts-node/register maintenance/release.ts"
   },
   "nyc": {
+    "all": true,
     "include": [
       "src/**/*.ts"
+    ],
+    "exclude": [
+      "build/**",
+      "src/**/*.test.ts"
     ],
     "extension": [
       ".ts"
     ],
     "require": [
-      "ts-node/register"
+      "ts-node/register",
+      "source-map-support/register"
     ],
     "reporter": [
       "text-summary",
-      "html"
+      "html",
+      "lcov"
     ],
     "sourceMap": true,
     "instrument": true

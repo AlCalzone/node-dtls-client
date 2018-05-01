@@ -1,42 +1,24 @@
+export declare type Predicate<T> = (value: T) => boolean;
+export declare type KeyValuePair<T> = [string, T];
 /**
  * Stellt einen Polyfill für Object.entries bereit
- * @param obj - Ein Objekt über dessen Einträge iteriert werden soll
+ * @param obj Das Objekt, dessen Eigenschaften als Key-Value-Pair iteriert werden sollen
  */
-export declare function entries(obj: any): KeyValuePair[];
-export declare type KeyValuePair = [string, any];
+export declare function entries<T>(obj: Record<string, T>): KeyValuePair<T>[];
 /**
- * Stellt einen Polyfill für Object.entries bereit
- * @param obj - Ein Objekt über dessen Werte iteriert werden soll
+ * Stellt einen Polyfill für Object.values bereit
+ * @param obj Das Objekt, dessen Eigenschaftswerte iteriert werden sollen
  */
-export declare function values(obj: any): any[];
+export declare function values<T>(obj: Record<string, T>): T[];
 /**
- * Filtert die Eigenschaften eines Objekts anhand der übergebenen Filterfunktion
- * @param obj - Das Objekt, dessen Eigenschaften gefiltert werden sollen
- * @param predicate - Die Funktion, die zum Filtern der Eigenschaften angewendet werden soll
+ * Gibt ein Subset eines Objekts zurück, dessen Eigenschaften einem Filter entsprechen
+ * @param obj Das Objekt, dessen Eigenschaften gefiltert werden sollen
+ * @param predicate Die Filter-Funktion, die auf Eigenschaften angewendet wird
  */
-export declare type predicateFunction = (any, string?) => boolean;
-export declare function filter(obj: any, predicate: predicateFunction): any;
-/**
- * Kombinierte mehrere Key-Value-Paare zu einem Objekt
- * @param properties - Die einzelnen Eigenschaften des zu kombinierenden Objekts als Key-Wert-Paare
- */
-export declare function composeObject(properties: KeyValuePair): any;
-/**
- * Extrahiert eine Eigenschaft aus einer Objektstruktur anhand eines Property-Pfades
- * @param object - Die Objektstruktur in der die Eigenschaft gesucht werden soll
- * @param path - Der Eigenschaftspfad der Form propName.propName.[arrayIndex].propName
- */
-export declare function dig(object: any, path: string): any;
-/**
- * Vergräbt eine Eigenschaft in einem Objekt (Gegenteil von dig)
- * @param object - Die Objektstruktur in der die Eigenschaft abgelegt werden soll
- * @param path - Der Eigenschaftspfad der Form propName.propName.[arrayIndex].propName
- * @param value - Der abzulegende Eigenschaftswert
- */
-export declare function bury(object: any, path: string, value: any): void;
+export declare function filter<T>(obj: Record<string, T>, predicate: Predicate<T>): Record<string, T>;
 /**
  * Kopiert Eigenschaften rekursiv von einem Objekt auf ein anderes
  * @param target - Das Zielobjekt, auf das die Eigenschaften übertragen werden sollen
  * @param source - Das Quellobjekt, aus dem die Eigenschaften kopiert werden sollen
  */
-export declare function extend(target: any, source: any): any;
+export declare function extend<T1 extends Record<string, any>, T2 extends Record<string, any>>(target: T1, source: T2): Record<string, any>;

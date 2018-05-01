@@ -4,14 +4,14 @@
         "declaration": true,
         "module": "commonjs",
         "moduleResolution": "node",
-        "noEmitOnError": false,
-        "noImplicitAny": false,
+        "noEmitOnError": true,
+        "noImplicitAny": true,
         "outDir": "build/",
         "removeComments": false,
-        //"sourceMap": false,
-        //"sourceRoot": "src/",
-        "target": "es5",
-        "watch": true
+        "stripInternal": true,
+        "target": "es2015",
+        "strictPropertyInitialization": true,
+        "watch": false // true breaks circleci
     },
     "include": [
         "src/**/*.ts"

@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var crypto = require("crypto");
+const crypto = require("crypto");
 function HMAC_factory(algorithm, length) {
-    var ret = (function (secret, data) {
-        var hmac = crypto.createHmac(algorithm, secret);
+    const ret = ((secret, data) => {
+        const hmac = crypto.createHmac(algorithm, secret);
         hmac.update(data);
         return hmac.digest();
     });
@@ -19,8 +19,8 @@ exports.HMAC = {
     sha512: HMAC_factory("sha512", 64),
 };
 function Hash_factory(algorithm, length) {
-    var ret = (function (data) {
-        var hash = crypto.createHash(algorithm);
+    const ret = ((data) => {
+        const hash = crypto.createHash(algorithm);
         hash.update(data);
         return hash.digest();
     });
@@ -28,7 +28,7 @@ function Hash_factory(algorithm, length) {
     ret.hashLength = length;
     return ret;
 }
-var Hash = {
+const Hash = {
     md5: Hash_factory("md5", 16),
     sha1: Hash_factory("sha1", 20),
     sha256: Hash_factory("sha256", 32),
@@ -43,10 +43,9 @@ var Hash = {
  * @param length - The desired amount of data.
  * @see https://tools.ietf.org/html/rfc5246#section-5
  */
-function P(algorithm, secret, seed, length) {
-    if (length === void 0) { length = 32; }
-    var _HMAC = exports.HMAC[algorithm];
-    var _A = [seed];
+function P(algorithm, secret, seed, length = 32) {
+    const _HMAC = exports.HMAC[algorithm];
+    const _A = [seed];
     function A(i) {
         if (i >= _A.length) {
             // need to generate the value first
@@ -54,11 +53,11 @@ function P(algorithm, secret, seed, length) {
         }
         return _A[i];
     }
-    var hashes = [];
-    var hashesLength = 0;
+    const hashes = [];
+    let hashesLength = 0;
     // iterate through the hash function
-    for (var i = 1; hashesLength < length; i++) {
-        var newHash = _HMAC(secret, Buffer.concat([A(i), seed]));
+    for (let i = 1; hashesLength < length; i++) {
+        const newHash = _HMAC(secret, Buffer.concat([A(i), seed]));
         hashes.push(newHash);
         hashesLength += newHash.length;
     }
@@ -73,8 +72,7 @@ exports.PRF = {
     sha512: PRF_factory("sha512"),
 };
 function PRF_factory(algorithm) {
-    var ret = (function (secret, label, seed, length) {
-        if (length === void 0) { length = 32; }
+    const ret = ((secret, label, seed, length = 32) => {
         return P(algorithm, secret, Buffer.concat([Buffer.from(label, "ascii"), seed]), length);
     });
     ret.hashFunction = Hash[algorithm];
