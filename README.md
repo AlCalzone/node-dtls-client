@@ -81,7 +81,7 @@ The events are defined as follows:
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### 0.4.0 (2018-05-01)
 * (AlCalzone) Check connection options before creating a new socket
 * (AlCalzone) Improve testing setup, use CircleCI for deployment
 
