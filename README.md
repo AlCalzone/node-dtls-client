@@ -81,6 +81,10 @@ The events are defined as follows:
 
 ## Changelog
 
+### __WORK IN PROGRESS__
+* (AlCalzone) Check connection options before creating a new socket
+* (AlCalzone) Improve testing setup, use CircleCI for deployment
+
 ### 0.3.2 (2018-04-27)
 * (AlCalzone) Support NodeJS 10
 

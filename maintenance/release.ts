@@ -12,7 +12,7 @@
 	npm run release -- <version> [--dry]
 
 	PLACEHOLDER for next version in readme:
-	#### __WORK IN PROGRESS__
+	### __WORK IN PROGRESS__
 
 */
 
@@ -38,7 +38,7 @@ const packPath = path.join(rootDir, "package.json");
 const pack = require(packPath);
 const readmePath = path.join(rootDir, "README.md");
 let readme = fs.readFileSync(readmePath, "utf8");
-const README_PLACEHOLDER = "#### __WORK IN PROGRESS__";
+const README_PLACEHOLDER = "### __WORK IN PROGRESS__";
 
 // check if the readme contains exactly 1 occurence of the changelog placeholder
 switch ((readme.match(new RegExp("^" + README_PLACEHOLDER + "$", "gm")) || []).length) {
@@ -106,7 +106,7 @@ if (argv.dry) {
 	const d = new Date();
 	readme = readme.replace(
 		README_PLACEHOLDER,
-		`#### ${newVersion} (${d.getFullYear()}-${padStart("" + (d.getMonth() + 1), 2, "0")}-${padStart("" + d.getDate(), 2, "0")})`,
+		`### ${newVersion} (${d.getFullYear()}-${padStart("" + (d.getMonth() + 1), 2, "0")}-${padStart("" + d.getDate(), 2, "0")})`,
 	);
 	fs.writeFileSync(readmePath, readme, "utf8");
 
