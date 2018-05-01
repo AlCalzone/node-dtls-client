@@ -81,7 +81,7 @@ The events are defined as follows:
 
 ## Changelog
 
-### 0.5.0 (2018-05-01)
+### __WORK IN PROGRESS__
 * (AlCalzone) **Potentially breaking change:** No longer use `node-aead-crypto` on NodeJS 10+
 
 ### 0.4.0 (2018-05-01)
