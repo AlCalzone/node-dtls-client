@@ -38,6 +38,7 @@ whitelist: &whitelist
   paths:
     - build/*
     - node_modules/*
+    - install/*
     - src/*
     - test/*
     - coverage/*
