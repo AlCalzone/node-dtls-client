@@ -22,6 +22,7 @@ export namespace dtls {
 	 * @param callback - If provided, callback is bound to the "message" event
 	 */
 	export function createSocket(options: Options, callback?: MessageEventHandler): Socket {
+		checkOptions(options);
 		const ret = new Socket(options);
 
 		// bind "message" event after the handshake is finished
@@ -267,6 +268,17 @@ export namespace dtls {
 		 * All supported cipher suites are used if not specified otherwise.
 		 */
 		ciphers?: (keyof typeof CipherSuites)[];
+	}
+	/**
+	 * Checks if a given object adheres to the Options interface definition
+	 * Throws if it doesn't.
+	 */
+	function checkOptions(opts: Options) {
+		if (opts == null) throw new Error("No connections options were given!");
+		if (opts.type !== "udp4" && opts.type !== "udp6") throw new Error(`The connection options must have a "type" property with value "udp4" or "udp6"!`);
+		if (typeof opts.address !== "string" || opts.address.length === 0) throw new Error(`The connection options must contain the remote address as a string!`);
+		if (typeof opts.port !== "number" || opts.port < 1 || opts.port > 65535) throw new Error(`The connection options must contain a remote port from 1 to 65535!`);
+		if (typeof opts.psk !== "object") throw new Error(`The connection options must contain a PSK dictionary object!`);
 	}
 
 	export type ListeningEventHandler = () => void;

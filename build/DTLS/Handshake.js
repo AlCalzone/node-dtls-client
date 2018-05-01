@@ -139,7 +139,9 @@ var FragmentedHandshake = /** @class */ (function (_super) {
         var firstSeqNum = fragments[0].message_seq;
         var totalLength = fragments[0].total_length;
         var ranges = fragments
+            // map to fragment range (start and end index)
             .map(function (f) { return ({ start: f.fragment_offset, end: f.fragment_offset + f.fragment.length - 1 }); })
+            // order the fragments by fragment offset
             .sort(function (a, b) { return a.start - b.start; });
         // check if the fragments have no holes
         var noHoles = ranges.every(function (val, i, arr) {

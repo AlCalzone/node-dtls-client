@@ -60,6 +60,7 @@ var ClientHandshakeHandler = /** @class */ (function () {
                                     var srvKeyExchange_PSK = Handshake.ServerKeyExchange_PSK.from(Handshake.ServerKeyExchange_PSK.spec, srvKeyExchange.raw_data).result;
                                     // TODO: do something with the identity hint
                                     break;
+                                // TODO: support other algorithms
                             }
                             break;
                         case Handshake.HandshakeType.server_hello_done:

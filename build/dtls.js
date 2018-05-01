@@ -29,6 +29,7 @@ var dtls;
      * @param callback - If provided, callback is bound to the "message" event
      */
     function createSocket(options, callback) {
+        checkOptions(options);
         var ret = new Socket(options);
         // bind "message" event after the handshake is finished
         if (callback != null) {
@@ -197,7 +198,7 @@ var dtls;
                             // if we are still shaking hands, buffer the message until we're done
                             this.bufferedMessages.push({ msg: msg, rinfo: rinfo });
                         }
-                        else {
+                        else /* finished */ {
                             // else emit the message
                             // TODO: extend params?
                             // TODO: do we need to emit rinfo?
@@ -238,4 +239,20 @@ var dtls;
         return Socket;
     }(events_1.EventEmitter));
     dtls.Socket = Socket;
+    /**
+     * Checks if a given object adheres to the Options interface definition
+     * Throws if it doesn't.
+     */
+    function checkOptions(opts) {
+        if (opts == null)
+            throw new Error("No connections options were given!");
+        if (opts.type !== "udp4" && opts.type !== "udp6")
+            throw new Error("The connection options must have a \"type\" property with value \"udp4\" or \"udp6\"!");
+        if (typeof opts.address !== "string" || opts.address.length === 0)
+            throw new Error("The connection options must contain the remote address as a string!");
+        if (typeof opts.port !== "number" || opts.port < 1 || opts.port > 65535)
+            throw new Error("The connection options must contain a remote port from 1 to 65535!");
+        if (typeof opts.psk !== "object")
+            throw new Error("The connection options must contain a PSK dictionary object!");
+    }
 })(dtls = exports.dtls || (exports.dtls = {}));
