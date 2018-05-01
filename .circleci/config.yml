@@ -208,6 +208,8 @@ workflows:
     jobs:
       - test_node6:
           <<: *tags_and_branches
+      - test_node8:
+          <<: *tags_and_branches
       - test_latest:
           <<: *tags_and_branches
 
