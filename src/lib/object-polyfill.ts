@@ -1,103 +1,41 @@
-﻿/**
- * Stellt einen Polyfill für Object.entries bereit
- * @param obj - Ein Objekt über dessen Einträge iteriert werden soll
- */
-export function entries(obj): KeyValuePair[] {
-	return Object.keys(obj)
-		.map((key: string) => [key, obj[key]] as KeyValuePair)
-		;
-}
-export type KeyValuePair = [string, any];
-// ES6-Generator-Version
-// export function* entries(obj) {
-// 	for (let key of Object.keys(obj)) {
-// 		yield [key, obj[key]];
-// 	}
-// }
+﻿export type Predicate<T> = (value: T) => boolean;
+export type KeyValuePair<T> = [string, T];
 
 /**
  * Stellt einen Polyfill für Object.entries bereit
- * @param obj - Ein Objekt über dessen Werte iteriert werden soll
+ * @param obj Das Objekt, dessen Eigenschaften als Key-Value-Pair iteriert werden sollen
  */
-export function values(obj): any[] {
+export function entries<T>(obj: Record<string, T>): KeyValuePair<T>[];
+export function entries(obj: any): KeyValuePair<any>[] {
+	return Object.keys(obj)
+		.map(key => [key, obj[key]] as KeyValuePair<any>)
+		;
+
+	}
+
+/**
+ * Stellt einen Polyfill für Object.values bereit
+ * @param obj Das Objekt, dessen Eigenschaftswerte iteriert werden sollen
+ */
+export function values<T>(obj: Record<string, T>): T[];
+export function values(obj: any): any[] {
 	return Object.keys(obj)
 		.map(key => obj[key])
 		;
 }
-// ES6-Version:
-// export function* values(obj) {
-// 	for (let key of Object.keys(obj)) {
-// 		yield obj[key];
-// 	}
-// }
 
 /**
- * Filtert die Eigenschaften eines Objekts anhand der übergebenen Filterfunktion
- * @param obj - Das Objekt, dessen Eigenschaften gefiltert werden sollen
- * @param predicate - Die Funktion, die zum Filtern der Eigenschaften angewendet werden soll
+ * Gibt ein Subset eines Objekts zurück, dessen Eigenschaften einem Filter entsprechen
+ * @param obj Das Objekt, dessen Eigenschaften gefiltert werden sollen
+ * @param predicate Die Filter-Funktion, die auf Eigenschaften angewendet wird
  */
-export type predicateFunction = (any, string?) => boolean;
-export function filter(obj: any, predicate: predicateFunction): any {
-	const ret = {};
+export function filter<T>(obj: Record<string, T>, predicate: Predicate<T>): Record<string, T>;
+export function filter(obj: any, predicate: Predicate<any>): Record<string, any> {
+	const ret: Record<string, any> = {};
 	for (const [key, val] of entries(obj)) {
-		if (predicate(val, key)) ret[key] = val;
+		if (predicate(val)) ret[key] = val;
 	}
 	return ret;
-}
-
-/**
- * Kombinierte mehrere Key-Value-Paare zu einem Objekt
- * @param properties - Die einzelnen Eigenschaften des zu kombinierenden Objekts als Key-Wert-Paare
- */
-export function composeObject(properties: KeyValuePair) {
-	return properties.reduce((acc, [key, value]) => {
-		acc[key] = value;
-		return acc;
-	}, {});
-}
-
-/**
- * Extrahiert eine Eigenschaft aus einer Objektstruktur anhand eines Property-Pfades
- * @param object - Die Objektstruktur in der die Eigenschaft gesucht werden soll
- * @param path - Der Eigenschaftspfad der Form propName.propName.[arrayIndex].propName
- */
-export function dig(object: any, path: string): any {
-	function _dig(obj, pathArr: string[]) {
-		// are we there yet? then return obj
-		if (!pathArr.length) return obj;
-		// go deeper
-		let propName: (string|number) = pathArr.shift();
-		if (/\[\d+\]/.test(propName)) {
-			// this is an array index
-			propName = +propName.slice(1, -1);
-		}
-		return _dig(obj[propName], pathArr);
-	}
-	return _dig(object, path.split("."));
-}
-
-/**
- * Vergräbt eine Eigenschaft in einem Objekt (Gegenteil von dig)
- * @param object - Die Objektstruktur in der die Eigenschaft abgelegt werden soll
- * @param path - Der Eigenschaftspfad der Form propName.propName.[arrayIndex].propName
- * @param value - Der abzulegende Eigenschaftswert
- */
-export function bury(object: any, path: string, value: any): void {
-	function _bury(obj, pathArr: string[]) {
-		// are we there yet? then return obj
-		if (pathArr.length === 1) {
-			obj[pathArr[0]] = value;
-			return;
-		}
-		// go deeper
-		let propName: (string|number) = pathArr.shift();
-		if (/\[\d+\]/.test(propName)) {
-			// this is an array index
-			propName = +propName.slice(1, -1);
-		}
-		_bury(obj[propName], pathArr);
-	}
-	_bury(object, path.split("."));
 }
 
 /**
@@ -105,8 +43,8 @@ export function bury(object: any, path: string, value: any): void {
  * @param target - Das Zielobjekt, auf das die Eigenschaften übertragen werden sollen
  * @param source - Das Quellobjekt, aus dem die Eigenschaften kopiert werden sollen
  */
-export function extend(target, source) {
-	target = target || {};
+export function extend<T1 extends Record<string, any>, T2 extends Record<string, any>>(target: T1, source: T2): Record<string, any> {
+	target = target || {} as T1;
 	for (const [prop, val] of entries(source)) {
 		if (val instanceof Object) {
 			target[prop] = extend(target[prop], val);

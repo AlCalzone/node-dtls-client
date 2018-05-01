@@ -19,6 +19,7 @@ import * as TypeSpecs from "./TypeSpecs";
 export enum CompressionMethod {
 	null = 0,
 }
+// tslint:disable-next-line:no-namespace
 export namespace CompressionMethod {
 	export const spec = TypeSpecs.define.Enum("uint8", CompressionMethod);
 }
@@ -33,13 +34,14 @@ const server_random_length = 32;
 
 export class ConnectionState {
 
-	constructor(values?) {
-		if (values) {
-			for (const [key, value] of entries(values)) {
-				if (this.hasOwnProperty(key)) this[key] = value;
-			}
-		}
-	}
+	// This doesn't seem to be used:
+	// constructor(values?: Partial<ConnectionState>) {
+	// 	if (values) {
+	// 		for (const [key, value] of entries(values)) {
+	// 			if (this.hasOwnProperty(key)) (this as any)[key] = value;
+	// 		}
+	// 	}
+	// }
 
 	public entity: ConnectionEnd = "client";
 	public cipherSuite: CipherSuite = CipherSuites.TLS_NULL_WITH_NULL_NULL;

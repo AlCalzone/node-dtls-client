@@ -7,7 +7,7 @@ import { Message } from "../TLS/Message";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { TLSStruct } from "../TLS/TLSStruct";
 import { DTLSCiphertext } from "./DTLSCiphertext";
-import { DTLSCompressed } from "./DTLSCompressed";
+import { CompressorDelegate, DecompressorDelegate, DTLSCompressed } from "./DTLSCompressed";
 import { DTLSPlaintext } from "./DTLSPlaintext";
 
 // enable debug output
@@ -57,7 +57,7 @@ export class RecordLayer {
 		);
 
 		// compress packet
-		const compressor = (identity) => identity; // TODO: only valid for NULL compression, check it!
+		const compressor: CompressorDelegate = (identity) => identity; // TODO: only valid for NULL compression, check it!
 		packet = DTLSCompressed.compress(packet, compressor);
 
 		if (epoch.connectionState.cipherSuite.cipherType != null) {
@@ -133,7 +133,7 @@ export class RecordLayer {
 			});
 
 		// decompress and decrypt packets
-		const decompressor = (identity) => identity; // TODO: only valid for NULL compression, check it!
+		const decompressor: DecompressorDelegate = (identity) => identity; // TODO: only valid for NULL compression, check it!
 
 		packets = packets
 			.map((p: DTLSCiphertext) => {

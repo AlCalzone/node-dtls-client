@@ -11,7 +11,6 @@ export declare namespace CompressionMethod {
 }
 export declare type ConnectionEnd = "server" | "client";
 export declare class ConnectionState {
-    constructor(values?: any);
     entity: ConnectionEnd;
     cipherSuite: CipherSuite;
     protocolVersion: ProtocolVersion;

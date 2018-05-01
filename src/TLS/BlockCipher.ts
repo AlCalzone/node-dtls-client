@@ -115,7 +115,7 @@ export function createDecipher(
 	const decipherParams = BlockCipherParameters[algorithm];
 	const ret = ((packet: DTLSCiphertext, keyMaterial: KeyMaterial, connEnd: ConnectionEnd) => {
 
-		function invalidMAC(deciphered?) {
+		function invalidMAC(deciphered?: Buffer) {
 			// Even if we have an error, still return some plaintext.
 			// This allows to prevent a CBC timing attack
 			return {

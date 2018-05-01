@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var CipherSuites_1 = require("../DTLS/CipherSuites");
-var object_polyfill_1 = require("../lib/object-polyfill");
 var ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 var PRF_1 = require("./PRF");
 var TypeSpecs = require("./TypeSpecs");
@@ -9,6 +8,7 @@ var CompressionMethod;
 (function (CompressionMethod) {
     CompressionMethod[CompressionMethod["null"] = 0] = "null";
 })(CompressionMethod = exports.CompressionMethod || (exports.CompressionMethod = {}));
+// tslint:disable-next-line:no-namespace
 (function (CompressionMethod) {
     CompressionMethod.spec = TypeSpecs.define.Enum("uint8", CompressionMethod);
 })(CompressionMethod = exports.CompressionMethod || (exports.CompressionMethod = {}));
@@ -16,18 +16,19 @@ var master_secret_length = 48;
 var client_random_length = 32;
 var server_random_length = 32;
 var ConnectionState = /** @class */ (function () {
-    function ConnectionState(values) {
+    function ConnectionState() {
+        // This doesn't seem to be used:
+        // constructor(values?: Partial<ConnectionState>) {
+        // 	if (values) {
+        // 		for (const [key, value] of entries(values)) {
+        // 			if (this.hasOwnProperty(key)) (this as any)[key] = value;
+        // 		}
+        // 	}
+        // }
         this.entity = "client";
         this.cipherSuite = CipherSuites_1.CipherSuites.TLS_NULL_WITH_NULL_NULL;
         this.protocolVersion = new ProtocolVersion_1.ProtocolVersion(~1, ~0); // default to DTLSv1.0 during handshakes
         this.compression_algorithm = CompressionMethod.null;
-        if (values) {
-            for (var _i = 0, _a = object_polyfill_1.entries(values); _i < _a.length; _i++) {
-                var _b = _a[_i], key = _b[0], value = _b[1];
-                if (this.hasOwnProperty(key))
-                    this[key] = value;
-            }
-        }
     }
     Object.defineProperty(ConnectionState.prototype, "Cipher", {
         get: function () {

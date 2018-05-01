@@ -371,7 +371,7 @@ export class ClientHandshakeHandler {
 						// remember the random value
 						this.recordLayer.nextEpoch.connectionState.server_random = hello.random.serialize();
 						// set the cipher suite and compression method to be used
-						this.recordLayer.nextEpoch.connectionState.cipherSuite = CipherSuites[hello.cipher_suite];
+						this.recordLayer.nextEpoch.connectionState.cipherSuite = (CipherSuites as any)[hello.cipher_suite];
 						this.recordLayer.nextEpoch.connectionState.compression_algorithm = hello.compression_method;
 						this.recordLayer.currentWriteEpoch.connectionState.protocolVersion = hello.server_version;
 						this.recordLayer.nextWriteEpoch.connectionState.protocolVersion = hello.server_version;

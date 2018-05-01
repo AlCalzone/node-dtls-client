@@ -10,11 +10,7 @@
         "array-type": [true, "array"],
         "max-line-length": [false],
         "interface-name": [false],
-        "variable-name": [
-            true, 
-            "ban-keywords", 
-            "check-format", "allow-leading-underscore", "allow-trailing-underscore"
-        ],
+        "variable-name": [false], // too many incompatible names in the specs
         "member-ordering": [false],
         "curly": [true, "ignore-same-line"],
         "triple-equals": [true, "allow-undefined-check", "allow-null-check"],
