@@ -10,7 +10,7 @@ import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
 import { Vector } from "./Vector";
 
-import { ccm, gcm } from "node-aead-crypto";
+import { AEADEncryptionInterface, ccm, gcm } from "../lib/AEADCrypto";
 
 export type AEADCipherAlgorithm =
 	"aes-128-ccm" | "aes-256-ccm" |
@@ -47,32 +47,8 @@ export interface AEADDecipherDelegate extends GenericDecipherDelegate {
 	authTagLength: number;
 }
 
-interface EncryptionInterface {
-	encrypt: (
-		key: Buffer,
-		iv: Buffer,
-		plaintext: Buffer,
-		additionalData: Buffer,
-		authTagLength?: number,
-	) => {
-		ciphertext: Buffer,
-		auth_tag: Buffer,
-	};
-
-	decrypt: (
-		key: Buffer,
-		iv: Buffer,
-		ciphertext: Buffer,
-		additionalData: Buffer,
-		authTag: Buffer,
-	) => {
-		plaintext: Buffer,
-		auth_ok: boolean,
-	};
-}
-
 interface AEADCipherParameter {
-	interface: EncryptionInterface;
+	interface: AEADEncryptionInterface;
 	keyLength: number;
 	blockSize: number;
 	authTagLength: number;
