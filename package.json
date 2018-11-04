@@ -1,6 +1,6 @@
 {
   "name": "node-dtls-client",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "DTLS protocol implementation for Node.js written in TypeScript.",
   "main": "./build/dtls.js",
   "types": "./build/dtls.d.ts",
@@ -39,6 +39,9 @@
     "debug": "^3.1.0",
     "semver": "^5.5.0"
   },
+  "optionalDependencies": {
+    "node-aead-crypto": "^2.0.0"
+  },
   "engines": {
     "node": ">=6"
   },
@@ -57,8 +60,7 @@
     "show-coverage": "npm run coverage && start ./coverage/index.html",
     "lint:ts": "tslint",
     "lint": "npm run lint:ts \"src/**/*.ts\"",
-    "release": "node --require ts-node/register maintenance/release.ts",
-    "install": "node install/postinstall.js"
+    "release": "node --require ts-node/register maintenance/release.ts"
   },
   "nyc": {
     "all": true,
