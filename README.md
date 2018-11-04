@@ -81,7 +81,7 @@ The events are defined as follows:
 
 ## Changelog
 
-### __WORK IN PROGRESS__
+### 0.5.6 (2018-11-04)
 * (AlCalzone) `node-aead-crypto` is now an optional dependency
 * (AlCalzone) Remove `strictPropertyInitialization` since it doesn't work without `strictNullChecks`
 
