@@ -81,6 +81,9 @@ The events are defined as follows:
 
 ## Changelog
 
+### __WORK IN PROGRESS__
+* (AlCalzone) `node-aead-crypto` is now an optional dependency
+
 ### 0.5.4 (2018-05-01)
 * (AlCalzone) **Potentially breaking change:** No longer use `node-aead-crypto` on NodeJS 10+
 
