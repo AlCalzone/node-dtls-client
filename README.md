@@ -3,7 +3,7 @@
 [![node](https://img.shields.io/node/v/node-dtls-client.svg) ![npm](https://img.shields.io/npm/v/node-dtls-client.svg)](https://www.npmjs.com/package/node-dtls-client)
 
 [![Build Status](https://img.shields.io/circleci/project/github/AlCalzone/node-dtls-client.svg)](https://circleci.com/gh/AlCalzone/node-dtls-client)
-[![Coverage Status](https://img.shields.io/coveralls/github/AlCalzone/node-dtls-client.svg)](https://coveralls.io/github/AlCalzone/node-dtls-client)
+[![Coverage Status](https://img.shields.io/coveralls/github/AlCalzone/node-dtls-client.svg)](https://coveralls.io/github/AlCalzone/node-dtls-client) [![Greenkeeper badge](https://badges.greenkeeper.io/AlCalzone/node-dtls-client.svg)](https://greenkeeper.io/)
 
 USE AT YOUR OWN RISK!
 
