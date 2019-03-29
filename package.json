@@ -36,7 +36,7 @@
     "yargs": "^11.0.0"
   },
   "dependencies": {
-    "debug": "^3.1.0",
+    "debug": "^4.1.1",
     "semver": "^6.0.0"
   },
   "optionalDependencies": {
