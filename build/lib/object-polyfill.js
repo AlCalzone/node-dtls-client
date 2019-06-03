@@ -28,9 +28,11 @@ function extend(target, source) {
     target = target || {};
     for (const [prop, val] of entries(source)) {
         if (val instanceof Object) {
+            // @ts-ignore This works, too much hassle to satisfy TS 3.5+
             target[prop] = extend(target[prop], val);
         }
         else {
+            // @ts-ignore This works, too much hassle to satisfy TS 3.5+
             target[prop] = val;
         }
     }

@@ -7,7 +7,7 @@ export declare enum HashAlgorithm {
     sha224 = 3,
     sha256 = 4,
     sha384 = 5,
-    sha512 = 6,
+    sha512 = 6
 }
 export declare namespace HashAlgorithm {
     const __spec: TypeSpecs.Enum;
@@ -16,7 +16,7 @@ export declare enum SignatureAlgorithm {
     anonymous = 0,
     rsa = 1,
     dsa = 2,
-    ecdsa = 3,
+    ecdsa = 3
 }
 export declare namespace SignatureAlgorithm {
     const __spec: TypeSpecs.Enum;

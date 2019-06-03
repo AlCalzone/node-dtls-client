@@ -47,8 +47,10 @@ export function extend<T1 extends Record<string, any>, T2 extends Record<string,
 	target = target || {} as T1;
 	for (const [prop, val] of entries(source)) {
 		if (val instanceof Object) {
+			// @ts-ignore This works, too much hassle to satisfy TS 3.5+
 			target[prop] = extend(target[prop], val);
 		} else {
+			// @ts-ignore This works, too much hassle to satisfy TS 3.5+
 			target[prop] = val;
 		}
 	}

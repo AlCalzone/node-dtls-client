@@ -17,7 +17,7 @@ export declare enum HandshakeType {
     server_hello_done = 14,
     certificate_verify = 15,
     client_key_exchange = 16,
-    finished = 20,
+    finished = 20
 }
 export declare abstract class Handshake extends TLSStruct {
     msg_type: HandshakeType;
@@ -61,7 +61,7 @@ export declare class FragmentedHandshake extends TLSStruct {
      * Enforces an array of fragments to belong to a single message
      * @throws Throws an error if the fragements belong to multiple messages. Passes otherwise.
      */
-    private static enforceSingleMessage(fragments);
+    private static enforceSingleMessage;
     /**
      * In the given array of fragments, find all that belong to the reference fragment
      * @param fragments - Array of fragments to be searched

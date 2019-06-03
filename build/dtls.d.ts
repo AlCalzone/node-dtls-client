@@ -34,16 +34,16 @@ export declare namespace dtls {
         close(callback?: CloseEventHandler): void;
         private bufferedMessages;
         private udp;
-        private udp_onListening();
-        private expectConnection();
-        private expectHandshake();
+        private udp_onListening;
+        private expectConnection;
+        private expectHandshake;
         sendAlert(alert: Alert, callback?: SendCallback): void;
-        private udp_onMessage(udpMsg, rinfo);
+        private udp_onMessage;
         private _isClosed;
-        private udp_onClose();
-        private udp_onError(exception);
+        private udp_onClose;
+        private udp_onError;
         /** Kills the underlying UDP connection and emits an error if neccessary */
-        private killConnection(err?);
+        private killConnection;
     }
     interface Options {
         /** the type of the underlying socket */

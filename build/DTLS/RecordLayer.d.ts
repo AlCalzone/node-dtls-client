@@ -25,7 +25,7 @@ export declare class RecordLayer {
      * Transforms the given message into a DTLSCiphertext packet,
      * does neccessary processing and buffers it up for sending
      */
-    private processOutgoingMessage(msg);
+    private processOutgoingMessage;
     /**
      * Sends all messages of a flight in one packet
      * @param messages - The messages to be sent
@@ -63,8 +63,8 @@ export declare class RecordLayer {
     /**
      * Ensure there's a next epoch to switch to
      */
-    private ensureNextEpoch();
-    private createEpoch(index);
+    private ensureNextEpoch;
+    private createEpoch;
     advanceReadEpoch(): void;
     advanceWriteEpoch(): void;
     /**
