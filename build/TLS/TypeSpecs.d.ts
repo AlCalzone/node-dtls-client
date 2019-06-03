@@ -1,5 +1,6 @@
 import { ISerializableConstructor } from "./Serializable";
-export declare type Numbers = "uint8" | "uint16" | "uint24" | "uint32" | "uint48" | "uint64";
+export declare type Numbers = "uint8" | "uint16" | "uint24" | "uint32" | "uint48" | // DTLS
+"uint64";
 export interface Number {
     type: "number";
     size: Numbers;

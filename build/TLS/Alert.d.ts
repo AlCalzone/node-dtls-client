@@ -2,7 +2,7 @@ import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
 export declare enum AlertLevel {
     warning = 1,
-    fatal = 2,
+    fatal = 2
 }
 export declare enum AlertDescription {
     close_notify = 0,
@@ -29,7 +29,7 @@ export declare enum AlertDescription {
     internal_error = 80,
     user_canceled = 90,
     no_renegotiation = 100,
-    unsupported_extension = 110,
+    unsupported_extension = 110
 }
 export declare class Alert extends TLSStruct {
     level: AlertLevel;

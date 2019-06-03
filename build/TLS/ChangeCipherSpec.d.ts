@@ -1,7 +1,7 @@
 import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
 export declare enum ChangeCipherSpecTypes {
-    change_cipher_spec = 1,
+    change_cipher_spec = 1
 }
 export declare namespace ChangeCipherSpecTypes {
     const __spec: TypeSpecs.Enum;

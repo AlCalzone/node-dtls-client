@@ -4,7 +4,7 @@ import { CipherDelegate, CipherSuite, DecipherDelegate, KeyMaterial } from "./Ci
 import { PreMasterSecret } from "./PreMasterSecret";
 import * as TypeSpecs from "./TypeSpecs";
 export declare enum CompressionMethod {
-    null = 0,
+    null = 0
 }
 export declare namespace CompressionMethod {
     const spec: TypeSpecs.Enum;
@@ -33,5 +33,5 @@ export declare class ConnectionState {
     /**
      * Calculates the key components
      */
-    private computeKeyMaterial();
+    private computeKeyMaterial;
 }

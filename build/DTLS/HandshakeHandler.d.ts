@@ -33,44 +33,44 @@ export declare class ClientHandshakeHandler {
     /**
      * Tries to assemble the fragmented messages in incompleteMessages
      */
-    private tryAssembleFragments(reference);
+    private tryAssembleFragments;
     private bufferedOutgoingMessages;
     private sendFlight_begin_wasCalled;
-    private sendFlight_begin();
+    private sendFlight_begin;
     /**
      * Processes a flight (including giving the messages a seq_num), but does not actually send it.
      * @param flight - The flight to be sent.
      * @param retransmit - If the flight is retransmitted, i.e. no sequence numbers are increased
      */
-    private sendFlight_processPartial(flight, retransmit?);
+    private sendFlight_processPartial;
     /**
      * Sends the currently buffered flight of messages
      * @param flight The flight to be sent.
      * @param expectedResponses The types of possible responses we are expecting.
      * @param retransmit If the flight is retransmitted, i.e. no sequence numbers are increased
      */
-    private sendFlight_finish(expectedResponses);
+    private sendFlight_finish;
     /**
      * Sends the given flight of messages and remembers it for potential retransmission
      * @param flight The flight to be sent.
      * @param expectedResponses The types of possible responses we are expecting.
      * @param retransmit If the flight is retransmitted, i.e. no sequence numbers are increased
      */
-    private sendFlight(flight, expectedResponses, retransmit?);
+    private sendFlight;
     /**
      * remembers the raw data of handshake messages for verification purposes
      * @param messages - the messages to be remembered
      */
-    private bufferHandshakeData(...messages);
+    private bufferHandshakeData;
     /**
      * For a given message, check if it needs to be hashed
      */
-    private needsToHashMessage(message);
+    private needsToHashMessage;
     /**
      * computes the verify data for a Finished message
      * @param handshakeMessages - the concatenated messages received so far
      */
-    private computeVerifyData(handshakeMessages, source);
+    private computeVerifyData;
     /**
      * handles server messages
      */

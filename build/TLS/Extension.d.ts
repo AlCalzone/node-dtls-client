@@ -2,7 +2,7 @@
 import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
 export declare enum ExtensionType {
-    signature_algorithms = 13,
+    signature_algorithms = 13
 }
 export declare namespace ExtensionType {
     const spec: TypeSpecs.Enum;
