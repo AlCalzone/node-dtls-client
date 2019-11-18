@@ -33,7 +33,7 @@
     "ts-node": "^8.0.3",
     "tslint": "^5.9.1",
     "typescript": "^3.3.4000",
-    "yargs": "^14.0.0"
+    "yargs": "^15.0.1"
   },
   "dependencies": {
     "debug": "^4.1.1",
