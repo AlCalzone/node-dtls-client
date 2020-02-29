@@ -80,48 +80,55 @@ The events are defined as follows:
 **PRs adding support for these are welcome!**
 
 ## Changelog
+<!--
+    PLACEHOLDER for next version:
+    ### __WORK IN PROGRESS__
+-->
+
+### __WORK IN PROGRESS__
+* Add support for DTLS 1.3 alerts
 
 ### 0.5.6 (2018-11-04)
-* (AlCalzone) `node-aead-crypto` is now an optional dependency
-* (AlCalzone) Remove `strictPropertyInitialization` since it doesn't work without `strictNullChecks`
+* `node-aead-crypto` is now an optional dependency
+* Remove `strictPropertyInitialization` since it doesn't work without `strictNullChecks`
 
 ### 0.5.4 (2018-05-01)
-* (AlCalzone) **Potentially breaking change:** No longer use `node-aead-crypto` on NodeJS 10+
+* **Potentially breaking change:** No longer use `node-aead-crypto` on NodeJS 10+
 
 ### 0.4.0 (2018-05-01)
-* (AlCalzone) Check connection options before creating a new socket
-* (AlCalzone) Improve testing setup, use CircleCI for deployment
+* Check connection options before creating a new socket
+* Improve testing setup, use CircleCI for deployment
 
 ### 0.3.2 (2018-04-27)
-* (AlCalzone) Support NodeJS 10
+* Support NodeJS 10
 
 ### 0.3.1 (2018-02-13)
-* (AlCalzone) Suppress spurious errors from DNS lookup after the connection has already timed out
+* Suppress spurious errors from DNS lookup after the connection has already timed out
 
 ### 0.3.0 (2018-02-05)
-* (AlCalzone) Fixed cipher parameters of 3DES and 256-bit AES (AEAD) cipher suites.
-* (AlCalzone) Added the possibility to limit the cipher suites to use
+* Fixed cipher parameters of 3DES and 256-bit AES (AEAD) cipher suites.
+* Added the possibility to limit the cipher suites to use
 
 ### 0.2.2 (2017-09-25)
-* (AlCalzone) Removed possible sources of infinite loops
+* Removed possible sources of infinite loops
 
 ### 0.2.1 (2017-09-25)
-* (AlCalzone) Fix error handling while trying to connect to a non-available endpoint
+* Fix error handling while trying to connect to a non-available endpoint
 
 ### 0.2.0 (2017-09-21)
-* (AlCalzone) add partial alert protocol implementation
+* add partial alert protocol implementation
 
 ### 0.1.0 (2017-08-23)
-* (AlCalzone) publish to npm
+* publish to npm
 
 ### 0.0.3 (2017-08-09)
-* (AlCalzone) bugfixes
+* bugfixes
 
 ### 0.0.2 (2017-08-01)
-* (AlCalzone) improved error and timeout handling in the socket wrapper.
+* improved error and timeout handling in the socket wrapper.
 
 ### 0.0.1
-* (AlCalzone) initial release. 
+* initial release. 
 
 ## Contributors
 * https://github.com/thoukydides - Thanks for noticing the errors in the 3DES and 256-bit AES (AEAD) cipher suites.
