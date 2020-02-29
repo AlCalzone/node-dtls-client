@@ -16,8 +16,8 @@ class PreMasterSecret extends TLSStruct_1.TLSStruct {
         return new PreMasterSecret(null, null);
     }
 }
+exports.PreMasterSecret = PreMasterSecret;
 PreMasterSecret.__spec = {
     other_secret: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
     psk: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
 };
-exports.PreMasterSecret = PreMasterSecret;

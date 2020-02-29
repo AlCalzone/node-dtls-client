@@ -9,7 +9,7 @@ export declare class ClientHandshakeHandler {
     private finishedCallback;
     constructor(recordLayer: RecordLayer, options: dtls.Options, finishedCallback: HandshakeFinishedCallback);
     private _isHandshaking;
-    readonly isHandshaking: boolean;
+    get isHandshaking(): boolean;
     /**
      * (Re)negotiates a DTLS session. Is automatically called when the Handshake handler is created
      */

@@ -19,8 +19,8 @@ class Random extends TLSStruct_1.TLSStruct {
         return new Random(null, null);
     }
 }
+exports.Random = Random;
 Random.__spec = {
     gmt_unix_time: TypeSpecs.uint32,
     random_bytes: TypeSpecs.define.Buffer(28),
 };
-exports.Random = Random;

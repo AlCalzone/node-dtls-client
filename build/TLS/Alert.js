@@ -34,6 +34,13 @@ var AlertDescription;
     AlertDescription[AlertDescription["user_canceled"] = 90] = "user_canceled";
     AlertDescription[AlertDescription["no_renegotiation"] = 100] = "no_renegotiation";
     AlertDescription[AlertDescription["unsupported_extension"] = 110] = "unsupported_extension";
+    AlertDescription[AlertDescription["certificate_unobtainable_RESERVED"] = 111] = "certificate_unobtainable_RESERVED";
+    AlertDescription[AlertDescription["unrecognized_name"] = 112] = "unrecognized_name";
+    AlertDescription[AlertDescription["bad_certificate_status_response"] = 113] = "bad_certificate_status_response";
+    AlertDescription[AlertDescription["bad_certificate_hash_value_RESERVED"] = 114] = "bad_certificate_hash_value_RESERVED";
+    AlertDescription[AlertDescription["unknown_psk_identity"] = 115] = "unknown_psk_identity";
+    AlertDescription[AlertDescription["certificate_required"] = 116] = "certificate_required";
+    AlertDescription[AlertDescription["no_application_protocol"] = 120] = "no_application_protocol";
 })(AlertDescription = exports.AlertDescription || (exports.AlertDescription = {}));
 class Alert extends TLSStruct_1.TLSStruct {
     constructor(level, description) {
@@ -45,9 +52,9 @@ class Alert extends TLSStruct_1.TLSStruct {
         return new Alert(0, 0);
     }
 }
+exports.Alert = Alert;
 Alert.__spec = {
     level: TypeSpecs.define.Enum("uint8", AlertLevel),
     description: TypeSpecs.define.Enum("uint8", AlertDescription),
 };
 Alert.spec = TypeSpecs.define.Struct(Alert);
-exports.Alert = Alert;

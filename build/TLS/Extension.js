@@ -19,9 +19,9 @@ class Extension extends TLSStruct_1.TLSStruct {
         return new Extension(null, null);
     }
 }
+exports.Extension = Extension;
 Extension.__spec = {
     extension_type: ExtensionType.spec,
     extension_data: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
 };
 Extension.spec = TypeSpecs.define.Struct(Extension);
-exports.Extension = Extension;

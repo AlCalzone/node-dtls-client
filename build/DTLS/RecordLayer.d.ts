@@ -41,25 +41,25 @@ export declare class RecordLayer {
      */
     private epochs;
     private _readEpochNr;
-    readonly readEpochNr: number;
+    get readEpochNr(): number;
     /**
      * The current epoch used for reading data
      */
-    readonly currentReadEpoch: Epoch;
-    readonly nextReadEpoch: Epoch;
+    get currentReadEpoch(): Epoch;
+    get nextReadEpoch(): Epoch;
     private _writeEpochNr;
-    readonly writeEpochNr: number;
+    get writeEpochNr(): number;
     /**
      * The current epoch used for writing data
      */
-    readonly currentWriteEpoch: Epoch;
-    readonly nextWriteEpoch: Epoch;
-    readonly nextEpochNr: number;
+    get currentWriteEpoch(): Epoch;
+    get nextWriteEpoch(): Epoch;
+    get nextEpochNr(): number;
     /**
      * The next read and write epoch that will be used.
      * Be careful as this might point to the wrong epoch between ChangeCipherSpec messages
      */
-    readonly nextEpoch: Epoch;
+    get nextEpoch(): Epoch;
     /**
      * Ensure there's a next epoch to switch to
      */
@@ -73,6 +73,6 @@ export declare class RecordLayer {
      */
     static MTU: number;
     static readonly MTU_OVERHEAD: number;
-    static readonly MAX_PAYLOAD_SIZE: number;
+    static get MAX_PAYLOAD_SIZE(): number;
     static DTLSVersion: ProtocolVersion;
 }

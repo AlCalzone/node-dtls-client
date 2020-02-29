@@ -18,7 +18,7 @@ class ChangeCipherSpec extends TLSStruct_1.TLSStruct {
         return new ChangeCipherSpec(ChangeCipherSpecTypes.change_cipher_spec);
     }
 }
+exports.ChangeCipherSpec = ChangeCipherSpec;
 ChangeCipherSpec.__spec = {
     type: TypeSpecs.define.Enum("uint8", ChangeCipherSpec),
 };
-exports.ChangeCipherSpec = ChangeCipherSpec;

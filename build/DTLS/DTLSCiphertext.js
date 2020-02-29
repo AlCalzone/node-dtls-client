@@ -17,6 +17,7 @@ class DTLSCiphertext extends TLSStruct_1.TLSStruct {
         return new DTLSCiphertext(null, null, null, null, null);
     }
 }
+exports.DTLSCiphertext = DTLSCiphertext;
 DTLSCiphertext.__spec = {
     type: ContentType_1.ContentType.__spec,
     version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
@@ -26,4 +27,3 @@ DTLSCiphertext.__spec = {
     fragment: TypeSpecs.define.Buffer(0, 2048 + Math.pow(2, 14)),
 };
 DTLSCiphertext.spec = TypeSpecs.define.Struct(DTLSCiphertext);
-exports.DTLSCiphertext = DTLSCiphertext;

@@ -20,9 +20,9 @@ export declare class ConnectionState {
     server_random: Buffer;
     key_material: KeyMaterial;
     private _cipher;
-    readonly Cipher: CipherDelegate;
+    get Cipher(): CipherDelegate;
     private _decipher;
-    readonly Decipher: DecipherDelegate;
+    get Decipher(): DecipherDelegate;
     /**
      * Compute the master secret from a given premaster secret
      * @param preMasterSecret - The secret used to calculate the master secret

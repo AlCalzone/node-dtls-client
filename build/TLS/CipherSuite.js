@@ -147,8 +147,8 @@ class CipherSuite extends TLSStruct_1.TLSStruct {
         }
     }
 }
+exports.CipherSuite = CipherSuite;
 CipherSuite.__spec = {
     id: TypeSpecs.uint16,
 };
 CipherSuite.spec = TypeSpecs.define.Struct(CipherSuite);
-exports.CipherSuite = CipherSuite;

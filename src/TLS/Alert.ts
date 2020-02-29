@@ -32,6 +32,13 @@ export enum AlertDescription {
 	user_canceled = 90,
 	no_renegotiation = 100,
 	unsupported_extension = 110,
+	certificate_unobtainable_RESERVED = 111,
+	unrecognized_name = 112,
+	bad_certificate_status_response = 113,
+	bad_certificate_hash_value_RESERVED = 114,
+	unknown_psk_identity = 115,
+	certificate_required = 116,
+	no_application_protocol = 120,
 }
 
 export class Alert extends TLSStruct {

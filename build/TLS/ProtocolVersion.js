@@ -18,8 +18,8 @@ class ProtocolVersion extends TLSStruct_1.TLSStruct {
         return new ProtocolVersion();
     }
 }
+exports.ProtocolVersion = ProtocolVersion;
 ProtocolVersion.__spec = {
     major: TypeSpecs.uint8,
     minor: TypeSpecs.uint8,
 };
-exports.ProtocolVersion = ProtocolVersion;

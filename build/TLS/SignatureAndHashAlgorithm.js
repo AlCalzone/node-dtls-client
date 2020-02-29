@@ -35,8 +35,8 @@ class SignatureAndHashAlgorithm extends TLSStruct_1.TLSStruct {
         return new SignatureAndHashAlgorithm(null, null);
     }
 }
+exports.default = SignatureAndHashAlgorithm;
 SignatureAndHashAlgorithm.__spec = {
     hash: HashAlgorithm.__spec,
     signature: SignatureAlgorithm.__spec,
 };
-exports.default = SignatureAndHashAlgorithm;

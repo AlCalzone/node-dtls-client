@@ -39,6 +39,7 @@ class DTLSCompressed extends TLSStruct_1.TLSStruct {
         return (new MACHeader(this.epoch, this.sequence_number, this.type, this.version, this.fragment.length)).serialize();
     }
 }
+exports.DTLSCompressed = DTLSCompressed;
 DTLSCompressed.__spec = {
     type: ContentType_1.ContentType.__spec,
     version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
@@ -48,7 +49,6 @@ DTLSCompressed.__spec = {
     fragment: TypeSpecs.define.Buffer(0, 1024 + Math.pow(2, 14)),
 };
 DTLSCompressed.spec = TypeSpecs.define.Struct(DTLSCompressed);
-exports.DTLSCompressed = DTLSCompressed;
 class MACHeader extends TLSStruct_1.TLSStruct {
     constructor(epoch, sequence_number, type, version, fragment_length) {
         super(MACHeader.__spec);
@@ -62,6 +62,7 @@ class MACHeader extends TLSStruct_1.TLSStruct {
         return new MACHeader(null, null, null, null, null);
     }
 }
+exports.MACHeader = MACHeader;
 MACHeader.__spec = {
     epoch: TypeSpecs.uint16,
     sequence_number: TypeSpecs.uint48,
@@ -69,4 +70,3 @@ MACHeader.__spec = {
     version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
     fragment_length: TypeSpecs.uint16,
 };
-exports.MACHeader = MACHeader;

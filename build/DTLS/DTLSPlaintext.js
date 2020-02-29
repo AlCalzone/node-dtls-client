@@ -17,6 +17,7 @@ class DTLSPlaintext extends TLSStruct_1.TLSStruct {
         return new DTLSPlaintext(null, null, null, null, null);
     }
 }
+exports.DTLSPlaintext = DTLSPlaintext;
 DTLSPlaintext.__spec = {
     type: TypeSpecs.define.Struct(ContentType_1.ContentType),
     version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
@@ -26,4 +27,3 @@ DTLSPlaintext.__spec = {
     fragment: TypeSpecs.define.Buffer(0, Math.pow(2, 14)),
 };
 DTLSPlaintext.spec = TypeSpecs.define.Struct(DTLSPlaintext);
-exports.DTLSPlaintext = DTLSPlaintext;
