@@ -85,7 +85,7 @@ The events are defined as follows:
     ### __WORK IN PROGRESS__
 -->
 
-### __WORK IN PROGRESS__
+### 0.6.0 (2020-02-29)
 * Add support for DTLS 1.3 alerts
 
 ### 0.5.6 (2018-11-04)
