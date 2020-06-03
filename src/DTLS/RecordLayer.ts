@@ -1,17 +1,16 @@
+// enable debug output
+import * as debugPackage from "debug";
 import * as dgram from "dgram";
 import { dtls } from "../dtls";
 import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
-import { CompressionMethod, ConnectionState } from "../TLS/ConnectionState";
+import { ConnectionState } from "../TLS/ConnectionState";
 import { ContentType } from "../TLS/ContentType";
 import { Message } from "../TLS/Message";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import { TLSStruct } from "../TLS/TLSStruct";
 import { DTLSCiphertext } from "./DTLSCiphertext";
 import { CompressorDelegate, DecompressorDelegate, DTLSCompressed } from "./DTLSCompressed";
 import { DTLSPlaintext } from "./DTLSPlaintext";
 
-// enable debug output
-import * as debugPackage from "debug";
 const debug = debugPackage("node-dtls-client");
 
 export interface Epoch {

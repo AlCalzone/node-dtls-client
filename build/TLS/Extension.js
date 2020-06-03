@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Extension = exports.ExtensionType = void 0;
 const TLSStruct_1 = require("./TLSStruct");
 const TypeSpecs = require("./TypeSpecs");
 var ExtensionType;
@@ -9,19 +10,22 @@ var ExtensionType;
 (function (ExtensionType) {
     ExtensionType.spec = TypeSpecs.define.Enum("uint16", ExtensionType);
 })(ExtensionType = exports.ExtensionType || (exports.ExtensionType = {}));
-class Extension extends TLSStruct_1.TLSStruct {
-    constructor(extension_type, extension_data) {
-        super(Extension.__spec);
-        this.extension_type = extension_type;
-        this.extension_data = extension_data;
+let Extension = /** @class */ (() => {
+    class Extension extends TLSStruct_1.TLSStruct {
+        constructor(extension_type, extension_data) {
+            super(Extension.__spec);
+            this.extension_type = extension_type;
+            this.extension_data = extension_data;
+        }
+        static createEmpty() {
+            return new Extension(null, null);
+        }
     }
-    static createEmpty() {
-        return new Extension(null, null);
-    }
-}
+    Extension.__spec = {
+        extension_type: ExtensionType.spec,
+        extension_data: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
+    };
+    Extension.spec = TypeSpecs.define.Struct(Extension);
+    return Extension;
+})();
 exports.Extension = Extension;
-Extension.__spec = {
-    extension_type: ExtensionType.spec,
-    extension_data: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
-};
-Extension.spec = TypeSpecs.define.Struct(Extension);

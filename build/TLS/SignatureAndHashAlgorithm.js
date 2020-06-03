@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.SignatureAlgorithm = exports.HashAlgorithm = void 0;
 const TLSStruct_1 = require("./TLSStruct");
 const TypeSpecs = require("./TypeSpecs");
 var HashAlgorithm;
@@ -25,18 +26,21 @@ var SignatureAlgorithm;
 (function (SignatureAlgorithm) {
     SignatureAlgorithm.__spec = TypeSpecs.define.Enum("uint8", SignatureAlgorithm);
 })(SignatureAlgorithm = exports.SignatureAlgorithm || (exports.SignatureAlgorithm = {}));
-class SignatureAndHashAlgorithm extends TLSStruct_1.TLSStruct {
-    constructor(hash, signature) {
-        super(SignatureAndHashAlgorithm.__spec);
-        this.hash = hash;
-        this.signature = signature;
+let SignatureAndHashAlgorithm = /** @class */ (() => {
+    class SignatureAndHashAlgorithm extends TLSStruct_1.TLSStruct {
+        constructor(hash, signature) {
+            super(SignatureAndHashAlgorithm.__spec);
+            this.hash = hash;
+            this.signature = signature;
+        }
+        static createEmpty() {
+            return new SignatureAndHashAlgorithm(null, null);
+        }
     }
-    static createEmpty() {
-        return new SignatureAndHashAlgorithm(null, null);
-    }
-}
+    SignatureAndHashAlgorithm.__spec = {
+        hash: HashAlgorithm.__spec,
+        signature: SignatureAlgorithm.__spec,
+    };
+    return SignatureAndHashAlgorithm;
+})();
 exports.default = SignatureAndHashAlgorithm;
-SignatureAndHashAlgorithm.__spec = {
-    hash: HashAlgorithm.__spec,
-    signature: SignatureAlgorithm.__spec,
-};

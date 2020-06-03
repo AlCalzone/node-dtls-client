@@ -1,16 +1,14 @@
 ﻿import * as crypto from "crypto";
 import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
 import { DTLSCompressed } from "../DTLS/DTLSCompressed";
-import * as BitConverter from "../lib/BitConverter";
+import { AEADEncryptionInterface, ccm, gcm } from "../lib/AEADCrypto";
 import { ContentType } from "../TLS/ContentType";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import { GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial } from "./CipherSuite";
+import { GenericCipherDelegate, GenericDecipherDelegate, KeyMaterial } from "./CipherSuite";
 import { ConnectionEnd } from "./ConnectionState";
 import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
-import { Vector } from "./Vector";
 
-import { AEADEncryptionInterface, ccm, gcm } from "../lib/AEADCrypto";
 
 export type AEADCipherAlgorithm =
 	"aes-128-ccm" | "aes-256-ccm" |

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.CipherSuites = void 0;
 const object_polyfill_1 = require("../lib/object-polyfill");
 const CipherSuite_1 = require("../TLS/CipherSuite");
 // block sizes etc. see https://tools.ietf.org/html/rfc5246 page 83
@@ -68,7 +69,7 @@ exports.CipherSuites = {
     TLS_PSK_DHE_WITH_AES_256_CCM_8: new CipherSuite_1.CipherSuite(0xC0AB, "dhe_psk", null, "sha256", "aead", "aes-256-ccm8"),
 };
 // define index accessors
-for (const [key, cs] of object_polyfill_1.entries(exports.CipherSuites)) {
+for (const cs of object_polyfill_1.values(exports.CipherSuites)) {
     if (!exports.CipherSuites.hasOwnProperty("" + cs.id)) {
         exports.CipherSuites[cs.id] = cs;
     }

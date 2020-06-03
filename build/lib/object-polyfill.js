@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.extend = exports.filter = exports.values = exports.entries = void 0;
 function entries(obj) {
     return Object.keys(obj)
         .map(key => [key, obj[key]]);

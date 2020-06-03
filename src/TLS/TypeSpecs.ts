@@ -1,5 +1,5 @@
 ﻿// tslint:disable:ban-types
-import { ISerializable, ISerializableConstructor } from "./Serializable";
+import { ISerializableConstructor } from "./Serializable";
 
 export type Numbers =
 	"uint8" |

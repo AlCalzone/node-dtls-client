@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ConnectionState = exports.CompressionMethod = void 0;
 const CipherSuites_1 = require("../DTLS/CipherSuites");
 const ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 const PRF_1 = require("./PRF");
@@ -13,8 +14,8 @@ var CompressionMethod;
     CompressionMethod.spec = TypeSpecs.define.Enum("uint8", CompressionMethod);
 })(CompressionMethod = exports.CompressionMethod || (exports.CompressionMethod = {}));
 const master_secret_length = 48;
-const client_random_length = 32;
-const server_random_length = 32;
+// const client_random_length = 32;
+// const server_random_length = 32;
 class ConnectionState {
     constructor() {
         // This doesn't seem to be used:

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.PRF = exports.HMAC = void 0;
 const crypto = require("crypto");
 function HMAC_factory(algorithm, length) {
     const ret = ((secret, data) => {

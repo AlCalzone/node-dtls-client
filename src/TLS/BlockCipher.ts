@@ -1,7 +1,7 @@
 ﻿import * as crypto from "crypto";
 import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
 import { DTLSCompressed } from "../DTLS/DTLSCompressed";
-import { CipherDelegate, DecipherDelegate, GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial } from "./CipherSuite";
+import { GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial } from "./CipherSuite";
 import { ConnectionEnd } from "./ConnectionState";
 
 export type BlockCipherAlgorithm =

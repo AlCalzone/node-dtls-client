@@ -1,7 +1,7 @@
 ﻿import { BitSizes, bufferToNumber, numberToBuffer } from "../lib/BitConverter";
 import { entries } from "../lib/object-polyfill";
 import * as util from "../lib/util";
-import { DeserializationResult, ISerializable, ISerializableConstructor } from "./Serializable";
+import { DeserializationResult } from "./Serializable";
 import * as TypeSpecs from "./TypeSpecs";
 import { Vector } from "./Vector";
 
@@ -14,7 +14,7 @@ export class TLSStruct {
 
 	constructor(spec: TypeSpecs.StructSpec, initial?: Record<string, any>) {
 		// Eigenschaften aus Spec kopieren
-		this.__spec__ = spec;
+		// this.__spec__ = spec;
 		for (const [key, value] of entries(spec)) {
 			this.propertyDefinitions.push({
 				name: key,
@@ -28,7 +28,7 @@ export class TLSStruct {
 		}
 	}
 
-	private __spec__: TypeSpecs.StructSpec;
+	// private __spec__: TypeSpecs.StructSpec;
 	private propertyDefinitions: PropertyDefinition[] = [];
 
 	/**

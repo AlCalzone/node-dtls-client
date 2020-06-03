@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ClientHandshakeHandler = void 0;
 const CipherSuites_1 = require("../DTLS/CipherSuites");
 const Alert_1 = require("../TLS/Alert");
 const ChangeCipherSpec_1 = require("../TLS/ChangeCipherSpec");
@@ -57,6 +58,7 @@ class ClientHandshakeHandler {
                                 case "psk":
                                     const srvKeyExchange_PSK = Handshake.ServerKeyExchange_PSK.from(Handshake.ServerKeyExchange_PSK.spec, srvKeyExchange.raw_data).result;
                                     // TODO: do something with the identity hint
+                                    void srvKeyExchange_PSK;
                                     break;
                                 // TODO: support other algorithms
                             }

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.SessionID = void 0;
 const TypeSpecs = require("./TypeSpecs");
 var SessionID;
 (function (SessionID) {

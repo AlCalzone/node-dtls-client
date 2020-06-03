@@ -1,6 +1,4 @@
-﻿import { Vector } from "../TLS/Vector";
-import { TLSStruct } from "./TLSStruct";
-import * as TypeSpecs from "./TypeSpecs";
+﻿import * as TypeSpecs from "./TypeSpecs";
 
 export namespace SessionID {
 

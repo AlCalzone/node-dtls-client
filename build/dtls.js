@@ -1,5 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.dtls = void 0;
+// enable debug output
+const debugPackage = require("debug");
 const dgram = require("dgram");
 const events_1 = require("events");
 const Handshake_1 = require("./DTLS/Handshake");
@@ -8,8 +11,6 @@ const RecordLayer_1 = require("./DTLS/RecordLayer");
 const Alert_1 = require("./TLS/Alert");
 const ContentType_1 = require("./TLS/ContentType");
 const TLSStruct_1 = require("./TLS/TLSStruct");
-// enable debug output
-const debugPackage = require("debug");
 const debug = debugPackage("node-dtls-client");
 var dtls;
 (function (dtls) {

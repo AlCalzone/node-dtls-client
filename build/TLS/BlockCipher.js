@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createDecipher = exports.createCipher = void 0;
 const crypto = require("crypto");
 const DTLSCiphertext_1 = require("../DTLS/DTLSCiphertext");
 const DTLSCompressed_1 = require("../DTLS/DTLSCompressed");

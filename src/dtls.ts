@@ -1,17 +1,16 @@
-﻿import * as dgram from "dgram";
+﻿// enable debug output
+import * as debugPackage from "debug";
+import * as dgram from "dgram";
 import { EventEmitter } from "events";
 import { CipherSuites } from "./DTLS/CipherSuites";
 import { FragmentedHandshake } from "./DTLS/Handshake";
 import { ClientHandshakeHandler } from "./DTLS/HandshakeHandler";
 import { RecordLayer } from "./DTLS/RecordLayer";
 import { Alert, AlertDescription, AlertLevel } from "./TLS/Alert";
-import { ChangeCipherSpec } from "./TLS/ChangeCipherSpec";
 import { ContentType } from "./TLS/ContentType";
 import { Message } from "./TLS/Message";
 import { TLSStruct } from "./TLS/TLSStruct";
 
-// enable debug output
-import * as debugPackage from "debug";
 const debug = debugPackage("node-dtls-client");
 
 export namespace dtls {

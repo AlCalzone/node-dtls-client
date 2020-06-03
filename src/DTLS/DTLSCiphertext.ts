@@ -1,10 +1,7 @@
-﻿import { CipherDelegate, DecipherDelegate/*, MacDelegate*/ } from "../TLS/CipherSuite";
-import { ContentType } from "../TLS/ContentType";
+﻿import { ContentType } from "../TLS/ContentType";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import { ISerializable, ISerializableConstructor } from "../TLS/Serializable";
 import { TLSStruct } from "../TLS/TLSStruct";
 import * as TypeSpecs from "../TLS/TypeSpecs";
-import { DTLSCompressed } from "./DTLSCompressed";
 import { DTLSPacket } from "./DTLSPacket";
 
 export class DTLSCiphertext extends TLSStruct implements DTLSPacket {

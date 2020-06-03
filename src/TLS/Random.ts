@@ -1,5 +1,4 @@
 ﻿import * as crypto from "crypto";
-import { Vector } from "../TLS/Vector";
 import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
 

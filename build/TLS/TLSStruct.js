@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TLSStruct = void 0;
 const BitConverter_1 = require("../lib/BitConverter");
 const object_polyfill_1 = require("../lib/object-polyfill");
 const util = require("../lib/util");
@@ -10,9 +11,10 @@ const Vector_1 = require("./Vector");
  */
 class TLSStruct {
     constructor(spec, initial) {
+        // private __spec__: TypeSpecs.StructSpec;
         this.propertyDefinitions = [];
         // Eigenschaften aus Spec kopieren
-        this.__spec__ = spec;
+        // this.__spec__ = spec;
         for (const [key, value] of object_polyfill_1.entries(spec)) {
             this.propertyDefinitions.push({
                 name: key,

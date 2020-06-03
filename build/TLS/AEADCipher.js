@@ -1,13 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createDecipher = exports.createCipher = void 0;
 const crypto = require("crypto");
 const DTLSCiphertext_1 = require("../DTLS/DTLSCiphertext");
 const DTLSCompressed_1 = require("../DTLS/DTLSCompressed");
+const AEADCrypto_1 = require("../lib/AEADCrypto");
 const ContentType_1 = require("../TLS/ContentType");
 const ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 const TLSStruct_1 = require("./TLSStruct");
 const TypeSpecs = require("./TypeSpecs");
-const AEADCrypto_1 = require("../lib/AEADCrypto");
 const AEADCipherParameters = {
     "aes-128-ccm": { interface: AEADCrypto_1.ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
     "aes-128-ccm8": { interface: AEADCrypto_1.ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
@@ -16,26 +17,29 @@ const AEADCipherParameters = {
     "aes-128-gcm": { interface: AEADCrypto_1.gcm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
     "aes-256-gcm": { interface: AEADCrypto_1.gcm, keyLength: 32, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
 };
-class AdditionalData extends TLSStruct_1.TLSStruct {
-    constructor(epoch, sequence_number, type, version, fragment_length) {
-        super(AdditionalData.__spec);
-        this.epoch = epoch;
-        this.sequence_number = sequence_number;
-        this.type = type;
-        this.version = version;
-        this.fragment_length = fragment_length;
+let AdditionalData = /** @class */ (() => {
+    class AdditionalData extends TLSStruct_1.TLSStruct {
+        constructor(epoch, sequence_number, type, version, fragment_length) {
+            super(AdditionalData.__spec);
+            this.epoch = epoch;
+            this.sequence_number = sequence_number;
+            this.type = type;
+            this.version = version;
+            this.fragment_length = fragment_length;
+        }
+        static createEmpty() {
+            return new AdditionalData(null, null, null, null, null);
+        }
     }
-    static createEmpty() {
-        return new AdditionalData(null, null, null, null, null);
-    }
-}
-AdditionalData.__spec = {
-    epoch: TypeSpecs.uint16,
-    sequence_number: TypeSpecs.uint48,
-    type: ContentType_1.ContentType.__spec,
-    version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    fragment_length: TypeSpecs.uint16,
-};
+    AdditionalData.__spec = {
+        epoch: TypeSpecs.uint16,
+        sequence_number: TypeSpecs.uint48,
+        type: ContentType_1.ContentType.__spec,
+        version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+        fragment_length: TypeSpecs.uint16,
+    };
+    return AdditionalData;
+})();
 /**
  * Creates an AEAD cipher delegate used to encrypt packet fragments.
  * @param algorithm - The AEAD cipher algorithm to be used

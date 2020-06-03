@@ -9,6 +9,7 @@
         "outDir": "build/",
         "removeComments": false,
         "stripInternal": true,
+        "noUnusedLocals": true,
         "target": "es2015",
         "watch": false // true breaks circleci
     },

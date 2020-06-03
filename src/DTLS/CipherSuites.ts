@@ -1,5 +1,5 @@
-﻿import { entries } from "../lib/object-polyfill";
-import { CipherSuite, CipherType, HashAlgorithm } from "../TLS/CipherSuite";
+﻿import { values } from "../lib/object-polyfill";
+import { CipherSuite } from "../TLS/CipherSuite";
 
 // block sizes etc. see https://tools.ietf.org/html/rfc5246 page 83
 export const CipherSuites = {
@@ -73,7 +73,7 @@ export const CipherSuites = {
 };
 
 // define index accessors
-for (const [key, cs] of entries(CipherSuites)) {
+for (const cs of values(CipherSuites)) {
 	if (!CipherSuites.hasOwnProperty("" + cs.id)) {
 		(CipherSuites as any)[cs.id] = cs;
 	}

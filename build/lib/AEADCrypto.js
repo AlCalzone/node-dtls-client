@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.gcm = exports.ccm = void 0;
 const crypto = require("crypto");
 const semver = require("semver");
 function encryptNative(mode, key, iv, plaintext, additionalData, authTagLength) {

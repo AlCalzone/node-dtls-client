@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.bufferToByteArray = exports.bufferToNumber = exports.numberToBuffer = void 0;
 function numberToBuffer(value, size) {
     const n = size / 8;
     const ret = Buffer.alloc(n);

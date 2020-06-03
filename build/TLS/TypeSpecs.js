@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.uint64 = exports.uint48 = exports.uint32 = exports.uint24 = exports.uint16 = exports.uint8 = exports.define = exports.Buffer = exports.Vector = exports.getPrimitiveSize = void 0;
 function getPrimitiveSize(spec) {
     return +spec.size.substr("uint".length);
 }

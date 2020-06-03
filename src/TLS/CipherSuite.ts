@@ -1,10 +1,8 @@
-﻿import * as crypto from "crypto";
-import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
+﻿import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
 import { DTLSCompressed } from "../DTLS/DTLSCompressed";
-import { extend } from "../lib/object-polyfill";
 import * as AEADCipher from "./AEADCipher";
 import * as BlockCipher from "./BlockCipher";
-import { ConnectionEnd, ConnectionState } from "./ConnectionState";
+import { ConnectionEnd } from "./ConnectionState";
 import { HMAC } from "./PRF";
 import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";

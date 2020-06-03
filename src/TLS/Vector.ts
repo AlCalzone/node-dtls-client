@@ -1,7 +1,6 @@
-﻿import { BitSizes, bufferToByteArray, bufferToNumber, numberToBuffer } from "../lib/BitConverter";
+﻿import { BitSizes, bufferToNumber, numberToBuffer } from "../lib/BitConverter";
 import { fitToWholeBytes } from "../lib/util";
-import { DeserializationResult, ISerializable, ISerializableConstructor } from "./Serializable";
-import { TLSStruct } from "./TLSStruct";
+import { DeserializationResult, ISerializable } from "./Serializable";
 import * as TypeSpecs from "./TypeSpecs";
 
 export class Vector<T extends number | ISerializable> {

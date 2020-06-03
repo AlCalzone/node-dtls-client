@@ -1,11 +1,7 @@
 ﻿import { dtls } from "../dtls";
 import { CipherSuites } from "../DTLS/CipherSuites";
-import { Cookie } from "../DTLS/Cookie";
-import { bufferToByteArray/*, buffersEqual*/ } from "../lib/BitConverter";
 import { Alert, AlertDescription, AlertLevel } from "../TLS/Alert";
 import { ChangeCipherSpec } from "../TLS/ChangeCipherSpec";
-import { CipherSuite } from "../TLS/CipherSuite";
-import { ConnectionEnd } from "../TLS/ConnectionState";
 import { CompressionMethod } from "../TLS/ConnectionState";
 import { ContentType } from "../TLS/ContentType";
 import { Extension } from "../TLS/Extension";
@@ -14,7 +10,6 @@ import { PreMasterSecret } from "../TLS/PreMasterSecret";
 import { PRF } from "../TLS/PRF";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { Random } from "../TLS/Random";
-import { SessionID } from "../TLS/SessionID";
 import { Vector } from "../TLS/Vector";
 import * as Handshake from "./Handshake";
 import { RecordLayer } from "./RecordLayer";
@@ -386,6 +381,7 @@ export class ClientHandshakeHandler {
 							case "psk":
 								const srvKeyExchange_PSK = Handshake.ServerKeyExchange_PSK.from(Handshake.ServerKeyExchange_PSK.spec, srvKeyExchange.raw_data).result;
 								// TODO: do something with the identity hint
+								void srvKeyExchange_PSK;
 								break;
 							// TODO: support other algorithms
 						}

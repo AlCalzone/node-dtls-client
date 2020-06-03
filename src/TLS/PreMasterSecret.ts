@@ -1,6 +1,5 @@
 ﻿import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
-import { Vector } from "./Vector";
 
 export class PreMasterSecret extends TLSStruct {
 

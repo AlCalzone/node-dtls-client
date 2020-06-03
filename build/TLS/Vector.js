@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Vector = void 0;
 const BitConverter_1 = require("../lib/BitConverter");
 const util_1 = require("../lib/util");
 const TypeSpecs = require("./TypeSpecs");

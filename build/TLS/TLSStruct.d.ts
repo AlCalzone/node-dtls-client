@@ -10,7 +10,6 @@ export interface PropertyDefinition {
  */
 export declare class TLSStruct {
     constructor(spec: TypeSpecs.StructSpec, initial?: Record<string, any>);
-    private __spec__;
     private propertyDefinitions;
     /**
      * Deserialisiert die Eigenschaften dieses Objekts aus dem angegebenen Buffer

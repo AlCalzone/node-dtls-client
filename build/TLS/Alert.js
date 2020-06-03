@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Alert = exports.AlertDescription = exports.AlertLevel = void 0;
 const TLSStruct_1 = require("./TLSStruct");
 const TypeSpecs = require("./TypeSpecs");
 var AlertLevel;
@@ -42,19 +43,22 @@ var AlertDescription;
     AlertDescription[AlertDescription["certificate_required"] = 116] = "certificate_required";
     AlertDescription[AlertDescription["no_application_protocol"] = 120] = "no_application_protocol";
 })(AlertDescription = exports.AlertDescription || (exports.AlertDescription = {}));
-class Alert extends TLSStruct_1.TLSStruct {
-    constructor(level, description) {
-        super(Alert.__spec);
-        this.level = level;
-        this.description = description;
+let Alert = /** @class */ (() => {
+    class Alert extends TLSStruct_1.TLSStruct {
+        constructor(level, description) {
+            super(Alert.__spec);
+            this.level = level;
+            this.description = description;
+        }
+        static createEmpty() {
+            return new Alert(0, 0);
+        }
     }
-    static createEmpty() {
-        return new Alert(0, 0);
-    }
-}
+    Alert.__spec = {
+        level: TypeSpecs.define.Enum("uint8", AlertLevel),
+        description: TypeSpecs.define.Enum("uint8", AlertDescription),
+    };
+    Alert.spec = TypeSpecs.define.Struct(Alert);
+    return Alert;
+})();
 exports.Alert = Alert;
-Alert.__spec = {
-    level: TypeSpecs.define.Enum("uint8", AlertLevel),
-    description: TypeSpecs.define.Enum("uint8", AlertDescription),
-};
-Alert.spec = TypeSpecs.define.Struct(Alert);

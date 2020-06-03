@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ContentType = void 0;
 const TypeSpecs = require("./TypeSpecs");
 var ContentType;
 (function (ContentType) {

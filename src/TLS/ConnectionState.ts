@@ -1,19 +1,8 @@
 ﻿import { CipherSuites } from "../DTLS/CipherSuites";
-import { entries } from "../lib/object-polyfill";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import {
-	CipherDelegate,
-	CipherSuite,
-	CipherType,
-	DecipherDelegate,
-	GenericCipherDelegate, GenericDecipherDelegate,
-	GenericMacDelegate, HashAlgorithm,
-	KeyExchangeAlgorithm,
-	KeyMaterial,
-} from "./CipherSuite";
+import { CipherDelegate, CipherSuite, DecipherDelegate, KeyMaterial } from "./CipherSuite";
 import { PreMasterSecret } from "./PreMasterSecret";
 import { PRF } from "./PRF";
-import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
 
 export enum CompressionMethod {
@@ -29,8 +18,8 @@ export type ConnectionEnd =
 	;
 
 const master_secret_length = 48;
-const client_random_length = 32;
-const server_random_length = 32;
+// const client_random_length = 32;
+// const server_random_length = 32;
 
 export class ConnectionState {
 
