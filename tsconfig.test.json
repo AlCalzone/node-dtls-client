@@ -1,0 +1,10 @@
+{
+    "extends": "./tsconfig.json",
+    "compileOnSave": true,
+    "compilerOptions": {
+        "noUnusedLocals": false
+    },
+    "include": [
+        "src/**/*.test.ts"
+    ]
+}
