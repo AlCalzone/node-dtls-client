@@ -11,7 +11,7 @@
   "license": "MIT",
   "homepage": "https://github.com/AlCalzone/node-dtls-client",
   "devDependencies": {
-    "@alcalzone/release-script": "^1.8.0",
+    "@alcalzone/release-script": "^1.8.1",
     "@types/chai": "^4.2.12",
     "@types/debug": "4.1.5",
     "@types/mocha": "^7.0.1",
