@@ -39,7 +39,8 @@ The `DtlsOptions` object looks as follows:
 	port: 5684,
 	psk: { "psk_hint": "PSK" },
 	timeout: 1000, // in ms, optional, minimum 100, default 1000
-	ciphers: [ /* ... */ ] // optional array of (D)TLS cipher suites, e.g. ["TLS_PSK_WITH_AES_128_CCM"]
+	ciphers: [ /* ... */ ], // optional array of (D)TLS cipher suites, e.g. ["TLS_PSK_WITH_AES_128_CCM"]
+	listenPort: 2345 // optional local port number to listen at, default: chosen at random
 }
 ```
 
