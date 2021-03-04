@@ -271,7 +271,7 @@ export namespace dtls {
 		 * All supported cipher suites are used if not specified otherwise.
 		 */
 		ciphers?: (keyof typeof CipherSuites)[];
-		/** The local port to listen at*/
+		/** The local port to listen at */
 		listenPort?: number;
 	}
 	/**
