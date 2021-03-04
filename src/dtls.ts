@@ -59,7 +59,11 @@ export namespace dtls {
 			this._connectionTimeout = setTimeout(() => this.expectConnection(), this.options.timeout);
 
 			// start the connection
-			this.udp.bind(options.port);
+			if(Number.isInteger(options.listenPort)) {
+				this.udp.bind(options.listenPort);
+			} else {
+				this.udp.bind();
+			}
 		}
 
 		private recordLayer: RecordLayer;
@@ -268,6 +272,8 @@ export namespace dtls {
 		 * All supported cipher suites are used if not specified otherwise.
 		 */
 		ciphers?: (keyof typeof CipherSuites)[];
+		/** The local port to listen at*/
+		listenPort?: number;
 	}
 	/**
 	 * Checks if a given object adheres to the Options interface definition
