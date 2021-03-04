@@ -58,7 +58,7 @@ export namespace dtls {
 			this._connectionTimeout = setTimeout(() => this.expectConnection(), this.options.timeout);
 
 			// start the connection
-			if(Number.isInteger(options.listenPort)) {
+			if(options.listenPort != undefined) {
 				this.udp.bind(options.listenPort);
 			} else {
 				this.udp.bind();
@@ -283,6 +283,9 @@ export namespace dtls {
 		if (opts.type !== "udp4" && opts.type !== "udp6") throw new Error(`The connection options must have a "type" property with value "udp4" or "udp6"!`);
 		if (typeof opts.address !== "string" || opts.address.length === 0) throw new Error(`The connection options must contain the remote address as a string!`);
 		if (typeof opts.port !== "number" || opts.port < 1 || opts.port > 65535) throw new Error(`The connection options must contain a remote port from 1 to 65535!`);
+		if (opts.listenPort != undefined) {
+			if (typeof opts.listenPort !== "number" || !Number.isInteger(opts.listenPort) || opts.listenPort < 1 || opts.listenPort > 65535) throw new Error(`The listen port must be between 1 and 65535!`);
+		}
 		if (typeof opts.psk !== "object") throw new Error(`The connection options must contain a PSK dictionary object!`);
 	}
 
