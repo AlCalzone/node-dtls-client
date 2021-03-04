@@ -1,6 +1,6 @@
 {
   "name": "node-dtls-client",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "DTLS protocol implementation for Node.js written in TypeScript.",
   "main": "./build/dtls.js",
   "types": "./build/dtls.d.ts",

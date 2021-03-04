@@ -86,6 +86,9 @@ The events are defined as follows:
     ### __WORK IN PROGRESS__
 -->
 
+### 0.7.0 (2021-03-04)
+* Added the ability to specify the local listen port
+
 ### 0.6.0 (2020-02-29)
 * Add support for DTLS 1.3 alerts
 
