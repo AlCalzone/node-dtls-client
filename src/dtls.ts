@@ -59,7 +59,7 @@ export namespace dtls {
 			this._connectionTimeout = setTimeout(() => this.expectConnection(), this.options.timeout);
 
 			// start the connection
-			this.udp.bind();
+			this.udp.bind(options.port);
 		}
 
 		private recordLayer: RecordLayer;

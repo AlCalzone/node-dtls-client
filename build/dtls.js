@@ -56,7 +56,7 @@ var dtls;
             this._udpConnected = false;
             this._connectionTimeout = setTimeout(() => this.expectConnection(), this.options.timeout);
             // start the connection
-            this.udp.bind();
+            this.udp.bind(options.port);
         }
         /**
          * Send the given data. It is automatically compressed and encrypted.
