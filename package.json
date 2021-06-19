@@ -24,7 +24,7 @@
     "chai-as-promised": "^7.1.1",
     "colors": "^1.2.3",
     "coveralls": "^3.0.0",
-    "mocha": "^7.0.0",
+    "mocha": "^9.0.1",
     "nyc": "^15.1.0",
     "proxyquire": "^2.0.1",
     "rimraf": "^3.0.0",
@@ -54,10 +54,10 @@
     "build": "tsc",
     "prebuild": "rimraf ./build",
     "watch": "tsc --watch",
-    "test:ts": "node_modules/.bin/mocha",
+    "test:ts": "mocha src/**/*.test.ts",
     "test": "npm run test:ts",
-    "coverage": "node_modules/.bin/nyc npm test",
-    "coveralls": "node_modules/.bin/nyc report --reporter=text-lcov | coveralls -v",
+    "coverage": "nyc npm test",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls -v",
     "show-coverage": "npm run coverage && start ./coverage/index.html",
     "lint:ts": "tslint",
     "lint": "npm run lint:ts \"src/**/*.ts\"",
@@ -76,7 +76,7 @@
       ".ts"
     ],
     "require": [
-      "./test/mocha.setup.js",
+      "./test/mocha.env.js",
       "ts-node/register",
       "source-map-support/register"
     ],
