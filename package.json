@@ -41,7 +41,7 @@
     "semver": "^7.3.5"
   },
   "optionalDependencies": {
-    "node-aead-crypto": "^2.0.0"
+    "node-aead-crypto": "^2.2.1"
   },
   "engines": {
     "node": ">=12"
