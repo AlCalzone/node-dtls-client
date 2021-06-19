@@ -85,7 +85,7 @@ The events are defined as follows:
     PLACEHOLDER for next version:
     ### __WORK IN PROGRESS__
 -->
-### __WORK IN PROGRESS__
+### 1.0.0 (2021-06-19)
 * Require Node.js 12+
 
 ### 0.7.0 (2021-03-04)
