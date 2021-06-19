@@ -76,7 +76,7 @@
       ".ts"
     ],
     "require": [
-      "./test/mocha.setup.js",
+      "./test/mocha.env.js",
       "ts-node/register",
       "source-map-support/register"
     ],
