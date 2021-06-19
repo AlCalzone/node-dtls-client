@@ -85,6 +85,8 @@ The events are defined as follows:
     PLACEHOLDER for next version:
     ### __WORK IN PROGRESS__
 -->
+### __WORK IN PROGRESS__
+* Require Node.js 12+
 
 ### 0.7.0 (2021-03-04)
 * Added the ability to specify the local listen port
