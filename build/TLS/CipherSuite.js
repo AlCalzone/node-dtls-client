@@ -49,110 +49,107 @@ function createNullMAC() {
     return ret;
 }
 // TODO: Documentation
-let CipherSuite = /** @class */ (() => {
-    class CipherSuite extends TLSStruct_1.TLSStruct {
-        constructor(id, keyExchange, macAlgorithm, prfAlgorithm, cipherType, algorithm, verify_data_length = 12) {
-            super(CipherSuite.__spec);
-            this.id = id;
-            this.keyExchange = keyExchange;
-            this.macAlgorithm = macAlgorithm;
-            this.prfAlgorithm = prfAlgorithm;
-            this.cipherType = cipherType;
-            this.algorithm = algorithm;
-            this.verify_data_length = verify_data_length;
+class CipherSuite extends TLSStruct_1.TLSStruct {
+    constructor(id, keyExchange, macAlgorithm, prfAlgorithm, cipherType, algorithm, verify_data_length = 12) {
+        super(CipherSuite.__spec);
+        this.id = id;
+        this.keyExchange = keyExchange;
+        this.macAlgorithm = macAlgorithm;
+        this.prfAlgorithm = prfAlgorithm;
+        this.cipherType = cipherType;
+        this.algorithm = algorithm;
+        this.verify_data_length = verify_data_length;
+    }
+    static createEmpty() {
+        return new CipherSuite(null, null, null, null, null);
+    }
+    get Cipher() {
+        if (this._cipher == undefined) {
+            this._cipher = this.createCipher();
         }
-        static createEmpty() {
-            return new CipherSuite(null, null, null, null, null);
-        }
-        get Cipher() {
-            if (this._cipher == undefined) {
-                this._cipher = this.createCipher();
-            }
-            return this._cipher;
-        }
-        createCipher() {
-            const ret = (() => {
-                switch (this.cipherType) {
-                    case null:
-                        return createNullCipher();
-                    case "block":
-                        return BlockCipher.createCipher(this.algorithm, this.MAC);
-                    case "aead":
-                        return AEADCipher.createCipher(this.algorithm);
-                    default:
-                        throw new Error(`createCipher not implemented for ${this.cipherType} cipher`);
-                }
-            })();
-            if (!ret.keyLength)
-                ret.keyLength = 0;
-            if (!ret.fixedIvLength)
-                ret.fixedIvLength = 0;
-            if (!ret.recordIvLength)
-                ret.recordIvLength = 0;
-            return ret;
-        }
-        specifyCipher(keyMaterial, connEnd) {
-            const ret = ((plaintext) => this.Cipher(plaintext, keyMaterial, connEnd));
-            ret.inner = this.Cipher;
-            return ret;
-        }
-        get Decipher() {
-            if (this._decipher == undefined) {
-                this._decipher = this.createDecipher();
-            }
-            return this._decipher;
-        }
-        createDecipher() {
-            const ret = (() => {
-                switch (this.cipherType) {
-                    case null:
-                        return createNullDecipher();
-                    case "block":
-                        return BlockCipher.createDecipher(this.algorithm, this.MAC);
-                    case "aead":
-                        return AEADCipher.createDecipher(this.algorithm);
-                    default:
-                        throw new Error(`createDecipher not implemented for ${this.cipherType} cipher`);
-                }
-            })();
-            if (!ret.keyLength)
-                ret.keyLength = 0;
-            if (!ret.fixedIvLength)
-                ret.fixedIvLength = 0;
-            if (!ret.recordIvLength)
-                ret.recordIvLength = 0;
-            return ret;
-        }
-        specifyDecipher(keyMaterial, connEnd) {
-            const ret = ((packet) => this.Decipher(packet, keyMaterial, connEnd));
-            ret.inner = this.Decipher;
-            return ret;
-        }
-        get MAC() {
-            if (this._mac == undefined) {
-                this._mac = this.createMAC();
-            }
-            return this._mac;
-        }
-        createMAC() {
+        return this._cipher;
+    }
+    createCipher() {
+        const ret = (() => {
             switch (this.cipherType) {
                 case null:
-                case "aead":
-                    return createNullMAC();
+                    return createNullCipher();
                 case "block":
-                    if (this.macAlgorithm == null) {
-                        return createNullMAC();
-                    }
-                    return createMAC(this.macAlgorithm);
+                    return BlockCipher.createCipher(this.algorithm, this.MAC);
+                case "aead":
+                    return AEADCipher.createCipher(this.algorithm);
                 default:
-                    throw new Error(`createMAC not implemented for ${this.cipherType} cipher`);
+                    throw new Error(`createCipher not implemented for ${this.cipherType} cipher`);
             }
+        })();
+        if (!ret.keyLength)
+            ret.keyLength = 0;
+        if (!ret.fixedIvLength)
+            ret.fixedIvLength = 0;
+        if (!ret.recordIvLength)
+            ret.recordIvLength = 0;
+        return ret;
+    }
+    specifyCipher(keyMaterial, connEnd) {
+        const ret = ((plaintext) => this.Cipher(plaintext, keyMaterial, connEnd));
+        ret.inner = this.Cipher;
+        return ret;
+    }
+    get Decipher() {
+        if (this._decipher == undefined) {
+            this._decipher = this.createDecipher();
+        }
+        return this._decipher;
+    }
+    createDecipher() {
+        const ret = (() => {
+            switch (this.cipherType) {
+                case null:
+                    return createNullDecipher();
+                case "block":
+                    return BlockCipher.createDecipher(this.algorithm, this.MAC);
+                case "aead":
+                    return AEADCipher.createDecipher(this.algorithm);
+                default:
+                    throw new Error(`createDecipher not implemented for ${this.cipherType} cipher`);
+            }
+        })();
+        if (!ret.keyLength)
+            ret.keyLength = 0;
+        if (!ret.fixedIvLength)
+            ret.fixedIvLength = 0;
+        if (!ret.recordIvLength)
+            ret.recordIvLength = 0;
+        return ret;
+    }
+    specifyDecipher(keyMaterial, connEnd) {
+        const ret = ((packet) => this.Decipher(packet, keyMaterial, connEnd));
+        ret.inner = this.Decipher;
+        return ret;
+    }
+    get MAC() {
+        if (this._mac == undefined) {
+            this._mac = this.createMAC();
+        }
+        return this._mac;
+    }
+    createMAC() {
+        switch (this.cipherType) {
+            case null:
+            case "aead":
+                return createNullMAC();
+            case "block":
+                if (this.macAlgorithm == null) {
+                    return createNullMAC();
+                }
+                return createMAC(this.macAlgorithm);
+            default:
+                throw new Error(`createMAC not implemented for ${this.cipherType} cipher`);
         }
     }
-    CipherSuite.__spec = {
-        id: TypeSpecs.uint16,
-    };
-    CipherSuite.spec = TypeSpecs.define.Struct(CipherSuite);
-    return CipherSuite;
-})();
+}
 exports.CipherSuite = CipherSuite;
+CipherSuite.__spec = {
+    id: TypeSpecs.uint16,
+};
+CipherSuite.spec = TypeSpecs.define.Struct(CipherSuite);

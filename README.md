@@ -41,6 +41,13 @@ The `DtlsOptions` object looks as follows:
 	timeout: 1000, // in ms, optional, minimum 100, default 1000
 	ciphers: [ /* ... */ ], // optional array of (D)TLS cipher suites, e.g. ["TLS_PSK_WITH_AES_128_CCM"]
 	listenPort: 2345 // optional local port number to listen at, default: chosen at random
+	compat: { // optional compat options
+		/**
+		 * The IKEA gateway v1.15.x has a bug where the Server Hello reuses the sequence number of the Hello Verify Request.
+		 * This flag can be set to true to work around it.
+		 */
+		resetAntiReplayWindowBeforeServerHello: true,
+	}
 }
 ```
 
@@ -85,6 +92,9 @@ The events are defined as follows:
     PLACEHOLDER for next version:
     ### __WORK IN PROGRESS__
 -->
+### __WORK IN PROGRESS__
+* Workaround for a bug in IKEA gateway firmware `v1.15.x`
+
 ### 1.0.0 (2021-06-19)
 * Require Node.js 12+
 

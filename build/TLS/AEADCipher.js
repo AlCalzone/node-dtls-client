@@ -17,29 +17,26 @@ const AEADCipherParameters = {
     "aes-128-gcm": { interface: AEADCrypto_1.gcm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
     "aes-256-gcm": { interface: AEADCrypto_1.gcm, keyLength: 32, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
 };
-let AdditionalData = /** @class */ (() => {
-    class AdditionalData extends TLSStruct_1.TLSStruct {
-        constructor(epoch, sequence_number, type, version, fragment_length) {
-            super(AdditionalData.__spec);
-            this.epoch = epoch;
-            this.sequence_number = sequence_number;
-            this.type = type;
-            this.version = version;
-            this.fragment_length = fragment_length;
-        }
-        static createEmpty() {
-            return new AdditionalData(null, null, null, null, null);
-        }
+class AdditionalData extends TLSStruct_1.TLSStruct {
+    constructor(epoch, sequence_number, type, version, fragment_length) {
+        super(AdditionalData.__spec);
+        this.epoch = epoch;
+        this.sequence_number = sequence_number;
+        this.type = type;
+        this.version = version;
+        this.fragment_length = fragment_length;
     }
-    AdditionalData.__spec = {
-        epoch: TypeSpecs.uint16,
-        sequence_number: TypeSpecs.uint48,
-        type: ContentType_1.ContentType.__spec,
-        version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-        fragment_length: TypeSpecs.uint16,
-    };
-    return AdditionalData;
-})();
+    static createEmpty() {
+        return new AdditionalData(null, null, null, null, null);
+    }
+}
+AdditionalData.__spec = {
+    epoch: TypeSpecs.uint16,
+    sequence_number: TypeSpecs.uint48,
+    type: ContentType_1.ContentType.__spec,
+    version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+    fragment_length: TypeSpecs.uint16,
+};
 /**
  * Creates an AEAD cipher delegate used to encrypt packet fragments.
  * @param algorithm - The AEAD cipher algorithm to be used

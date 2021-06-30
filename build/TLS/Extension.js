@@ -10,22 +10,19 @@ var ExtensionType;
 (function (ExtensionType) {
     ExtensionType.spec = TypeSpecs.define.Enum("uint16", ExtensionType);
 })(ExtensionType = exports.ExtensionType || (exports.ExtensionType = {}));
-let Extension = /** @class */ (() => {
-    class Extension extends TLSStruct_1.TLSStruct {
-        constructor(extension_type, extension_data) {
-            super(Extension.__spec);
-            this.extension_type = extension_type;
-            this.extension_data = extension_data;
-        }
-        static createEmpty() {
-            return new Extension(null, null);
-        }
+class Extension extends TLSStruct_1.TLSStruct {
+    constructor(extension_type, extension_data) {
+        super(Extension.__spec);
+        this.extension_type = extension_type;
+        this.extension_data = extension_data;
     }
-    Extension.__spec = {
-        extension_type: ExtensionType.spec,
-        extension_data: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
-    };
-    Extension.spec = TypeSpecs.define.Struct(Extension);
-    return Extension;
-})();
+    static createEmpty() {
+        return new Extension(null, null);
+    }
+}
 exports.Extension = Extension;
+Extension.__spec = {
+    extension_type: ExtensionType.spec,
+    extension_data: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
+};
+Extension.spec = TypeSpecs.define.Struct(Extension);
