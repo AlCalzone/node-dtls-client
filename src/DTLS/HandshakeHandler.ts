@@ -1,6 +1,7 @@
 ﻿import { dtls } from "../dtls";
 import { CipherSuites } from "../DTLS/CipherSuites";
 import { Alert, AlertDescription, AlertLevel } from "../TLS/Alert";
+import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
 import { ChangeCipherSpec } from "../TLS/ChangeCipherSpec";
 import { CompressionMethod } from "../TLS/ConnectionState";
 import { ContentType } from "../TLS/ContentType";
@@ -350,6 +351,10 @@ export class ClientHandshakeHandler {
 			// add the cookie to the client hello and send it again
 			const hello = this.lastFlight[0] as Handshake.ClientHello;
 			hello.cookie = hvr.cookie;
+			// Work around IKEAs bug in gateway v1.15.x
+			if (this.options.compat?.resetAntiReplayWindowBeforeServerHello) {
+				this.recordLayer.currentReadEpoch.antiReplayWindow = new AntiReplayWindow();
+			}
 			// TODO: do something with session id?
 			this.sendFlight(
 				[hello],
