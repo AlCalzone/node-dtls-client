@@ -65,8 +65,16 @@ export declare namespace dtls {
          * All supported cipher suites are used if not specified otherwise.
          */
         ciphers?: (keyof typeof CipherSuites)[];
-        /** The local port to listen at*/
+        /** The local port to listen at */
         listenPort?: number;
+        /** Compatibility options */
+        compat?: {
+            /**
+             * The IKEA gateway v1.15.x has a bug where the Server Hello reuses the sequence number of the Hello Verify Request.
+             * This flag can be set to true to work around it.
+             */
+            resetAntiReplayWindowBeforeServerHello?: boolean;
+        };
     }
     type ListeningEventHandler = () => void;
     type MessageEventHandler = (msg: Buffer, rinfo: dgram.RemoteInfo) => void;

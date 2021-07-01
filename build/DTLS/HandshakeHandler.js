@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClientHandshakeHandler = void 0;
 const CipherSuites_1 = require("../DTLS/CipherSuites");
 const Alert_1 = require("../TLS/Alert");
+const AntiReplayWindow_1 = require("../TLS/AntiReplayWindow");
 const ChangeCipherSpec_1 = require("../TLS/ChangeCipherSpec");
 const ConnectionState_1 = require("../TLS/ConnectionState");
 const ContentType_1 = require("../TLS/ContentType");
@@ -25,12 +26,17 @@ class ClientHandshakeHandler {
         this.handle = {
             /** Handles a HelloVerifyRequest message */
             [Handshake.HandshakeType.hello_verify_request]: (messages) => {
+                var _a;
                 // this flight should only contain a single message,
                 // but to be sure extract the last one
                 const hvr = messages[messages.length - 1];
                 // add the cookie to the client hello and send it again
                 const hello = this.lastFlight[0];
                 hello.cookie = hvr.cookie;
+                // Work around IKEAs bug in gateway v1.15.x
+                if ((_a = this.options.compat) === null || _a === void 0 ? void 0 : _a.resetAntiReplayWindowBeforeServerHello) {
+                    this.recordLayer.currentReadEpoch.antiReplayWindow = new AntiReplayWindow_1.AntiReplayWindow();
+                }
                 // TODO: do something with session id?
                 this.sendFlight([hello], [Handshake.HandshakeType.server_hello_done]);
             },

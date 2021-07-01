@@ -26,21 +26,18 @@ var SignatureAlgorithm;
 (function (SignatureAlgorithm) {
     SignatureAlgorithm.__spec = TypeSpecs.define.Enum("uint8", SignatureAlgorithm);
 })(SignatureAlgorithm = exports.SignatureAlgorithm || (exports.SignatureAlgorithm = {}));
-let SignatureAndHashAlgorithm = /** @class */ (() => {
-    class SignatureAndHashAlgorithm extends TLSStruct_1.TLSStruct {
-        constructor(hash, signature) {
-            super(SignatureAndHashAlgorithm.__spec);
-            this.hash = hash;
-            this.signature = signature;
-        }
-        static createEmpty() {
-            return new SignatureAndHashAlgorithm(null, null);
-        }
+class SignatureAndHashAlgorithm extends TLSStruct_1.TLSStruct {
+    constructor(hash, signature) {
+        super(SignatureAndHashAlgorithm.__spec);
+        this.hash = hash;
+        this.signature = signature;
     }
-    SignatureAndHashAlgorithm.__spec = {
-        hash: HashAlgorithm.__spec,
-        signature: SignatureAlgorithm.__spec,
-    };
-    return SignatureAndHashAlgorithm;
-})();
+    static createEmpty() {
+        return new SignatureAndHashAlgorithm(null, null);
+    }
+}
 exports.default = SignatureAndHashAlgorithm;
+SignatureAndHashAlgorithm.__spec = {
+    hash: HashAlgorithm.__spec,
+    signature: SignatureAlgorithm.__spec,
+};
