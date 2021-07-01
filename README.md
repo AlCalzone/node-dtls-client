@@ -92,7 +92,7 @@ The events are defined as follows:
     PLACEHOLDER for next version:
     ### __WORK IN PROGRESS__
 -->
-### __WORK IN PROGRESS__
+### 0.7.1 (2021-07-01)
 * Workaround for a bug in IKEA gateway firmware `v1.15.x`
 
 ### 0.7.0 (2021-03-04)
