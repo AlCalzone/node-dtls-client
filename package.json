@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "semver": "^7.3.5"
+    "semver": "^7.3.7"
   },
   "optionalDependencies": {
     "node-aead-crypto": "^2.2.1"
