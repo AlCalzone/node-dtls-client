@@ -12,7 +12,7 @@
   "homepage": "https://github.com/AlCalzone/node-dtls-client",
   "devDependencies": {
     "@alcalzone/release-script": "~3.5.9",
-    "@alcalzone/release-script-plugin-license": "~3.5.3",
+    "@alcalzone/release-script-plugin-license": "~3.5.9",
     "@types/chai": "^4.3.1",
     "@types/debug": "4.1.7",
     "@types/mocha": "^9.1.1",
