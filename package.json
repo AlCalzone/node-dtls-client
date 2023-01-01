@@ -16,7 +16,7 @@
     "@types/chai": "^4.3.3",
     "@types/debug": "4.1.7",
     "@types/mocha": "^9.1.1",
-    "@types/node": "^16.11.38",
+    "@types/node": "^18.11.18",
     "@types/semver": "^7.3.12",
     "@types/sinon": "^10.0.11",
     "@types/sinon-chai": "^3.2.8",
