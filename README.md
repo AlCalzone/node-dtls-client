@@ -92,6 +92,9 @@ The events are defined as follows:
     PLACEHOLDER for next version:
     ### __WORK IN PROGRESS__
 -->
+### 1.1.0 (2023-01-26)
+* Updated the `node-aead-crypto` dependency for proper Electron support
+
 ### 1.0.2 (2023-01-26)
 * Fixed the check for Electron runtime
 

@@ -1,6 +1,6 @@
 {
   "name": "node-dtls-client",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "DTLS protocol implementation for Node.js written in TypeScript.",
   "main": "./build/dtls.js",
   "types": "./build/dtls.d.ts",
@@ -41,7 +41,7 @@
     "semver": "^7.3.7"
   },
   "optionalDependencies": {
-    "node-aead-crypto": "^2.2.1"
+    "node-aead-crypto": "^3.0.0"
   },
   "engines": {
     "node": ">=12"
