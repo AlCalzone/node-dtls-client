@@ -92,7 +92,7 @@ The events are defined as follows:
     PLACEHOLDER for next version:
     ### __WORK IN PROGRESS__
 -->
-### __WORK IN PROGRESS__
+### 1.0.2 (2023-01-26)
 * Fixed the check for Electron runtime
 
 ### 1.0.1 (2021-06-30)
@@ -147,7 +147,7 @@ The events are defined as follows:
 * improved error and timeout handling in the socket wrapper.
 
 ### 0.0.1
-* initial release. 
+* initial release.
 
 ## Contributors
 * https://github.com/thoukydides - Thanks for noticing the errors in the 3DES and 256-bit AES (AEAD) cipher suites.
@@ -155,7 +155,7 @@ The events are defined as follows:
 ## License
 The MIT License (MIT)
 
-Copyright (c) 2017 AlCalzone <d.griesel@gmx.net>
+Copyright (c) 2017-2023 AlCalzone <d.griesel@gmx.net>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
