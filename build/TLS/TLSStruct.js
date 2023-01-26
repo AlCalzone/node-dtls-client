@@ -15,7 +15,7 @@ class TLSStruct {
         this.propertyDefinitions = [];
         // Eigenschaften aus Spec kopieren
         // this.__spec__ = spec;
-        for (const [key, value] of object_polyfill_1.entries(spec)) {
+        for (const [key, value] of (0, object_polyfill_1.entries)(spec)) {
             this.propertyDefinitions.push({
                 name: key,
                 type: value,
@@ -42,7 +42,7 @@ class TLSStruct {
                 case "number":
                 case "enum":
                     const bitSize = TypeSpecs.getPrimitiveSize(type);
-                    result = { result: BitConverter_1.bufferToNumber(buf, bitSize, offset + delta), readBytes: bitSize / 8 };
+                    result = { result: (0, BitConverter_1.bufferToNumber)(buf, bitSize, offset + delta), readBytes: bitSize / 8 };
                     break;
                 case "vector":
                     result = Vector_1.Vector.from(type, buf, offset + delta);
@@ -64,7 +64,7 @@ class TLSStruct {
                         // for variable length Buffers, read the actual length first
                         if (TypeSpecs.Buffer.isVariableLength(type)) {
                             const lengthBits = (8 * util.fitToWholeBytes(type.maxLength));
-                            length = BitConverter_1.bufferToNumber(buf, lengthBits, offset + delta);
+                            length = (0, BitConverter_1.bufferToNumber)(buf, lengthBits, offset + delta);
                             lengthBytes += lengthBits / 8;
                         }
                         // copy the data into the new buffer
@@ -104,7 +104,7 @@ class TLSStruct {
                 case "number":
                 case "enum":
                     const bitSize = TypeSpecs.getPrimitiveSize(type);
-                    return BitConverter_1.numberToBuffer(propValue, bitSize);
+                    return (0, BitConverter_1.numberToBuffer)(propValue, bitSize);
                 case "vector":
                     // we know propValue is a Vector<T> but we don't know or care about T
                     return propValue.serialize(type);
@@ -117,7 +117,7 @@ class TLSStruct {
                     if (TypeSpecs.Buffer.isVariableLength(type)) {
                         const lengthBits = (8 * util.fitToWholeBytes(type.maxLength));
                         result = Buffer.concat([
-                            BitConverter_1.numberToBuffer(result.length, lengthBits),
+                            (0, BitConverter_1.numberToBuffer)(result.length, lengthBits),
                             result,
                         ]);
                     }

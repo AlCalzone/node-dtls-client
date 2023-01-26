@@ -70,7 +70,7 @@ exports.CipherSuites = {
     // TRADFRI wants TLS_PSK_WITH_AES_128_CCM_8 or TLS_PSK_WITH_AES_128_CBC_SHA256
 };
 // define index accessors
-for (const cs of object_polyfill_1.values(exports.CipherSuites)) {
+for (const cs of (0, object_polyfill_1.values)(exports.CipherSuites)) {
     if (!exports.CipherSuites.hasOwnProperty("" + cs.id)) {
         exports.CipherSuites[cs.id] = cs;
     }

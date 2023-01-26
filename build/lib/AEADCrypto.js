@@ -39,7 +39,8 @@ let importedCCM;
 let importedGCM;
 let nativeCCM;
 let nativeGCM;
-if (semver.satisfies(process.version, ">=10")) {
+if (!process.versions.electron &&
+    semver.satisfies(process.versions.node, ">=10")) {
     // We can use the native methods
     nativeCCM = {
         encrypt: encryptNative.bind(undefined, "ccm"),

@@ -92,6 +92,9 @@ The events are defined as follows:
     PLACEHOLDER for next version:
     ### __WORK IN PROGRESS__
 -->
+### __WORK IN PROGRESS__
+* Fixed the check for Electron runtime
+
 ### 1.0.1 (2021-06-30)
 * Workaround for a bug in IKEA gateway firmware `v1.15.x`
 

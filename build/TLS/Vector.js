@@ -20,7 +20,7 @@ class Vector {
             case "number":
             case "enum":
                 bitSize = TypeSpecs.getPrimitiveSize(spec.itemSpec);
-                serializedItems = this.items.map(v => BitConverter_1.numberToBuffer(v, bitSize));
+                serializedItems = this.items.map(v => (0, BitConverter_1.numberToBuffer)(v, bitSize));
                 break;
             case "struct":
                 serializedItems = this.items.map(v => v.serialize());
@@ -28,9 +28,9 @@ class Vector {
         let ret = Buffer.concat(serializedItems);
         // for variable length vectors, prepend the maximum length
         if (TypeSpecs.Vector.isVariableLength(spec)) {
-            const lengthBits = (8 * util_1.fitToWholeBytes(spec.maxLength));
+            const lengthBits = (8 * (0, util_1.fitToWholeBytes)(spec.maxLength));
             ret = Buffer.concat([
-                BitConverter_1.numberToBuffer(ret.length, lengthBits),
+                (0, BitConverter_1.numberToBuffer)(ret.length, lengthBits),
                 ret,
             ]);
         }
@@ -41,8 +41,8 @@ class Vector {
         let length = spec.maxLength;
         let delta = 0;
         if (TypeSpecs.Vector.isVariableLength(spec)) {
-            const lengthBits = (8 * util_1.fitToWholeBytes(spec.maxLength));
-            length = BitConverter_1.bufferToNumber(buf, lengthBits, offset);
+            const lengthBits = (8 * (0, util_1.fitToWholeBytes)(spec.maxLength));
+            length = (0, BitConverter_1.bufferToNumber)(buf, lengthBits, offset);
             delta += lengthBits / 8;
         }
         let i;
@@ -51,7 +51,7 @@ class Vector {
             case "enum":
                 const bitSize = TypeSpecs.getPrimitiveSize(spec.itemSpec);
                 for (i = 0; i < length; i += bitSize / 8) {
-                    this.items.push(BitConverter_1.bufferToNumber(buf, bitSize, offset + delta)); // we know this is a number!
+                    this.items.push((0, BitConverter_1.bufferToNumber)(buf, bitSize, offset + delta)); // we know this is a number!
                     delta += bitSize / 8;
                 }
                 break;

@@ -91,7 +91,10 @@ let importedGCM: AEADEncryptionInterface;
 let nativeCCM: AEADEncryptionInterface;
 let nativeGCM: AEADEncryptionInterface;
 
-if (semver.satisfies(process.version, ">=10")) {
+if (
+	!process.versions.electron &&
+	semver.satisfies(process.versions.node, ">=10")
+) {
 	// We can use the native methods
 	nativeCCM = {
 		encrypt: encryptNative.bind(undefined, "ccm"),
