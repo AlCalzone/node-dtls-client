@@ -413,7 +413,8 @@ export class ClientHandshakeHandler {
 								flight.push(clKeyExchange);
 
 								// now we have everything, construct the pre master secret
-								const psk = Buffer.from(this.options.psk[psk_identity], "ascii");
+								const pskValue = this.options.psk[psk_identity];
+								const psk = Buffer.isBuffer(pskValue) ? pskValue : Buffer.from(pskValue, "ascii");
 								preMasterSecret = new PreMasterSecret(null, psk);
 								break;
 
