@@ -6,33 +6,35 @@ name: Test and Release
 # as well as tags with a semantic version
 on:
   push:
-    branches:
-      - master
-    tags:
-      # normal versions
-      - "v[0-9]+.[0-9]+.[0-9]+"
-      # pre-releases
-      - "v[0-9]+.[0-9]+.[0-9]+-**"
+      branches:
+        - master
+        - "*" # For testing, temporary
+      tags:
+        # normal versions
+        - "v[0-9]+.[0-9]+.[0-9]+"
+        # pre-releases
+        - "v[0-9]+.[0-9]+.[0-9]+-**"
   pull_request: {}
 
 permissions:
-  id-token: write # Required for publishing with OICD
+  id-token: write # Required for publishing with OIDC
   contents: write # Required for creating releases
 
 jobs:
   # Performs quick checks before the expensive test runs
   check-and-lint:
-    if: contains(github.event.head_commit.message || github.event.pull_request.title || '', '[skip ci]') == false
-
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22]
 
     steps:
       - uses: actions/checkout@v6
-      - name: Use Node.js 22
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v6
         with:
-          node-version: 22
-          cache: "npm"
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -47,8 +49,6 @@ jobs:
 
   # Runs unit tests on all supported node versions and OSes
   unit-tests:
-    if: contains(github.event.head_commit.message || github.event.pull_request.title || '', '[skip ci]') == false
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -60,7 +60,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -77,23 +77,25 @@ jobs:
   deploy:
     # Trigger this step only when a commit on master is tagged with a version number
     if: |
-      contains(github.event.head_commit.message || github.event.pull_request.title || '', '[skip ci]') == false &&
       github.event_name == 'push' &&
       startsWith(github.ref, 'refs/tags/v')
 
     needs: [check-and-lint, unit-tests]
 
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Use Node.js 22
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v6
         with:
-          node-version: 22
-          cache: "npm"
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
       # Ensure npm 11.5.1 or later is installed
       - name: Update npm
@@ -111,7 +113,7 @@ jobs:
           echo "BODY<<$EOF" >> $GITHUB_OUTPUT
           echo "$BODY" >> $GITHUB_OUTPUT
           echo "$EOF" >> $GITHUB_OUTPUT
-          if [[ $VERSION == *"-"* ]]; then
+          if [[ $VERSION == *"-"* ]] ; then
             echo "TAG=--tag next" >> $GITHUB_OUTPUT
           fi
 
@@ -121,17 +123,8 @@ jobs:
       - name: Create a clean build
         run: npm run build
 
-      - name: Create release artifacts
-        id: package_release
-        run: |
-          PACKAGE_FILE=$(npm pack --silent)
-          echo "PACKAGE_FILE=$PACKAGE_FILE" >> $GITHUB_OUTPUT
-          BUILD_ARCHIVE="node-dtls-client-${{ steps.extract_release.outputs.VERSION }}-build.tar.gz"
-          tar -czf "$BUILD_ARCHIVE" build
-          echo "BUILD_ARCHIVE=$BUILD_ARCHIVE" >> $GITHUB_OUTPUT
-
       - name: Publish package to npm
-        run: npm publish "${{ steps.package_release.outputs.PACKAGE_FILE }}" ${{ steps.extract_release.outputs.TAG }}
+        run: npm publish ${{ steps.extract_release.outputs.TAG }}
 
       - name: Create Github Release
         uses: softprops/action-gh-release@v2
@@ -144,6 +137,3 @@ jobs:
           # Prerelease versions create prereleases on Github
           prerelease: ${{ contains(steps.extract_release.outputs.VERSION, '-') }}
           body: ${{ steps.extract_release.outputs.BODY }}
-          files: |
-            ${{ steps.package_release.outputs.PACKAGE_FILE }}
-            ${{ steps.package_release.outputs.BUILD_ARCHIVE }}
