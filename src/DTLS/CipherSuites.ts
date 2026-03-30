@@ -1,5 +1,5 @@
-import { values } from "../lib/object-polyfill";
-import { CipherSuite } from "../TLS/CipherSuite";
+import { values } from "../lib/object-polyfill.js";
+import { CipherSuite } from "../TLS/CipherSuite.js";
 
 // block sizes etc. see https://tools.ietf.org/html/rfc5246 page 83
 export const CipherSuites = {

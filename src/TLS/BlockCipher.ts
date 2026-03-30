@@ -1,8 +1,8 @@
 import * as crypto from "crypto";
-import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
-import { DTLSCompressed } from "../DTLS/DTLSCompressed";
-import { GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial } from "./CipherSuite";
-import { ConnectionEnd } from "./ConnectionState";
+import { DTLSCiphertext } from "../DTLS/DTLSCiphertext.js";
+import { DTLSCompressed } from "../DTLS/DTLSCompressed.js";
+import { GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial } from "./CipherSuite.js";
+import { ConnectionEnd } from "./ConnectionState.js";
 
 export type BlockCipherAlgorithm =
 	"aes-128-cbc" | "aes-256-cbc" |

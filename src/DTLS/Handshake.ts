@@ -1,14 +1,14 @@
-import { CipherSuite } from "../TLS/CipherSuite";
-import { CompressionMethod } from "../TLS/ConnectionState";
-import { Extension } from "../TLS/Extension";
-import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import { Random } from "../TLS/Random";
-import { SessionID } from "../TLS/SessionID";
-import { TLSStruct } from "../TLS/TLSStruct";
-import * as TypeSpecs from "../TLS/TypeSpecs";
-import { Vector } from "../TLS/Vector";
-import { Cookie } from "./Cookie";
-import { RecordLayer } from "./RecordLayer";
+import { CipherSuite } from "../TLS/CipherSuite.js";
+import { CompressionMethod } from "../TLS/ConnectionState.js";
+import { Extension } from "../TLS/Extension.js";
+import { ProtocolVersion } from "../TLS/ProtocolVersion.js";
+import { Random } from "../TLS/Random.js";
+import { SessionID } from "../TLS/SessionID.js";
+import { TLSStruct } from "../TLS/TLSStruct.js";
+import * as TypeSpecs from "../TLS/TypeSpecs.js";
+import { Vector } from "../TLS/Vector.js";
+import { Cookie } from "./Cookie.js";
+import { RecordLayer } from "./RecordLayer.js";
 
 export enum HandshakeType {
 	hello_request = 0,

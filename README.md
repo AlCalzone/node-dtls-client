@@ -18,7 +18,7 @@ This libary's main goal is to allow using protocols that *require* DTLS.
 
 ### Establish a secure connection:
 ```js
-var dtls = require("node-dtls-client");
+import { dtls } from "node-dtls-client";
 
 const socket = dtls
 	// create a socket and initialize the secure connection
@@ -93,10 +93,9 @@ The events are defined as follows:
     ### __WORK IN PROGRESS__
 -->
 ### __WORK IN PROGRESS__
-* Replace TSLint with Oxlint
-* Replace Mocha/Chai/Sinon with Vitest
-* Move CI to GitHub Actions
-* Require Node.js 22+
+* Node.js 22+ is now required. Your mileage on older versions may vary.
+* This package is now pure ESM
+* Modernized codebase and CI pipeline
 
 ### 1.1.1 (2023-01-26)
 * Updated the `node-aead-crypto` dependency for proper Electron support

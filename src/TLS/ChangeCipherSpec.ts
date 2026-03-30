@@ -1,5 +1,5 @@
-import { TLSStruct } from "./TLSStruct";
-import * as TypeSpecs from "./TypeSpecs";
+import { TLSStruct } from "./TLSStruct.js";
+import * as TypeSpecs from "./TypeSpecs.js";
 
 export enum ChangeCipherSpecTypes {
 	change_cipher_spec = 1,

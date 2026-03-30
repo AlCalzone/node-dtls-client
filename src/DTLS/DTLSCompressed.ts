@@ -1,9 +1,9 @@
-import { ContentType } from "../TLS/ContentType";
-import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import { TLSStruct } from "../TLS/TLSStruct";
-import * as TypeSpecs from "../TLS/TypeSpecs";
-import { DTLSPacket } from "./DTLSPacket";
-import { DTLSPlaintext } from "./DTLSPlaintext";
+import { ContentType } from "../TLS/ContentType.js";
+import { ProtocolVersion } from "../TLS/ProtocolVersion.js";
+import { TLSStruct } from "../TLS/TLSStruct.js";
+import * as TypeSpecs from "../TLS/TypeSpecs.js";
+import { DTLSPacket } from "./DTLSPacket.js";
+import { DTLSPlaintext } from "./DTLSPlaintext.js";
 
 export class DTLSCompressed extends TLSStruct implements DTLSPacket {
 

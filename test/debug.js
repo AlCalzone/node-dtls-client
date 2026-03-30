@@ -1,7 +1,6 @@
-﻿const PRF = require("../build/TLS/PRF").PRF;
-const PreMasterSecret = require("../build/TLS/PreMasterSecret").PreMasterSecret;
-
-var dtls = require("../").dtls;
+import { dtls } from "node-dtls-client";
+import { PRF } from "../build/TLS/PRF.js";
+import { PreMasterSecret } from "../build/TLS/PreMasterSecret.js";
 
 const socket = dtls.createSocket({
 	type: "udp4",
@@ -36,10 +35,10 @@ verify data: 3cae2c620a2b4357b32ed1c4
 actual     : d53613f7ef44a3c9da30f752
 */
 
-//const PRF = require("../build/TLS/PRF").PRF;
-//const CipherSuites = require("../build/DTLS/CipherSuites").CipherSuites;
-//const CipherSuite = require("../build/TLS/CipherSuite").CipherSuite;
-//const PreMasterSecret = require("../build/TLS/PreMasterSecret").PreMasterSecret;
+//import { PRF } from "../build/TLS/PRF.js";
+//import { CipherSuites } from "../build/DTLS/CipherSuites.js";
+//import { CipherSuite } from "../build/TLS/CipherSuite.js";
+//import { PreMasterSecret } from "../build/TLS/PreMasterSecret.js";
 
 //// a real (working) handshake to test our implementation
 //const packets = {

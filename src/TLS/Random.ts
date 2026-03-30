@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
-import { TLSStruct } from "./TLSStruct";
-import * as TypeSpecs from "./TypeSpecs";
+import { TLSStruct } from "./TLSStruct.js";
+import * as TypeSpecs from "./TypeSpecs.js";
 
 export class Random extends TLSStruct {
 

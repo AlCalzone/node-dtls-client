@@ -1,4 +1,4 @@
-import { ISerializableConstructor } from "./Serializable";
+import { ISerializableConstructor } from "./Serializable.js";
 
 export type Numbers =
 	"uint8" |

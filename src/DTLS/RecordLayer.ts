@@ -1,15 +1,15 @@
 // enable debug output
 import debugPackage from "debug";
 import * as dgram from "dgram";
-import { dtls } from "../dtls";
-import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
-import { ConnectionState } from "../TLS/ConnectionState";
-import { ContentType } from "../TLS/ContentType";
-import { Message } from "../TLS/Message";
-import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import { DTLSCiphertext } from "./DTLSCiphertext";
-import { CompressorDelegate, DecompressorDelegate, DTLSCompressed } from "./DTLSCompressed";
-import { DTLSPlaintext } from "./DTLSPlaintext";
+import { dtls } from "../dtls.js";
+import { AntiReplayWindow } from "../TLS/AntiReplayWindow.js";
+import { ConnectionState } from "../TLS/ConnectionState.js";
+import { ContentType } from "../TLS/ContentType.js";
+import { Message } from "../TLS/Message.js";
+import { ProtocolVersion } from "../TLS/ProtocolVersion.js";
+import { DTLSCiphertext } from "./DTLSCiphertext.js";
+import { CompressorDelegate, DecompressorDelegate, DTLSCompressed } from "./DTLSCompressed.js";
+import { DTLSPlaintext } from "./DTLSPlaintext.js";
 
 const debug = debugPackage("node-dtls-client");
 

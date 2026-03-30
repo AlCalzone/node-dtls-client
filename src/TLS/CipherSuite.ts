@@ -1,11 +1,11 @@
-import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
-import { DTLSCompressed } from "../DTLS/DTLSCompressed";
-import * as AEADCipher from "./AEADCipher";
-import * as BlockCipher from "./BlockCipher";
-import { ConnectionEnd } from "./ConnectionState";
-import { HMAC } from "./PRF";
-import { TLSStruct } from "./TLSStruct";
-import * as TypeSpecs from "./TypeSpecs";
+import { DTLSCiphertext } from "../DTLS/DTLSCiphertext.js";
+import { DTLSCompressed } from "../DTLS/DTLSCompressed.js";
+import * as AEADCipher from "./AEADCipher.js";
+import * as BlockCipher from "./BlockCipher.js";
+import { ConnectionEnd } from "./ConnectionState.js";
+import { HMAC } from "./PRF.js";
+import { TLSStruct } from "./TLSStruct.js";
+import * as TypeSpecs from "./TypeSpecs.js";
 
 export type HashAlgorithm =
 	"md5" |

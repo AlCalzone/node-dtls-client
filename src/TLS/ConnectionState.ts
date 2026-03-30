@@ -1,9 +1,9 @@
-import { CipherSuites } from "../DTLS/CipherSuites";
-import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import { CipherDelegate, CipherSuite, DecipherDelegate, KeyMaterial } from "./CipherSuite";
-import { PreMasterSecret } from "./PreMasterSecret";
-import { PRF } from "./PRF";
-import * as TypeSpecs from "./TypeSpecs";
+import { CipherSuites } from "../DTLS/CipherSuites.js";
+import { ProtocolVersion } from "../TLS/ProtocolVersion.js";
+import { CipherDelegate, CipherSuite, DecipherDelegate, KeyMaterial } from "./CipherSuite.js";
+import { PreMasterSecret } from "./PreMasterSecret.js";
+import { PRF } from "./PRF.js";
+import * as TypeSpecs from "./TypeSpecs.js";
 
 export enum CompressionMethod {
 	null = 0,

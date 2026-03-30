@@ -1,4 +1,4 @@
-import * as TypeSpecs from "../TLS/TypeSpecs";
+import * as TypeSpecs from "../TLS/TypeSpecs.js";
 
 export namespace Cookie {
 

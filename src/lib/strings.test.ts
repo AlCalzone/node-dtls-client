@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { padStart } from "./strings";
+import { padStart } from "./strings.js";
 
 describe("lib/strings => padStart() =>", () => {
 	it("should return a string padded to the given target length", () => {

@@ -1,19 +1,19 @@
-import { dtls } from "../dtls";
-import { CipherSuites } from "../DTLS/CipherSuites";
-import { Alert, AlertDescription, AlertLevel } from "../TLS/Alert";
-import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
-import { ChangeCipherSpec } from "../TLS/ChangeCipherSpec";
-import { CompressionMethod } from "../TLS/ConnectionState";
-import { ContentType } from "../TLS/ContentType";
-import { Extension } from "../TLS/Extension";
-import { Message } from "../TLS/Message";
-import { PreMasterSecret } from "../TLS/PreMasterSecret";
-import { PRF } from "../TLS/PRF";
-import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import { Random } from "../TLS/Random";
-import { Vector } from "../TLS/Vector";
-import * as Handshake from "./Handshake";
-import { RecordLayer } from "./RecordLayer";
+import { dtls } from "../dtls.js";
+import { CipherSuites } from "../DTLS/CipherSuites.js";
+import { Alert, AlertDescription, AlertLevel } from "../TLS/Alert.js";
+import { AntiReplayWindow } from "../TLS/AntiReplayWindow.js";
+import { ChangeCipherSpec } from "../TLS/ChangeCipherSpec.js";
+import { CompressionMethod } from "../TLS/ConnectionState.js";
+import { ContentType } from "../TLS/ContentType.js";
+import { Extension } from "../TLS/Extension.js";
+import { Message } from "../TLS/Message.js";
+import { PreMasterSecret } from "../TLS/PreMasterSecret.js";
+import { PRF } from "../TLS/PRF.js";
+import { ProtocolVersion } from "../TLS/ProtocolVersion.js";
+import { Random } from "../TLS/Random.js";
+import { Vector } from "../TLS/Vector.js";
+import * as Handshake from "./Handshake.js";
+import { RecordLayer } from "./RecordLayer.js";
 
 // TODO
 ///// **

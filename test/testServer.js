@@ -1,4 +1,4 @@
-﻿const dgram = require("dgram");
+import * as dgram from "node:dgram";
 
 // a real (working) handshake to test our implementation
 const packets = {
