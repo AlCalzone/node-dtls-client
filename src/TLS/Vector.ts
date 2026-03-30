@@ -1,7 +1,7 @@
-import { BitSizes, bufferToNumber, numberToBuffer } from "../lib/BitConverter";
-import { fitToWholeBytes } from "../lib/util";
-import { DeserializationResult, ISerializable } from "./Serializable";
-import * as TypeSpecs from "./TypeSpecs";
+import { BitSizes, bufferToNumber, numberToBuffer } from "../lib/BitConverter.js";
+import { fitToWholeBytes } from "../lib/util.js";
+import { DeserializationResult, ISerializable } from "./Serializable.js";
+import * as TypeSpecs from "./TypeSpecs.js";
 
 export class Vector<T extends number | ISerializable> {
 

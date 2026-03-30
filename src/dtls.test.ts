@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { dtls } from "./dtls";
+import { dtls } from "./dtls.js";
 
 describe("dtls.createSocket() =>", () => {
 	it("should throw when required properties on the options object are missing", () => {

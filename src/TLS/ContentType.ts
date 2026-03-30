@@ -1,4 +1,4 @@
-import * as TypeSpecs from "./TypeSpecs";
+import * as TypeSpecs from "./TypeSpecs.js";
 
 export enum ContentType {
 	change_cipher_spec = 20,

@@ -1,4 +1,5 @@
 import * as crypto from "crypto";
+import { createRequire } from "node:module";
 import * as semver from "semver";
 
 /**
@@ -90,6 +91,7 @@ let importedGCM: AEADEncryptionInterface;
 
 let nativeCCM: AEADEncryptionInterface;
 let nativeGCM: AEADEncryptionInterface;
+const require = createRequire(import.meta.url);
 
 if (
 	!process.versions.electron &&

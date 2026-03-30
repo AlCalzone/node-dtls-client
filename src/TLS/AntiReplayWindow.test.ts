@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AntiReplayWindow } from "./AntiReplayWindow";
+import { AntiReplayWindow } from "./AntiReplayWindow.js";
 
 describe("AntiReplayWindow =>", () => {
 	it("constructor & reset", () => {

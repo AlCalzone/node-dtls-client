@@ -2,14 +2,14 @@
 import debugPackage from "debug";
 import * as dgram from "dgram";
 import { EventEmitter } from "events";
-import { CipherSuites } from "./DTLS/CipherSuites";
-import { FragmentedHandshake } from "./DTLS/Handshake";
-import { ClientHandshakeHandler } from "./DTLS/HandshakeHandler";
-import { RecordLayer } from "./DTLS/RecordLayer";
-import { Alert, AlertDescription, AlertLevel } from "./TLS/Alert";
-import { ContentType } from "./TLS/ContentType";
-import { Message } from "./TLS/Message";
-import { TLSStruct } from "./TLS/TLSStruct";
+import { CipherSuites } from "./DTLS/CipherSuites.js";
+import { FragmentedHandshake } from "./DTLS/Handshake.js";
+import { ClientHandshakeHandler } from "./DTLS/HandshakeHandler.js";
+import { RecordLayer } from "./DTLS/RecordLayer.js";
+import { Alert, AlertDescription, AlertLevel } from "./TLS/Alert.js";
+import { ContentType } from "./TLS/ContentType.js";
+import { Message } from "./TLS/Message.js";
+import { TLSStruct } from "./TLS/TLSStruct.js";
 
 const debug = debugPackage("node-dtls-client");
 

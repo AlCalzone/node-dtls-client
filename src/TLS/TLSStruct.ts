@@ -1,9 +1,9 @@
-import { BitSizes, bufferToNumber, numberToBuffer } from "../lib/BitConverter";
-import { entries } from "../lib/object-polyfill";
-import * as util from "../lib/util";
-import { DeserializationResult } from "./Serializable";
-import * as TypeSpecs from "./TypeSpecs";
-import { Vector } from "./Vector";
+import { BitSizes, bufferToNumber, numberToBuffer } from "../lib/BitConverter.js";
+import { entries } from "../lib/object-polyfill.js";
+import * as util from "../lib/util.js";
+import { DeserializationResult } from "./Serializable.js";
+import * as TypeSpecs from "./TypeSpecs.js";
+import { Vector } from "./Vector.js";
 
 export interface PropertyDefinition { name: string; type: TypeSpecs.All; }
 

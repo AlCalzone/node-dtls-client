@@ -7,7 +7,7 @@
         "outDir": "build/",
         "removeComments": false,
         "rootDir": "src",
-        "strictNullChecks": false,
+        "strictNullChecks": false, // This is gonna take some work to enable
         "stripInternal": true,
         "types": ["node"]
     },

@@ -1,13 +1,13 @@
 import * as crypto from "crypto";
-import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
-import { DTLSCompressed } from "../DTLS/DTLSCompressed";
-import { AEADEncryptionInterface, ccm, gcm } from "../lib/AEADCrypto";
-import { ContentType } from "../TLS/ContentType";
-import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import { GenericCipherDelegate, GenericDecipherDelegate, KeyMaterial } from "./CipherSuite";
-import { ConnectionEnd } from "./ConnectionState";
-import { TLSStruct } from "./TLSStruct";
-import * as TypeSpecs from "./TypeSpecs";
+import { DTLSCiphertext } from "../DTLS/DTLSCiphertext.js";
+import { DTLSCompressed } from "../DTLS/DTLSCompressed.js";
+import { AEADEncryptionInterface, ccm, gcm } from "../lib/AEADCrypto.js";
+import { ContentType } from "../TLS/ContentType.js";
+import { ProtocolVersion } from "../TLS/ProtocolVersion.js";
+import { GenericCipherDelegate, GenericDecipherDelegate, KeyMaterial } from "./CipherSuite.js";
+import { ConnectionEnd } from "./ConnectionState.js";
+import { TLSStruct } from "./TLSStruct.js";
+import * as TypeSpecs from "./TypeSpecs.js";
 
 
 export type AEADCipherAlgorithm =

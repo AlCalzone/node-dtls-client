@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { bufferToNumber, numberToBuffer } from "./BitConverter";
+import { bufferToNumber, numberToBuffer } from "./BitConverter.js";
 
 describe("BitConverter Number Tests =>", () => {
 	it("uint8 read 1", () => {
