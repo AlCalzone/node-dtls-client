@@ -44,6 +44,7 @@
   "scripts": {
     "build": "tsc",
     "prebuild": "rimraf ./build",
+    "prepack": "npm run build",
     "watch": "tsc --watch",
     "test:ts": "vitest run",
     "test:watch": "vitest",

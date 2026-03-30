@@ -122,8 +122,17 @@ jobs:
       - name: Create a clean build
         run: npm run build
 
+      - name: Create release artifacts
+        id: package_release
+        run: |
+          PACKAGE_FILE=$(npm pack --silent)
+          echo "PACKAGE_FILE=$PACKAGE_FILE" >> $GITHUB_OUTPUT
+          BUILD_ARCHIVE="node-dtls-client-${{ steps.extract_release.outputs.VERSION }}-build.tar.gz"
+          tar -czf "$BUILD_ARCHIVE" build
+          echo "BUILD_ARCHIVE=$BUILD_ARCHIVE" >> $GITHUB_OUTPUT
+
       - name: Publish package to npm
-        run: npm publish ${{ steps.extract_release.outputs.TAG }}
+        run: npm publish "${{ steps.package_release.outputs.PACKAGE_FILE }}" ${{ steps.extract_release.outputs.TAG }}
 
       - name: Create Github Release
         uses: softprops/action-gh-release@v2
@@ -136,3 +145,6 @@ jobs:
           # Prerelease versions create prereleases on Github
           prerelease: ${{ contains(steps.extract_release.outputs.VERSION, '-') }}
           body: ${{ steps.extract_release.outputs.BODY }}
+          files: |
+            ${{ steps.package_release.outputs.PACKAGE_FILE }}
+            ${{ steps.package_release.outputs.BUILD_ARCHIVE }}
