@@ -1,5 +1,5 @@
-﻿// enable debug output
-import * as debugPackage from "debug";
+// enable debug output
+import debugPackage from "debug";
 import * as dgram from "dgram";
 import { EventEmitter } from "events";
 import { CipherSuites } from "./DTLS/CipherSuites";
@@ -69,7 +69,7 @@ export namespace dtls {
 		private handshakeHandler: ClientHandshakeHandler;
 		private _handshakeFinished: boolean = false;
 		private _udpConnected: boolean;
-		private _connectionTimeout: NodeJS.Timer;
+		private _connectionTimeout: NodeJS.Timeout;
 
 		/**
 		 * Send the given data. It is automatically compressed and encrypted.
@@ -98,7 +98,7 @@ export namespace dtls {
 		public close(callback?: CloseEventHandler) {
 			this.sendAlert(
 				new Alert(AlertLevel.warning, AlertDescription.close_notify),
-				(e) => {
+				() => {
 					this.udp.close();
 					if (callback) this.once("close", callback);
 				},

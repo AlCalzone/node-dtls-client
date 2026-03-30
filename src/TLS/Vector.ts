@@ -1,4 +1,4 @@
-﻿import { BitSizes, bufferToNumber, numberToBuffer } from "../lib/BitConverter";
+import { BitSizes, bufferToNumber, numberToBuffer } from "../lib/BitConverter";
 import { fitToWholeBytes } from "../lib/util";
 import { DeserializationResult, ISerializable } from "./Serializable";
 import * as TypeSpecs from "./TypeSpecs";

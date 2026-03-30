@@ -1,4 +1,4 @@
-﻿import { ContentType } from "./ContentType";
+import { ContentType } from "./ContentType";
 
 export interface Message {
 	type: ContentType;

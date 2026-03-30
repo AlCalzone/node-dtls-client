@@ -1,4 +1,4 @@
-﻿import * as crypto from "crypto";
+import * as crypto from "crypto";
 import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
 

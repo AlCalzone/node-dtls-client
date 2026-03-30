@@ -1,4 +1,4 @@
-﻿import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
+import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
 import { DTLSCompressed } from "../DTLS/DTLSCompressed";
 import * as AEADCipher from "./AEADCipher";
 import * as BlockCipher from "./BlockCipher";
@@ -181,7 +181,7 @@ function createNullDecipher(): GenericDecipherDelegate {
 }
 /** Creates a dummy MAC which just returns an empty Buffer */
 function createNullMAC(): GenericMacDelegate {
-	const ret = ((data, _1, _2) => Buffer.from([])) as GenericMacDelegate;
+	const ret = ((_data, _1, _2) => Buffer.from([])) as GenericMacDelegate;
 	ret.keyAndHashLength = 0;
 	return ret;
 }

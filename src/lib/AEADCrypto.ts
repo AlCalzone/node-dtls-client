@@ -81,7 +81,7 @@ function decryptNative(
 	try {
 		decipher.final();
 		auth_ok = true;
-	} catch (e) {/* nothing to do */ }
+	} catch {/* nothing to do */ }
 	return { plaintext, auth_ok };
 }
 

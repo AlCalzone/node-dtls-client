@@ -1,4 +1,4 @@
-﻿import { BitSizes, bufferToNumber, numberToBuffer } from "../lib/BitConverter";
+import { BitSizes, bufferToNumber, numberToBuffer } from "../lib/BitConverter";
 import { entries } from "../lib/object-polyfill";
 import * as util from "../lib/util";
 import { DeserializationResult } from "./Serializable";

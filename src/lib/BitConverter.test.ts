@@ -1,18 +1,14 @@
-﻿import { expect } from "chai";
+import { describe, expect, it } from "vitest";
 
-import { BitSizes, bufferToNumber, numberToBuffer } from "./BitConverter";
-
-const msg_data_mismatch = "Daten stimmen nicht mit dem erwarteten Ergebnis überein";
-const msg_delta_mismatch = "Delta stimmt nicht mit dem erwarteten Wert überein";
+import { bufferToNumber, numberToBuffer } from "./BitConverter";
 
 describe("BitConverter Number Tests =>", () => {
-
 	it("uint8 read 1", () => {
 		const input = Buffer.from([0xFE]);
 		const expected = 0xFE;
 		const output = bufferToNumber(input, 8);
 
-		expect(output).to.equal(expected, msg_data_mismatch);
+		expect(output).toBe(expected);
 	});
 
 	it("uint8 read 2", () => {
@@ -20,7 +16,7 @@ describe("BitConverter Number Tests =>", () => {
 		const expected = 0xFE;
 		const output = bufferToNumber(input, 8, 1);
 
-		expect(output).to.equal(expected, msg_data_mismatch);
+		expect(output).toBe(expected);
 	});
 
 	it("uint8 write", () => {
@@ -28,7 +24,7 @@ describe("BitConverter Number Tests =>", () => {
 		const expected = Buffer.from([0xFE]);
 		const output = numberToBuffer(input, 8);
 
-		expect(output).to.deep.equal(expected, msg_data_mismatch);
+		expect(output).toEqual(expected);
 	});
 
 	it("uint24 read 1", () => {
@@ -36,7 +32,7 @@ describe("BitConverter Number Tests =>", () => {
 		const expected = 0xFEFDFC;
 		const output = bufferToNumber(input, 24);
 
-		expect(output).to.equal(expected, msg_data_mismatch);
+		expect(output).toBe(expected);
 	});
 
 	it("uint24 read 2", () => {
@@ -44,7 +40,7 @@ describe("BitConverter Number Tests =>", () => {
 		const expected = 0xFEFDFC;
 		const output = bufferToNumber(input, 24, 1);
 
-		expect(output).to.equal(expected, msg_data_mismatch);
+		expect(output).toBe(expected);
 	});
 
 	it("uint24 write", () => {
@@ -52,7 +48,7 @@ describe("BitConverter Number Tests =>", () => {
 		const expected = Buffer.from([0xFE, 0xFD, 0xFC]);
 		const output = numberToBuffer(input, 24);
 
-		expect(output).to.deep.equal(expected, msg_data_mismatch);
+		expect(output).toEqual(expected);
 	});
 
 // 	it('uint8 write 2', () => {

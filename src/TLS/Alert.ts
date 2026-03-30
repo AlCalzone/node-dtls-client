@@ -1,4 +1,4 @@
-﻿import { TLSStruct } from "./TLSStruct";
+import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
 
 export enum AlertLevel {
@@ -54,7 +54,10 @@ export class Alert extends TLSStruct {
 	}
 
 	public static createEmpty(): Alert {
-		return new Alert(0, 0);
+		return new Alert(
+			0 as AlertLevel,
+			0 as AlertDescription,
+		);
 	}
 
 }

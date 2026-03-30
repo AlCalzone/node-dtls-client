@@ -2,13 +2,13 @@
 
 [![node](https://img.shields.io/node/v/node-dtls-client.svg) ![npm](https://img.shields.io/npm/v/node-dtls-client.svg)](https://www.npmjs.com/package/node-dtls-client)
 
-[![Build Status](https://img.shields.io/circleci/project/github/AlCalzone/node-dtls-client.svg)](https://circleci.com/gh/AlCalzone/node-dtls-client)
-[![Coverage Status](https://img.shields.io/coveralls/github/AlCalzone/node-dtls-client.svg)](https://coveralls.io/github/AlCalzone/node-dtls-client)
+[![Test and Release](https://github.com/AlCalzone/node-dtls-client/actions/workflows/test-and-release.yml/badge.svg)](https://github.com/AlCalzone/node-dtls-client/actions/workflows/test-and-release.yml)
 
 USE AT YOUR OWN RISK!
 
 [DTLS](https://en.wikipedia.org/wiki/Datagram_Transport_Layer_Security) protocol implementation for Node.js written in TypeScript. 
 This library provides the missing native DTLS support for Node.js client-side applications. It contains no server-side implementation.
+It requires Node.js 22 or newer.
 
 Although great care has been taken to properly implement the required encryption and validation, 
 there's no explicit protection against TLS attacks. Thus it is not advised to use it for security-critical applications. 
@@ -92,6 +92,12 @@ The events are defined as follows:
     PLACEHOLDER for next version:
     ### __WORK IN PROGRESS__
 -->
+### __WORK IN PROGRESS__
+* Replace TSLint with Oxlint
+* Replace Mocha/Chai/Sinon with Vitest
+* Move CI to GitHub Actions
+* Require Node.js 22+
+
 ### 1.1.1 (2023-01-26)
 * Updated the `node-aead-crypto` dependency for proper Electron support
 
@@ -158,7 +164,7 @@ The events are defined as follows:
 ## License
 The MIT License (MIT)
 
-Copyright (c) 2017-2023 AlCalzone <d.griesel@gmx.net>
+Copyright (c) 2017-2026 AlCalzone <d.griesel@gmx.net>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -1,5 +1,5 @@
 // enable debug output
-import * as debugPackage from "debug";
+import debugPackage from "debug";
 import * as dgram from "dgram";
 import { dtls } from "../dtls";
 import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
@@ -139,7 +139,7 @@ export class RecordLayer {
 				const connectionState = this.epochs[p.epoch].connectionState;
 				try {
 					return connectionState.Decipher(p);
-				} catch (e) {
+				} catch {
 					// decryption can fail because of bad MAC etc...
 					// TODO: terminate connection if some threshold is passed (bad_record_mac)
 					return null;

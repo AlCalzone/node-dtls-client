@@ -1,4 +1,4 @@
-﻿import { CipherSuites } from "../DTLS/CipherSuites";
+import { CipherSuites } from "../DTLS/CipherSuites";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { CipherDelegate, CipherSuite, DecipherDelegate, KeyMaterial } from "./CipherSuite";
 import { PreMasterSecret } from "./PreMasterSecret";
@@ -8,7 +8,6 @@ import * as TypeSpecs from "./TypeSpecs";
 export enum CompressionMethod {
 	null = 0,
 }
-// tslint:disable-next-line:no-namespace
 export namespace CompressionMethod {
 	export const spec = TypeSpecs.define.Enum("uint8", CompressionMethod);
 }

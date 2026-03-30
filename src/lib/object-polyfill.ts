@@ -1,4 +1,4 @@
-﻿export type Predicate<T> = (value: T) => boolean;
+export type Predicate<T> = (value: T) => boolean;
 export type KeyValuePair<T> = [string, T];
 
 /**
