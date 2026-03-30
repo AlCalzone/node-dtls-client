@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
 export declare enum ExtensionType {

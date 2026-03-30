@@ -1,5 +1,5 @@
-export declare type Predicate<T> = (value: T) => boolean;
-export declare type KeyValuePair<T> = [string, T];
+export type Predicate<T> = (value: T) => boolean;
+export type KeyValuePair<T> = [string, T];
 /**
  * Stellt einen Polyfill für Object.entries bereit
  * @param obj Das Objekt, dessen Eigenschaften als Key-Value-Pair iteriert werden sollen

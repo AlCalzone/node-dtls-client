@@ -1,4 +1,4 @@
-﻿import { ContentType } from "../TLS/ContentType";
+import { ContentType } from "../TLS/ContentType";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 
 export interface DTLSPacket {

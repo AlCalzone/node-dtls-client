@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { ContentType } from "../TLS/ContentType";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { TLSStruct } from "../TLS/TLSStruct";
@@ -37,8 +36,8 @@ export declare class DTLSCompressed extends TLSStruct implements DTLSPacket {
      */
     computeMACHeader(): Buffer;
 }
-export declare type CompressorDelegate = (plaintext: Buffer) => Buffer;
-export declare type DecompressorDelegate = (compressed: Buffer) => Buffer;
+export type CompressorDelegate = (plaintext: Buffer) => Buffer;
+export type DecompressorDelegate = (compressed: Buffer) => Buffer;
 export declare class MACHeader extends TLSStruct {
     epoch: number;
     sequence_number: number;

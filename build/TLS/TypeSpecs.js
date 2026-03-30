@@ -1,24 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uint64 = exports.uint48 = exports.uint32 = exports.uint24 = exports.uint16 = exports.uint8 = exports.define = exports.Buffer = exports.Vector = exports.getPrimitiveSize = void 0;
+exports.uint64 = exports.uint48 = exports.uint32 = exports.uint24 = exports.uint16 = exports.uint8 = exports.define = exports.Buffer = exports.Vector = void 0;
+exports.getPrimitiveSize = getPrimitiveSize;
 function getPrimitiveSize(spec) {
     return +spec.size.substr("uint".length);
 }
-exports.getPrimitiveSize = getPrimitiveSize;
 var Vector;
 (function (Vector) {
     function isVariableLength(spec) {
         return spec.maxLength !== spec.minLength;
     }
     Vector.isVariableLength = isVariableLength;
-})(Vector = exports.Vector || (exports.Vector = {}));
+})(Vector || (exports.Vector = Vector = {}));
 var Buffer;
 (function (Buffer) {
     function isVariableLength(spec) {
         return spec.maxLength !== spec.minLength;
     }
     Buffer.isVariableLength = isVariableLength;
-})(Buffer = exports.Buffer || (exports.Buffer = {}));
+})(Buffer || (exports.Buffer = Buffer = {}));
 // Shortcuts:
 exports.define = {
     Enum: (size, enumType) => ({ type: "enum", size, enumType }),

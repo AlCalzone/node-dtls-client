@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { ProtocolVersion } from "../TLS/ProtocolVersion";
 import { CipherDelegate, CipherSuite, DecipherDelegate, KeyMaterial } from "./CipherSuite";
 import { PreMasterSecret } from "./PreMasterSecret";
@@ -9,7 +8,7 @@ export declare enum CompressionMethod {
 export declare namespace CompressionMethod {
     const spec: TypeSpecs.Enum;
 }
-export declare type ConnectionEnd = "server" | "client";
+export type ConnectionEnd = "server" | "client";
 export declare class ConnectionState {
     entity: ConnectionEnd;
     cipherSuite: CipherSuite;

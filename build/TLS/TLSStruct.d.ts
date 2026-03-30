@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { DeserializationResult } from "./Serializable";
 import * as TypeSpecs from "./TypeSpecs";
 export interface PropertyDefinition {

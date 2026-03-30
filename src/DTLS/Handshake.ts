@@ -1,4 +1,3 @@
-﻿// tslint:disable:class-name
 import { CipherSuite } from "../TLS/CipherSuite";
 import { CompressionMethod } from "../TLS/ConnectionState";
 import { Extension } from "../TLS/Extension";

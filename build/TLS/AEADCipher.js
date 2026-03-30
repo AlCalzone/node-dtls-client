@@ -1,14 +1,48 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createDecipher = exports.createCipher = void 0;
-const crypto = require("crypto");
+exports.createCipher = createCipher;
+exports.createDecipher = createDecipher;
+const crypto = __importStar(require("crypto"));
 const DTLSCiphertext_1 = require("../DTLS/DTLSCiphertext");
 const DTLSCompressed_1 = require("../DTLS/DTLSCompressed");
 const AEADCrypto_1 = require("../lib/AEADCrypto");
 const ContentType_1 = require("../TLS/ContentType");
 const ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 const TLSStruct_1 = require("./TLSStruct");
-const TypeSpecs = require("./TypeSpecs");
+const TypeSpecs = __importStar(require("./TypeSpecs"));
 const AEADCipherParameters = {
     "aes-128-ccm": { interface: AEADCrypto_1.ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
     "aes-128-ccm8": { interface: AEADCrypto_1.ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
@@ -18,6 +52,18 @@ const AEADCipherParameters = {
     "aes-256-gcm": { interface: AEADCrypto_1.gcm, keyLength: 32, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
 };
 class AdditionalData extends TLSStruct_1.TLSStruct {
+    epoch;
+    sequence_number;
+    type;
+    version;
+    fragment_length;
+    static __spec = {
+        epoch: TypeSpecs.uint16, // the seq_num in the specs refers to the TLS seq_num, which is 64 bits!
+        sequence_number: TypeSpecs.uint48,
+        type: ContentType_1.ContentType.__spec,
+        version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+        fragment_length: TypeSpecs.uint16,
+    };
     constructor(epoch, sequence_number, type, version, fragment_length) {
         super(AdditionalData.__spec);
         this.epoch = epoch;
@@ -30,13 +76,6 @@ class AdditionalData extends TLSStruct_1.TLSStruct {
         return new AdditionalData(null, null, null, null, null);
     }
 }
-AdditionalData.__spec = {
-    epoch: TypeSpecs.uint16,
-    sequence_number: TypeSpecs.uint48,
-    type: ContentType_1.ContentType.__spec,
-    version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    fragment_length: TypeSpecs.uint16,
-};
 /**
  * Creates an AEAD cipher delegate used to encrypt packet fragments.
  * @param algorithm - The AEAD cipher algorithm to be used
@@ -76,7 +115,6 @@ function createCipher(algorithm) {
     ret.recordIvLength = cipherParams.recordIvLength;
     return ret;
 }
-exports.createCipher = createCipher;
 /**
  * Creates an AEAD cipher delegate used to decrypt packet fragments.
  * @param algorithm - The AEAD cipher algorithm to be used
@@ -114,4 +152,3 @@ function createDecipher(algorithm) {
     ret.recordIvLength = decipherParams.recordIvLength;
     return ret;
 }
-exports.createDecipher = createDecipher;

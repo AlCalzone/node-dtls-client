@@ -1,18 +1,49 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TLSStruct = void 0;
 const BitConverter_1 = require("../lib/BitConverter");
 const object_polyfill_1 = require("../lib/object-polyfill");
-const util = require("../lib/util");
-const TypeSpecs = require("./TypeSpecs");
+const util = __importStar(require("../lib/util"));
+const TypeSpecs = __importStar(require("./TypeSpecs"));
 const Vector_1 = require("./Vector");
 /**
  * Basisklasse für TLS-Objekte
  */
 class TLSStruct {
     constructor(spec, initial) {
-        // private __spec__: TypeSpecs.StructSpec;
-        this.propertyDefinitions = [];
         // Eigenschaften aus Spec kopieren
         // this.__spec__ = spec;
         for (const [key, value] of (0, object_polyfill_1.entries)(spec)) {
@@ -26,6 +57,8 @@ class TLSStruct {
             }
         }
     }
+    // private __spec__: TypeSpecs.StructSpec;
+    propertyDefinitions = [];
     /**
      * Deserialisiert die Eigenschaften dieses Objekts aus dem angegebenen Buffer
      * @param buf - Der Buffer, aus dem gelesen werden soll

@@ -1,5 +1,5 @@
 import { ISerializableConstructor } from "./Serializable";
-export declare type Numbers = "uint8" | "uint16" | "uint24" | "uint32" | "uint48" | // DTLS
+export type Numbers = "uint8" | "uint16" | "uint24" | "uint32" | "uint48" | // DTLS
 "uint64";
 export interface Number {
     type: "number";
@@ -10,7 +10,7 @@ export interface Enum {
     size: Numbers;
     enumType: any;
 }
-export declare type Primitive = Number | Enum;
+export type Primitive = Number | Enum;
 export declare function getPrimitiveSize(spec: Primitive): number;
 export interface IStruct extends ISerializableConstructor {
     readonly __spec: StructSpec;
@@ -22,7 +22,7 @@ export interface Struct {
     type: "struct";
     structType: ISerializableConstructor;
 }
-export declare type Complex = Primitive | Struct;
+export type Complex = Primitive | Struct;
 export interface Vector {
     type: "vector";
     itemSpec: Complex;
@@ -42,7 +42,7 @@ export interface Buffer {
 export declare namespace Buffer {
     function isVariableLength(spec: Buffer): boolean;
 }
-export declare type All = Complex | Vector | Buffer;
+export type All = Complex | Vector | Buffer;
 export declare const define: {
     Enum: (size: Numbers, enumType: any) => Enum;
     Number: (size: Numbers) => Number;

@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
 import { DTLSCompressed } from "../DTLS/DTLSCompressed";
 import * as AEADCipher from "./AEADCipher";
@@ -6,9 +5,9 @@ import * as BlockCipher from "./BlockCipher";
 import { ConnectionEnd } from "./ConnectionState";
 import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
-export declare type HashAlgorithm = "md5" | "sha1" | "sha256" | "sha384" | "sha512";
-export declare type CipherType = "block" | "aead";
-export declare type KeyExchangeAlgorithm = "dhe_dss" | "dhe_rsa" | "rsa" | "dh_dss" | "dh_rsa" | "psk" | "dhe_psk" | "rsa_psk";
+export type HashAlgorithm = "md5" | "sha1" | "sha256" | "sha384" | "sha512";
+export type CipherType = "block" | "aead";
+export type KeyExchangeAlgorithm = "dhe_dss" | "dhe_rsa" | "rsa" | "dh_dss" | "dh_rsa" | "psk" | "dhe_psk" | "rsa_psk";
 export interface GenericMacDelegate {
     /**
      * Generates a MAC hash from the given data using the underlying HMAC function.

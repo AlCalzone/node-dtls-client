@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { CompressionMethod } from "../TLS/ConnectionState";
 import { Extension } from "../TLS/Extension";
 import { ProtocolVersion } from "../TLS/ProtocolVersion";

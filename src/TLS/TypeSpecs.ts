@@ -1,4 +1,3 @@
-﻿// tslint:disable:ban-types
 import { ISerializableConstructor } from "./Serializable";
 
 export type Numbers =

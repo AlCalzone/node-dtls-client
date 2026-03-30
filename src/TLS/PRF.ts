@@ -1,4 +1,4 @@
-﻿import * as crypto from "crypto";
+import * as crypto from "crypto";
 import { HashAlgorithm } from "../TLS/CipherSuite";
 
 export interface HMACDelegate {

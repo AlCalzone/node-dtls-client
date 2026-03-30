@@ -1,13 +1,47 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CipherSuite = exports.createMAC = void 0;
+exports.CipherSuite = void 0;
+exports.createMAC = createMAC;
 const DTLSCiphertext_1 = require("../DTLS/DTLSCiphertext");
 const DTLSCompressed_1 = require("../DTLS/DTLSCompressed");
-const AEADCipher = require("./AEADCipher");
-const BlockCipher = require("./BlockCipher");
+const AEADCipher = __importStar(require("./AEADCipher"));
+const BlockCipher = __importStar(require("./BlockCipher"));
 const PRF_1 = require("./PRF");
 const TLSStruct_1 = require("./TLSStruct");
-const TypeSpecs = require("./TypeSpecs");
+const TypeSpecs = __importStar(require("./TypeSpecs"));
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used
@@ -25,7 +59,6 @@ function createMAC(algorithm) {
     ret.keyAndHashLength = MAC.keyAndHashLenth;
     return ret;
 }
-exports.createMAC = createMAC;
 /** Creates a dummy cipher which is just an identity operation */
 function createNullCipher() {
     const ret = ((packet, _1, _2) => new DTLSCiphertext_1.DTLSCiphertext(packet.type, packet.version, packet.epoch, packet.sequence_number, packet.fragment));
@@ -44,12 +77,23 @@ function createNullDecipher() {
 }
 /** Creates a dummy MAC which just returns an empty Buffer */
 function createNullMAC() {
-    const ret = ((data, _1, _2) => Buffer.from([]));
+    const ret = ((_data, _1, _2) => Buffer.from([]));
     ret.keyAndHashLength = 0;
     return ret;
 }
 // TODO: Documentation
 class CipherSuite extends TLSStruct_1.TLSStruct {
+    id;
+    keyExchange;
+    macAlgorithm;
+    prfAlgorithm;
+    cipherType;
+    algorithm;
+    verify_data_length;
+    static __spec = {
+        id: TypeSpecs.uint16,
+    };
+    static spec = TypeSpecs.define.Struct(CipherSuite);
     constructor(id, keyExchange, macAlgorithm, prfAlgorithm, cipherType, algorithm, verify_data_length = 12) {
         super(CipherSuite.__spec);
         this.id = id;
@@ -63,6 +107,7 @@ class CipherSuite extends TLSStruct_1.TLSStruct {
     static createEmpty() {
         return new CipherSuite(null, null, null, null, null);
     }
+    _cipher;
     get Cipher() {
         if (this._cipher == undefined) {
             this._cipher = this.createCipher();
@@ -95,6 +140,7 @@ class CipherSuite extends TLSStruct_1.TLSStruct {
         ret.inner = this.Cipher;
         return ret;
     }
+    _decipher;
     get Decipher() {
         if (this._decipher == undefined) {
             this._decipher = this.createDecipher();
@@ -127,6 +173,7 @@ class CipherSuite extends TLSStruct_1.TLSStruct {
         ret.inner = this.Decipher;
         return ret;
     }
+    _mac;
     get MAC() {
         if (this._mac == undefined) {
             this._mac = this.createMAC();
@@ -149,7 +196,3 @@ class CipherSuite extends TLSStruct_1.TLSStruct {
     }
 }
 exports.CipherSuite = CipherSuite;
-CipherSuite.__spec = {
-    id: TypeSpecs.uint16,
-};
-CipherSuite.spec = TypeSpecs.define.Struct(CipherSuite);

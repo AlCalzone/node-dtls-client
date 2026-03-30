@@ -1,5 +1,5 @@
 import { GenericCipherDelegate, GenericDecipherDelegate } from "./CipherSuite";
-export declare type AEADCipherAlgorithm = "aes-128-ccm" | "aes-256-ccm" | "aes-128-ccm8" | "aes-256-ccm8" | "aes-128-gcm" | "aes-256-gcm";
+export type AEADCipherAlgorithm = "aes-128-ccm" | "aes-256-ccm" | "aes-128-ccm8" | "aes-256-ccm8" | "aes-128-gcm" | "aes-256-gcm";
 export interface AEADCipherDelegate extends GenericCipherDelegate {
     /**
      * The length of nonces for each record

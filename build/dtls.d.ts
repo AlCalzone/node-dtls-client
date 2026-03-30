@@ -1,6 +1,3 @@
-/// <reference types="node" />
-/// <reference types="node" />
-/// <reference types="node" />
 import * as dgram from "dgram";
 import { EventEmitter } from "events";
 import { CipherSuites } from "./DTLS/CipherSuites";
@@ -58,7 +55,7 @@ export declare namespace dtls {
         port: number;
         /** Pre shared key information as a table <identity> => <psk> */
         psk: {
-            [identity: string]: string;
+            [identity: string]: string | Buffer;
         };
         /** Time after which a connection should successfully established */
         timeout?: number;

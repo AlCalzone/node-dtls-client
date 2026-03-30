@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.padStart = void 0;
+exports.padStart = padStart;
 /**
  * Pads a string to the given length by repeatedly prepending the filler at the beginning of the string.
  * @param str The string to pad
@@ -19,4 +19,3 @@ function padStart(str, targetLen, fill = " ") {
     const repeats = Math.ceil(missingLength / fill.length);
     return fill.repeat(repeats).substr(0, missingLength) + str;
 }
-exports.padStart = padStart;

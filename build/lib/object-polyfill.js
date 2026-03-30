@@ -1,16 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.extend = exports.filter = exports.values = exports.entries = void 0;
+exports.entries = entries;
+exports.values = values;
+exports.filter = filter;
+exports.extend = extend;
 function entries(obj) {
     return Object.keys(obj)
         .map(key => [key, obj[key]]);
 }
-exports.entries = entries;
 function values(obj) {
     return Object.keys(obj)
         .map(key => obj[key]);
 }
-exports.values = values;
 function filter(obj, predicate) {
     const ret = {};
     for (const [key, val] of entries(obj)) {
@@ -19,7 +20,6 @@ function filter(obj, predicate) {
     }
     return ret;
 }
-exports.filter = filter;
 /**
  * Kopiert Eigenschaften rekursiv von einem Objekt auf ein anderes
  * @param target - Das Zielobjekt, auf das die Eigenschaften übertragen werden sollen
@@ -39,4 +39,3 @@ function extend(target, source) {
     }
     return target;
 }
-exports.extend = extend;

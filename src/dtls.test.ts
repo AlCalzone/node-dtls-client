@@ -1,20 +1,8 @@
-// tslint:disable:no-console
-// tslint:disable:no-unused-expression
-// tslint:disable:variable-name
-
-import { assert, expect, should, use } from "chai";
-import { spy, stub } from "sinon";
-import * as sinonChai from "sinon-chai";
+import { describe, expect, it } from "vitest";
 
 import { dtls } from "./dtls";
 
-// enable the should interface with sinon
-should();
-// improve stubs for testing
-use(sinonChai);
-
-describe("dtls.createSocket() => ", () => {
-
+describe("dtls.createSocket() =>", () => {
 	it("should throw when required properties on the options object are missing", () => {
 		// valid options:
 		// {type: "udp4", address: "localhost", port: 1234, psk: {}},
@@ -41,8 +29,7 @@ describe("dtls.createSocket() => ", () => {
 			{type: "udp4", address: "localhost", port: 1234, psk: 123},
 		];
 		for (const opts of faultyOptions) {
-			expect(() => dtls.createSocket(opts as dtls.Options)).to.throw("connection options");
+			expect(() => dtls.createSocket(opts as dtls.Options)).toThrow("connection options");
 		}
 	});
-
 });

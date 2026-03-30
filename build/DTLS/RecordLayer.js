@@ -1,8 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RecordLayer = void 0;
 // enable debug output
-const debugPackage = require("debug");
+const debug_1 = __importDefault(require("debug"));
 const AntiReplayWindow_1 = require("../TLS/AntiReplayWindow");
 const ConnectionState_1 = require("../TLS/ConnectionState");
 const ContentType_1 = require("../TLS/ContentType");
@@ -10,18 +13,14 @@ const ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 const DTLSCiphertext_1 = require("./DTLSCiphertext");
 const DTLSCompressed_1 = require("./DTLSCompressed");
 const DTLSPlaintext_1 = require("./DTLSPlaintext");
-const debug = debugPackage("node-dtls-client");
+const debug = (0, debug_1.default)("node-dtls-client");
 class RecordLayer {
+    udpSocket;
+    options;
     // TODO: specify connection end
     constructor(udpSocket, options) {
         this.udpSocket = udpSocket;
         this.options = options;
-        /**
-         * All known connection epochs
-         */
-        this.epochs = [];
-        this._readEpochNr = 0;
-        this._writeEpochNr = 0;
         // initialize with NULL cipherspec
         // current state
         this.epochs[0] = this.createEpoch(0);
@@ -119,7 +118,7 @@ class RecordLayer {
             try {
                 return connectionState.Decipher(p);
             }
-            catch (e) {
+            catch {
                 // decryption can fail because of bad MAC etc...
                 // TODO: terminate connection if some threshold is passed (bad_record_mac)
                 return null;
@@ -136,12 +135,18 @@ class RecordLayer {
             data: p.fragment,
         }));
     }
+    /**
+     * All known connection epochs
+     */
+    epochs = [];
+    _readEpochNr = 0;
     get readEpochNr() { return this._readEpochNr; }
     /**
      * The current epoch used for reading data
      */
     get currentReadEpoch() { return this.epochs[this._readEpochNr]; }
     get nextReadEpoch() { return this.epochs[this._readEpochNr + 1]; }
+    _writeEpochNr = 0;
     get writeEpochNr() { return this._writeEpochNr; }
     /**
      * The current epoch used for writing data
@@ -181,14 +186,14 @@ class RecordLayer {
         this._writeEpochNr++;
         this.ensureNextEpoch();
     }
+    /**
+     * Maximum transfer unit of the underlying connection.
+     * Note: Ethernet supports up to 1500 bytes, of which 20 bytes are reserved for the IP header and 8 for the UDP header
+     */
+    static MTU = 1280;
+    static MTU_OVERHEAD = 20 + 8;
     static get MAX_PAYLOAD_SIZE() { return RecordLayer.MTU - RecordLayer.MTU_OVERHEAD; }
+    // Default to DTLSv1.2
+    static DTLSVersion = new ProtocolVersion_1.ProtocolVersion(~1, ~2);
 }
 exports.RecordLayer = RecordLayer;
-/**
- * Maximum transfer unit of the underlying connection.
- * Note: Ethernet supports up to 1500 bytes, of which 20 bytes are reserved for the IP header and 8 for the UDP header
- */
-RecordLayer.MTU = 1280;
-RecordLayer.MTU_OVERHEAD = 20 + 8;
-// Default to DTLSv1.2
-RecordLayer.DTLSVersion = new ProtocolVersion_1.ProtocolVersion(~1, ~2);

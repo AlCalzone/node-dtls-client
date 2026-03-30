@@ -1,4 +1,4 @@
-﻿import { values } from "../lib/object-polyfill";
+import { values } from "../lib/object-polyfill";
 import { CipherSuite } from "../TLS/CipherSuite";
 
 // block sizes etc. see https://tools.ietf.org/html/rfc5246 page 83

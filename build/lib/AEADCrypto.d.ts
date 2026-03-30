@@ -1,4 +1,3 @@
-/// <reference types="node" />
 /**
  * Starting with NodeJS 10, we can use the official crypto API to do AEAD encryption
  * because authTagLength is now configurable. This module is a wrapper around either

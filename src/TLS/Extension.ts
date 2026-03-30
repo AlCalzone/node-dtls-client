@@ -1,4 +1,4 @@
-﻿import { TLSStruct } from "./TLSStruct";
+import { TLSStruct } from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
 
 export enum ExtensionType {

@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.bufferToByteArray = exports.bufferToNumber = exports.numberToBuffer = void 0;
+exports.numberToBuffer = numberToBuffer;
+exports.bufferToNumber = bufferToNumber;
+exports.bufferToByteArray = bufferToByteArray;
 function numberToBuffer(value, size) {
     const n = size / 8;
     const ret = Buffer.alloc(n);
@@ -10,7 +12,6 @@ function numberToBuffer(value, size) {
     }
     return ret;
 }
-exports.numberToBuffer = numberToBuffer;
 function bufferToNumber(buf, size, offset = 0) {
     let ret = 0;
     const n = size / 8;
@@ -19,8 +20,6 @@ function bufferToNumber(buf, size, offset = 0) {
     }
     return ret;
 }
-exports.bufferToNumber = bufferToNumber;
 function bufferToByteArray(buf, offset = 0) {
     return Array.prototype.slice.apply(buf, [offset]);
 }
-exports.bufferToByteArray = bufferToByteArray;

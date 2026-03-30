@@ -7,11 +7,12 @@ const INT_SIZE = 32; // in JS, bitwise operators use 32bit ints
  * Provides protection against replay attacks by remembering received packets in a sliding window
  */
 class AntiReplayWindow {
+    // window bitmap looks as follows:
+    //  v- upper end                    lower end --v
+    // [111011 ... window_n]...[11111101 ... window_0]
+    window = [];
+    ceiling; // upper end of the window bitmap / highest received seq_num
     constructor() {
-        // window bitmap looks as follows:
-        //  v- upper end                    lower end --v
-        // [111011 ... window_n]...[11111101 ... window_0]
-        this.window = [];
         this.reset();
     }
     /**

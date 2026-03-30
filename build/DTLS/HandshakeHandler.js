@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClientHandshakeHandler = void 0;
 const CipherSuites_1 = require("../DTLS/CipherSuites");
@@ -12,126 +45,22 @@ const PRF_1 = require("../TLS/PRF");
 const ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 const Random_1 = require("../TLS/Random");
 const Vector_1 = require("../TLS/Vector");
-const Handshake = require("./Handshake");
+const Handshake = __importStar(require("./Handshake"));
 class ClientHandshakeHandler {
+    recordLayer;
+    options;
+    finishedCallback;
     constructor(recordLayer, options, finishedCallback) {
         this.recordLayer = recordLayer;
         this.options = options;
         this.finishedCallback = finishedCallback;
-        this.bufferedOutgoingMessages = [];
-        this.sendFlight_begin_wasCalled = false;
-        /**
-         * handles server messages
-         */
-        this.handle = {
-            /** Handles a HelloVerifyRequest message */
-            [Handshake.HandshakeType.hello_verify_request]: (messages) => {
-                var _a;
-                // this flight should only contain a single message,
-                // but to be sure extract the last one
-                const hvr = messages[messages.length - 1];
-                // add the cookie to the client hello and send it again
-                const hello = this.lastFlight[0];
-                hello.cookie = hvr.cookie;
-                // Work around IKEAs bug in gateway v1.15.x
-                if ((_a = this.options.compat) === null || _a === void 0 ? void 0 : _a.resetAntiReplayWindowBeforeServerHello) {
-                    this.recordLayer.currentReadEpoch.antiReplayWindow = new AntiReplayWindow_1.AntiReplayWindow();
-                }
-                // TODO: do something with session id?
-                this.sendFlight([hello], [Handshake.HandshakeType.server_hello_done]);
-            },
-            /** Handles a ServerHelloDone flight */
-            [Handshake.HandshakeType.server_hello_done]: (messages) => {
-                for (const msg of messages) {
-                    switch (msg.msg_type) {
-                        case Handshake.HandshakeType.server_hello:
-                            const hello = msg;
-                            // remember the random value
-                            this.recordLayer.nextEpoch.connectionState.server_random = hello.random.serialize();
-                            // set the cipher suite and compression method to be used
-                            this.recordLayer.nextEpoch.connectionState.cipherSuite = CipherSuites_1.CipherSuites[hello.cipher_suite];
-                            this.recordLayer.nextEpoch.connectionState.compression_algorithm = hello.compression_method;
-                            this.recordLayer.currentWriteEpoch.connectionState.protocolVersion = hello.server_version;
-                            this.recordLayer.nextWriteEpoch.connectionState.protocolVersion = hello.server_version;
-                            // TODO: parse/support extensions?
-                            // TODO: remember the session id?
-                            break;
-                        // TODO: support more messages (certificates etc.)
-                        case Handshake.HandshakeType.server_key_exchange:
-                            const srvKeyExchange = msg;
-                            // parse the content depending on the key exchange algorithm
-                            switch (this.recordLayer.nextEpoch.connectionState.cipherSuite.keyExchange) {
-                                case "psk":
-                                    const srvKeyExchange_PSK = Handshake.ServerKeyExchange_PSK.from(Handshake.ServerKeyExchange_PSK.spec, srvKeyExchange.raw_data).result;
-                                    // TODO: do something with the identity hint
-                                    // tslint:disable-next-line:no-unused-expression
-                                    void srvKeyExchange_PSK;
-                                    break;
-                                // TODO: support other algorithms
-                            }
-                            break;
-                        case Handshake.HandshakeType.server_hello_done:
-                            // its our turn, build flight depending on the key exchange algorithm
-                            const connState = this.recordLayer.nextEpoch.connectionState;
-                            // TODO: support multiple identities
-                            const psk_identity = Object.keys(this.options.psk)[0];
-                            let preMasterSecret;
-                            const flight = [];
-                            switch (connState.cipherSuite.keyExchange) {
-                                case "psk":
-                                    // for PSK, build the key exchange message
-                                    const clKeyExchange = Handshake.ClientKeyExchange.createEmpty();
-                                    const clKeyExchange_PSK = new Handshake.ClientKeyExchange_PSK(Buffer.from(psk_identity, "ascii"));
-                                    clKeyExchange.raw_data = clKeyExchange_PSK.serialize();
-                                    // and add it to the flight
-                                    flight.push(clKeyExchange);
-                                    // now we have everything, construct the pre master secret
-                                    const psk = Buffer.from(this.options.psk[psk_identity], "ascii");
-                                    preMasterSecret = new PreMasterSecret_1.PreMasterSecret(null, psk);
-                                    break;
-                                default:
-                                    this.finishedCallback(new Alert_1.Alert(Alert_1.AlertLevel.fatal, Alert_1.AlertDescription.handshake_failure), new Error(`${connState.cipherSuite.keyExchange} key exchange not implemented`));
-                                    return;
-                            }
-                            // we now have everything to compute the master secret
-                            connState.computeMasterSecret(preMasterSecret);
-                            // in order to build the finished message, we need to process the partial flight so far
-                            this.sendFlight_begin();
-                            this.sendFlight_processPartial(flight);
-                            // now we can compute the verify_data
-                            const handshake_messages = Buffer.concat(this.allHandshakeData);
-                            const verify_data = this.computeVerifyData(handshake_messages, "client");
-                            // now build the finished message and process it
-                            const finished = new Handshake.Finished(verify_data);
-                            this.sendFlight_processPartial([finished]);
-                            // finish sending the flight
-                            this.sendFlight_finish([Handshake.HandshakeType.finished]);
-                            break;
-                    }
-                }
-            },
-            /** Handles a Finished flight */
-            [Handshake.HandshakeType.finished]: (messages) => {
-                // this flight should only contain a single message (server->client),
-                // but to be sure extract the last one
-                const finished = messages[messages.length - 1];
-                // compute the expected verify data
-                const handshake_messages = Buffer.concat(this.allHandshakeData);
-                const expectedVerifyData = this.computeVerifyData(handshake_messages, "server");
-                if (finished.verify_data.equals(expectedVerifyData)) {
-                    // all good!
-                    this._isHandshaking = false;
-                    this.finishedCallback();
-                }
-                else {
-                    this._isHandshaking = false;
-                    this.finishedCallback(new Alert_1.Alert(Alert_1.AlertLevel.fatal, Alert_1.AlertDescription.decrypt_error), new Error("DTLS handshake failed"));
-                    // connection is automatically canceled by the callback
-                }
-            },
-        };
         this.renegotiate();
     }
+    // private _state;
+    // public get state(): HandshakeStates {
+    // 	return this._state;
+    // }
+    _isHandshaking;
     get isHandshaking() {
         return this._isHandshaking;
     }
@@ -181,6 +110,19 @@ class ClientHandshakeHandler {
             Handshake.HandshakeType.hello_verify_request,
         ]);
     }
+    /** The last message seq number that has been processed already */
+    lastProcessedSeqNum;
+    /** The seq number of the last sent message */
+    lastSentSeqNum;
+    /** The previously sent flight */
+    lastFlight;
+    /* The collected handshake messages waiting for processing */
+    incompleteMessages;
+    completeMessages;
+    /** The currently expected flight, designated by the type of its last message */
+    expectedResponses;
+    /** All handshake data sent so far, buffered for the Finished -> verify_data */
+    allHandshakeData;
     // special cases for reordering of "Finished" flights
     // TODO: add these special cases to general handling functions
     // private cscReceived: boolean;
@@ -269,6 +211,8 @@ class ClientHandshakeHandler {
         }
         return false;
     }
+    bufferedOutgoingMessages = [];
+    sendFlight_begin_wasCalled = false;
     sendFlight_begin() {
         this.sendFlight_begin_wasCalled = true;
         this.lastFlight = [];
@@ -375,6 +319,115 @@ class ClientHandshakeHandler {
         const verify_data = PRF_fn(connState.master_secret, `${source} finished`, handshakeHash, connState.cipherSuite.verify_data_length);
         return verify_data;
     }
+    /**
+     * handles server messages
+     */
+    handle = {
+        /** Handles a HelloVerifyRequest message */
+        [Handshake.HandshakeType.hello_verify_request]: (messages) => {
+            // this flight should only contain a single message,
+            // but to be sure extract the last one
+            const hvr = messages[messages.length - 1];
+            // add the cookie to the client hello and send it again
+            const hello = this.lastFlight[0];
+            hello.cookie = hvr.cookie;
+            // Work around IKEAs bug in gateway v1.15.x
+            if (this.options.compat?.resetAntiReplayWindowBeforeServerHello) {
+                this.recordLayer.currentReadEpoch.antiReplayWindow = new AntiReplayWindow_1.AntiReplayWindow();
+            }
+            // TODO: do something with session id?
+            this.sendFlight([hello], [Handshake.HandshakeType.server_hello_done]);
+        },
+        /** Handles a ServerHelloDone flight */
+        [Handshake.HandshakeType.server_hello_done]: (messages) => {
+            for (const msg of messages) {
+                switch (msg.msg_type) {
+                    case Handshake.HandshakeType.server_hello:
+                        const hello = msg;
+                        // remember the random value
+                        this.recordLayer.nextEpoch.connectionState.server_random = hello.random.serialize();
+                        // set the cipher suite and compression method to be used
+                        this.recordLayer.nextEpoch.connectionState.cipherSuite = CipherSuites_1.CipherSuites[hello.cipher_suite];
+                        this.recordLayer.nextEpoch.connectionState.compression_algorithm = hello.compression_method;
+                        this.recordLayer.currentWriteEpoch.connectionState.protocolVersion = hello.server_version;
+                        this.recordLayer.nextWriteEpoch.connectionState.protocolVersion = hello.server_version;
+                        // TODO: parse/support extensions?
+                        // TODO: remember the session id?
+                        break;
+                    // TODO: support more messages (certificates etc.)
+                    case Handshake.HandshakeType.server_key_exchange:
+                        const srvKeyExchange = msg;
+                        // parse the content depending on the key exchange algorithm
+                        switch (this.recordLayer.nextEpoch.connectionState.cipherSuite.keyExchange) {
+                            case "psk":
+                                const srvKeyExchange_PSK = Handshake.ServerKeyExchange_PSK.from(Handshake.ServerKeyExchange_PSK.spec, srvKeyExchange.raw_data).result;
+                                // TODO: do something with the identity hint
+                                void srvKeyExchange_PSK;
+                                break;
+                            // TODO: support other algorithms
+                        }
+                        break;
+                    case Handshake.HandshakeType.server_hello_done:
+                        // its our turn, build flight depending on the key exchange algorithm
+                        const connState = this.recordLayer.nextEpoch.connectionState;
+                        // TODO: support multiple identities
+                        const psk_identity = Object.keys(this.options.psk)[0];
+                        let preMasterSecret;
+                        const flight = [];
+                        switch (connState.cipherSuite.keyExchange) {
+                            case "psk":
+                                // for PSK, build the key exchange message
+                                const clKeyExchange = Handshake.ClientKeyExchange.createEmpty();
+                                const clKeyExchange_PSK = new Handshake.ClientKeyExchange_PSK(Buffer.from(psk_identity, "ascii"));
+                                clKeyExchange.raw_data = clKeyExchange_PSK.serialize();
+                                // and add it to the flight
+                                flight.push(clKeyExchange);
+                                // now we have everything, construct the pre master secret
+                                const pskValue = this.options.psk[psk_identity];
+                                const psk = Buffer.isBuffer(pskValue) ? pskValue : Buffer.from(pskValue, "ascii");
+                                preMasterSecret = new PreMasterSecret_1.PreMasterSecret(null, psk);
+                                break;
+                            default:
+                                this.finishedCallback(new Alert_1.Alert(Alert_1.AlertLevel.fatal, Alert_1.AlertDescription.handshake_failure), new Error(`${connState.cipherSuite.keyExchange} key exchange not implemented`));
+                                return;
+                        }
+                        // we now have everything to compute the master secret
+                        connState.computeMasterSecret(preMasterSecret);
+                        // in order to build the finished message, we need to process the partial flight so far
+                        this.sendFlight_begin();
+                        this.sendFlight_processPartial(flight);
+                        // now we can compute the verify_data
+                        const handshake_messages = Buffer.concat(this.allHandshakeData);
+                        const verify_data = this.computeVerifyData(handshake_messages, "client");
+                        // now build the finished message and process it
+                        const finished = new Handshake.Finished(verify_data);
+                        this.sendFlight_processPartial([finished]);
+                        // finish sending the flight
+                        this.sendFlight_finish([Handshake.HandshakeType.finished]);
+                        break;
+                }
+            }
+        },
+        /** Handles a Finished flight */
+        [Handshake.HandshakeType.finished]: (messages) => {
+            // this flight should only contain a single message (server->client),
+            // but to be sure extract the last one
+            const finished = messages[messages.length - 1];
+            // compute the expected verify data
+            const handshake_messages = Buffer.concat(this.allHandshakeData);
+            const expectedVerifyData = this.computeVerifyData(handshake_messages, "server");
+            if (finished.verify_data.equals(expectedVerifyData)) {
+                // all good!
+                this._isHandshaking = false;
+                this.finishedCallback();
+            }
+            else {
+                this._isHandshaking = false;
+                this.finishedCallback(new Alert_1.Alert(Alert_1.AlertLevel.fatal, Alert_1.AlertDescription.decrypt_error), new Error("DTLS handshake failed"));
+                // connection is automatically canceled by the callback
+            }
+        },
+    };
 }
 exports.ClientHandshakeHandler = ClientHandshakeHandler;
 /* Client                                          Server

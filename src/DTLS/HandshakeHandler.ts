@@ -1,4 +1,4 @@
-﻿import { dtls } from "../dtls";
+import { dtls } from "../dtls";
 import { CipherSuites } from "../DTLS/CipherSuites";
 import { Alert, AlertDescription, AlertLevel } from "../TLS/Alert";
 import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
@@ -386,7 +386,6 @@ export class ClientHandshakeHandler {
 							case "psk":
 								const srvKeyExchange_PSK = Handshake.ServerKeyExchange_PSK.from(Handshake.ServerKeyExchange_PSK.spec, srvKeyExchange.raw_data).result;
 								// TODO: do something with the identity hint
-								// tslint:disable-next-line:no-unused-expression
 								void srvKeyExchange_PSK;
 								break;
 							// TODO: support other algorithms

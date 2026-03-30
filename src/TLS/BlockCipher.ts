@@ -1,4 +1,4 @@
-﻿import * as crypto from "crypto";
+import * as crypto from "crypto";
 import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
 import { DTLSCompressed } from "../DTLS/DTLSCompressed";
 import { GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial } from "./CipherSuite";
@@ -152,7 +152,6 @@ export function createDecipher(
 			}
 
 			// strip off padding
-			// tslint:disable-next-line:no-shadowed-variable
 			const plaintext = Buffer.from(
 				deciphered.slice(0, -1 - paddingLength),
 			);

@@ -1,5 +1,5 @@
 import { GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate } from "./CipherSuite";
-export declare type BlockCipherAlgorithm = "aes-128-cbc" | "aes-256-cbc" | "des-ede3-cbc";
+export type BlockCipherAlgorithm = "aes-128-cbc" | "aes-256-cbc" | "des-ede3-cbc";
 export interface BlockCipherDelegate extends GenericCipherDelegate {
     /**
      * The block size of this algorithm

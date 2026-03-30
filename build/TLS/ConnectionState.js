@@ -1,42 +1,78 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConnectionState = exports.CompressionMethod = void 0;
 const CipherSuites_1 = require("../DTLS/CipherSuites");
 const ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 const PRF_1 = require("./PRF");
-const TypeSpecs = require("./TypeSpecs");
+const TypeSpecs = __importStar(require("./TypeSpecs"));
 var CompressionMethod;
 (function (CompressionMethod) {
     CompressionMethod[CompressionMethod["null"] = 0] = "null";
-})(CompressionMethod = exports.CompressionMethod || (exports.CompressionMethod = {}));
-// tslint:disable-next-line:no-namespace
+})(CompressionMethod || (exports.CompressionMethod = CompressionMethod = {}));
 (function (CompressionMethod) {
     CompressionMethod.spec = TypeSpecs.define.Enum("uint8", CompressionMethod);
-})(CompressionMethod = exports.CompressionMethod || (exports.CompressionMethod = {}));
+})(CompressionMethod || (exports.CompressionMethod = CompressionMethod = {}));
 const master_secret_length = 48;
 // const client_random_length = 32;
 // const server_random_length = 32;
 class ConnectionState {
-    constructor() {
-        // This doesn't seem to be used:
-        // constructor(values?: Partial<ConnectionState>) {
-        // 	if (values) {
-        // 		for (const [key, value] of entries(values)) {
-        // 			if (this.hasOwnProperty(key)) (this as any)[key] = value;
-        // 		}
-        // 	}
-        // }
-        this.entity = "client";
-        this.cipherSuite = CipherSuites_1.CipherSuites.TLS_NULL_WITH_NULL_NULL;
-        this.protocolVersion = new ProtocolVersion_1.ProtocolVersion(~1, ~0); // default to DTLSv1.0 during handshakes
-        this.compression_algorithm = CompressionMethod.null;
-    }
+    // This doesn't seem to be used:
+    // constructor(values?: Partial<ConnectionState>) {
+    // 	if (values) {
+    // 		for (const [key, value] of entries(values)) {
+    // 			if (this.hasOwnProperty(key)) (this as any)[key] = value;
+    // 		}
+    // 	}
+    // }
+    entity = "client";
+    cipherSuite = CipherSuites_1.CipherSuites.TLS_NULL_WITH_NULL_NULL;
+    protocolVersion = new ProtocolVersion_1.ProtocolVersion(~1, ~0); // default to DTLSv1.0 during handshakes
+    compression_algorithm = CompressionMethod.null;
+    master_secret;
+    client_random;
+    server_random;
+    key_material;
+    _cipher;
     get Cipher() {
         if (this._cipher == undefined) {
             this._cipher = this.cipherSuite.specifyCipher(this.key_material, this.entity);
         }
         return this._cipher;
     }
+    _decipher;
     get Decipher() {
         if (this._decipher == undefined) {
             this._decipher = this.cipherSuite.specifyDecipher(this.key_material, this.entity);

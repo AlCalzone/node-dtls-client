@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { HashAlgorithm } from "../TLS/CipherSuite";
 export interface HMACDelegate {
     /**

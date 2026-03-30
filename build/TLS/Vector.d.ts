@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { DeserializationResult, ISerializable } from "./Serializable";
 import * as TypeSpecs from "./TypeSpecs";
 export declare class Vector<T extends number | ISerializable> {

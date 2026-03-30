@@ -1,7 +1,39 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HandshakeMessages = exports.Finished = exports.ServerHelloDone = exports.ClientKeyExchange_PSK = exports.ClientKeyExchange = exports.ServerKeyExchange_PSK = exports.ServerKeyExchange = exports.HelloVerifyRequest = exports.ServerHello = exports.ClientHello = exports.HelloRequest = exports.FragmentedHandshake = exports.Handshake = exports.HandshakeType = void 0;
-// tslint:disable:class-name
 const CipherSuite_1 = require("../TLS/CipherSuite");
 const ConnectionState_1 = require("../TLS/ConnectionState");
 const Extension_1 = require("../TLS/Extension");
@@ -9,7 +41,7 @@ const ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 const Random_1 = require("../TLS/Random");
 const SessionID_1 = require("../TLS/SessionID");
 const TLSStruct_1 = require("../TLS/TLSStruct");
-const TypeSpecs = require("../TLS/TypeSpecs");
+const TypeSpecs = __importStar(require("../TLS/TypeSpecs"));
 const Cookie_1 = require("./Cookie");
 const RecordLayer_1 = require("./RecordLayer");
 var HandshakeType;
@@ -25,12 +57,14 @@ var HandshakeType;
     HandshakeType[HandshakeType["certificate_verify"] = 15] = "certificate_verify";
     HandshakeType[HandshakeType["client_key_exchange"] = 16] = "client_key_exchange";
     HandshakeType[HandshakeType["finished"] = 20] = "finished";
-})(HandshakeType = exports.HandshakeType || (exports.HandshakeType = {}));
+})(HandshakeType || (exports.HandshakeType = HandshakeType = {}));
 class Handshake extends TLSStruct_1.TLSStruct {
+    msg_type;
     constructor(msg_type, bodySpec, initial) {
         super(bodySpec, initial);
         this.msg_type = msg_type;
     }
+    message_seq;
     /**
      * Converts this Handshake message into a fragment ready to be sent
      */
@@ -64,6 +98,23 @@ class Handshake extends TLSStruct_1.TLSStruct {
 }
 exports.Handshake = Handshake;
 class FragmentedHandshake extends TLSStruct_1.TLSStruct {
+    msg_type;
+    total_length;
+    message_seq;
+    fragment_offset;
+    fragment;
+    static __spec = {
+        msg_type: TypeSpecs.define.Enum("uint8", HandshakeType),
+        total_length: TypeSpecs.uint24,
+        message_seq: TypeSpecs.uint16,
+        fragment_offset: TypeSpecs.uint24,
+        fragment: TypeSpecs.define.Buffer(0, 2 ** 24 - 1),
+    };
+    static spec = TypeSpecs.define.Struct(FragmentedHandshake);
+    /**
+     * The amount of data consumed by a handshake message header (without the actual fragment)
+     */
+    static headerLength = 1 + 3 + 2 + 3 + 3; // TODO: dynamisch?
     constructor(msg_type, total_length, message_seq, fragment_offset, fragment) {
         super(FragmentedHandshake.__spec);
         this.msg_type = msg_type;
@@ -201,20 +252,9 @@ class FragmentedHandshake extends TLSStruct_1.TLSStruct {
     }
 }
 exports.FragmentedHandshake = FragmentedHandshake;
-FragmentedHandshake.__spec = {
-    msg_type: TypeSpecs.define.Enum("uint8", HandshakeType),
-    total_length: TypeSpecs.uint24,
-    message_seq: TypeSpecs.uint16,
-    fragment_offset: TypeSpecs.uint24,
-    fragment: TypeSpecs.define.Buffer(0, Math.pow(2, 24) - 1),
-};
-FragmentedHandshake.spec = TypeSpecs.define.Struct(FragmentedHandshake);
-/**
- * The amount of data consumed by a handshake message header (without the actual fragment)
- */
-FragmentedHandshake.headerLength = 1 + 3 + 2 + 3 + 3; // TODO: dynamisch?
 // Handshake message implementations
 class HelloRequest extends Handshake {
+    static __spec = {};
     constructor() {
         super(HandshakeType.hello_request, HelloRequest.__spec);
     }
@@ -223,8 +263,23 @@ class HelloRequest extends Handshake {
     }
 }
 exports.HelloRequest = HelloRequest;
-HelloRequest.__spec = {};
 class ClientHello extends Handshake {
+    client_version;
+    random;
+    session_id;
+    cookie;
+    cipher_suites;
+    compression_methods;
+    extensions;
+    static __spec = {
+        client_version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+        random: TypeSpecs.define.Struct(Random_1.Random),
+        session_id: SessionID_1.SessionID.spec,
+        cookie: Cookie_1.Cookie.spec,
+        cipher_suites: TypeSpecs.define.Vector(CipherSuite_1.CipherSuite.__spec.id, 2, 2 ** 16 - 2),
+        compression_methods: TypeSpecs.define.Vector(ConnectionState_1.CompressionMethod.spec, 1, 2 ** 8 - 1),
+        extensions: TypeSpecs.define.Vector(Extension_1.Extension.spec, 0, 2 ** 16 - 1, true),
+    };
     constructor(client_version, random, session_id, cookie, cipher_suites, compression_methods, extensions) {
         super(HandshakeType.client_hello, ClientHello.__spec);
         this.client_version = client_version;
@@ -240,16 +295,21 @@ class ClientHello extends Handshake {
     }
 }
 exports.ClientHello = ClientHello;
-ClientHello.__spec = {
-    client_version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    random: TypeSpecs.define.Struct(Random_1.Random),
-    session_id: SessionID_1.SessionID.spec,
-    cookie: Cookie_1.Cookie.spec,
-    cipher_suites: TypeSpecs.define.Vector(CipherSuite_1.CipherSuite.__spec.id, 2, Math.pow(2, 16) - 2),
-    compression_methods: TypeSpecs.define.Vector(ConnectionState_1.CompressionMethod.spec, 1, Math.pow(2, 8) - 1),
-    extensions: TypeSpecs.define.Vector(Extension_1.Extension.spec, 0, Math.pow(2, 16) - 1, true),
-};
 class ServerHello extends Handshake {
+    server_version;
+    random;
+    session_id;
+    cipher_suite;
+    compression_method;
+    extensions;
+    static __spec = {
+        server_version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+        random: TypeSpecs.define.Struct(Random_1.Random),
+        session_id: SessionID_1.SessionID.spec,
+        cipher_suite: CipherSuite_1.CipherSuite.__spec.id,
+        compression_method: ConnectionState_1.CompressionMethod.spec,
+        extensions: TypeSpecs.define.Vector(Extension_1.Extension.spec, 0, 2 ** 16 - 1, true),
+    };
     constructor(server_version, random, session_id, cipher_suite, compression_method, extensions) {
         super(HandshakeType.server_hello, ServerHello.__spec);
         this.server_version = server_version;
@@ -264,15 +324,13 @@ class ServerHello extends Handshake {
     }
 }
 exports.ServerHello = ServerHello;
-ServerHello.__spec = {
-    server_version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    random: TypeSpecs.define.Struct(Random_1.Random),
-    session_id: SessionID_1.SessionID.spec,
-    cipher_suite: CipherSuite_1.CipherSuite.__spec.id,
-    compression_method: ConnectionState_1.CompressionMethod.spec,
-    extensions: TypeSpecs.define.Vector(Extension_1.Extension.spec, 0, Math.pow(2, 16) - 1, true),
-};
 class HelloVerifyRequest extends Handshake {
+    server_version;
+    cookie;
+    static __spec = {
+        server_version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
+        cookie: Cookie_1.Cookie.spec,
+    };
     constructor(server_version, cookie) {
         super(HandshakeType.hello_verify_request, HelloVerifyRequest.__spec);
         this.server_version = server_version;
@@ -283,11 +341,11 @@ class HelloVerifyRequest extends Handshake {
     }
 }
 exports.HelloVerifyRequest = HelloVerifyRequest;
-HelloVerifyRequest.__spec = {
-    server_version: TypeSpecs.define.Struct(ProtocolVersion_1.ProtocolVersion),
-    cookie: Cookie_1.Cookie.spec,
-};
 class ServerKeyExchange extends Handshake {
+    static __spec = {
+        raw_data: TypeSpecs.define.Buffer(), // the entire fragment
+    };
+    raw_data;
     constructor() {
         super(HandshakeType.server_key_exchange, ServerKeyExchange.__spec);
     }
@@ -296,10 +354,12 @@ class ServerKeyExchange extends Handshake {
     }
 }
 exports.ServerKeyExchange = ServerKeyExchange;
-ServerKeyExchange.__spec = {
-    raw_data: TypeSpecs.define.Buffer(), // the entire fragment
-};
 class ServerKeyExchange_PSK extends TLSStruct_1.TLSStruct {
+    psk_identity_hint;
+    static __spec = {
+        psk_identity_hint: TypeSpecs.define.Buffer(0, 2 ** 16 - 1),
+    };
+    static spec = TypeSpecs.define.Struct(ServerKeyExchange_PSK);
     constructor(psk_identity_hint) {
         super(ServerKeyExchange_PSK.__spec);
         this.psk_identity_hint = psk_identity_hint;
@@ -309,11 +369,11 @@ class ServerKeyExchange_PSK extends TLSStruct_1.TLSStruct {
     }
 }
 exports.ServerKeyExchange_PSK = ServerKeyExchange_PSK;
-ServerKeyExchange_PSK.__spec = {
-    psk_identity_hint: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
-};
-ServerKeyExchange_PSK.spec = TypeSpecs.define.Struct(ServerKeyExchange_PSK);
 class ClientKeyExchange extends Handshake {
+    static __spec = {
+        raw_data: TypeSpecs.define.Buffer(), // the entire fragment
+    };
+    raw_data;
     constructor() {
         super(HandshakeType.client_key_exchange, ClientKeyExchange.__spec);
     }
@@ -322,10 +382,12 @@ class ClientKeyExchange extends Handshake {
     }
 }
 exports.ClientKeyExchange = ClientKeyExchange;
-ClientKeyExchange.__spec = {
-    raw_data: TypeSpecs.define.Buffer(), // the entire fragment
-};
 class ClientKeyExchange_PSK extends TLSStruct_1.TLSStruct {
+    psk_identity;
+    static __spec = {
+        psk_identity: TypeSpecs.define.Buffer(0, 2 ** 16 - 1),
+    };
+    static spec = TypeSpecs.define.Struct(ClientKeyExchange_PSK);
     constructor(psk_identity) {
         super(ClientKeyExchange_PSK.__spec);
         this.psk_identity = psk_identity;
@@ -335,11 +397,8 @@ class ClientKeyExchange_PSK extends TLSStruct_1.TLSStruct {
     }
 }
 exports.ClientKeyExchange_PSK = ClientKeyExchange_PSK;
-ClientKeyExchange_PSK.__spec = {
-    psk_identity: TypeSpecs.define.Buffer(0, Math.pow(2, 16) - 1),
-};
-ClientKeyExchange_PSK.spec = TypeSpecs.define.Struct(ClientKeyExchange_PSK);
 class ServerHelloDone extends Handshake {
+    static __spec = {};
     constructor() {
         super(HandshakeType.server_hello_done, ServerHelloDone.__spec);
     }
@@ -348,8 +407,11 @@ class ServerHelloDone extends Handshake {
     }
 }
 exports.ServerHelloDone = ServerHelloDone;
-ServerHelloDone.__spec = {};
 class Finished extends Handshake {
+    verify_data;
+    static __spec = {
+        verify_data: TypeSpecs.define.Buffer(), // full-length
+    };
     constructor(verify_data) {
         super(HandshakeType.finished, Finished.__spec);
         this.verify_data = verify_data;
@@ -359,9 +421,6 @@ class Finished extends Handshake {
     }
 }
 exports.Finished = Finished;
-Finished.__spec = {
-    verify_data: TypeSpecs.define.Buffer(), // full-length
-};
 // define handshake messages for lookup
 exports.HandshakeMessages = {};
 exports.HandshakeMessages[HandshakeType.hello_request] = HelloRequest;

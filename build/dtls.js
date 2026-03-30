@@ -1,9 +1,45 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dtls = void 0;
 // enable debug output
-const debugPackage = require("debug");
-const dgram = require("dgram");
+const debug_1 = __importDefault(require("debug"));
+const dgram = __importStar(require("dgram"));
 const events_1 = require("events");
 const Handshake_1 = require("./DTLS/Handshake");
 const HandshakeHandler_1 = require("./DTLS/HandshakeHandler");
@@ -11,7 +47,7 @@ const RecordLayer_1 = require("./DTLS/RecordLayer");
 const Alert_1 = require("./TLS/Alert");
 const ContentType_1 = require("./TLS/ContentType");
 const TLSStruct_1 = require("./TLS/TLSStruct");
-const debug = debugPackage("node-dtls-client");
+const debug = (0, debug_1.default)("node-dtls-client");
 var dtls;
 (function (dtls) {
     /**
@@ -35,16 +71,13 @@ var dtls;
      * DTLS-secured UDP socket. Can be used as a drop-in replacement for dgram.Socket
      */
     class Socket extends events_1.EventEmitter {
+        options;
         /**
          * INTERNAL USE, DON'T CALL DIRECTLY. use createSocket instead!
          */
         constructor(options) {
             super();
             this.options = options;
-            this._handshakeFinished = false;
-            // buffer messages while handshaking
-            this.bufferedMessages = [];
-            this._isClosed = false;
             // setup the connection
             this.udp = dgram
                 .createSocket(options)
@@ -64,6 +97,11 @@ var dtls;
                 this.udp.bind();
             }
         }
+        recordLayer;
+        handshakeHandler;
+        _handshakeFinished = false;
+        _udpConnected;
+        _connectionTimeout;
         /**
          * Send the given data. It is automatically compressed and encrypted.
          */
@@ -85,12 +123,18 @@ var dtls;
          * Closes the connection
          */
         close(callback) {
-            this.sendAlert(new Alert_1.Alert(Alert_1.AlertLevel.warning, Alert_1.AlertDescription.close_notify), (e) => {
+            this.sendAlert(new Alert_1.Alert(Alert_1.AlertLevel.warning, Alert_1.AlertDescription.close_notify), () => {
                 this.udp.close();
                 if (callback)
                     this.once("close", callback);
             });
         }
+        // buffer messages while handshaking
+        bufferedMessages = [];
+        /*
+            Internal Socket handler functions
+        */
+        udp;
         udp_onListening() {
             // connection successful
             this._udpConnected = true;
@@ -198,6 +242,7 @@ var dtls;
                 }
             }
         }
+        _isClosed = false;
         udp_onClose() {
             // we no longer want to receive events
             this.udp.removeAllListeners();
@@ -248,4 +293,4 @@ var dtls;
         if (typeof opts.psk !== "object")
             throw new Error(`The connection options must contain a PSK dictionary object!`);
     }
-})(dtls = exports.dtls || (exports.dtls = {}));
+})(dtls || (exports.dtls = dtls = {}));
