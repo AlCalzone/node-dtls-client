@@ -28,9 +28,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6
       - name: Use Node.js 22
-        uses: actions/setup-node@v6.3.0
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: "npm"
@@ -56,9 +56,9 @@ jobs:
         node-version: [22, 24]
 
     steps:
-      - uses: actions/checkout@v6.0.2
+      - uses: actions/checkout@v6
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v6.3.0
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
@@ -88,10 +88,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
 
       - name: Use Node.js 22
-        uses: actions/setup-node@v6.3.0
+        uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: "npm"
@@ -126,7 +126,7 @@ jobs:
         run: npm publish ${{ steps.extract_release.outputs.TAG }}
 
       - name: Create Github Release
-        uses: softprops/action-gh-release@v2.6.1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
 
       - name: Check if PR should be auto-merged
-        uses: ahmadnassri/action-dependabot-auto-merge@v2.6.6
+        uses: ahmadnassri/action-dependabot-auto-merge@v2
         with:
           github-token: ${{ secrets.AUTO_MERGE_TOKEN }}
           # By default, squash and merge, so Github chooses nice commit messages
