@@ -262,7 +262,7 @@ export namespace dtls {
 		/** The remote port to connect to */
 		port: number;
 		/** Pre shared key information as a table <identity> => <psk> */
-		psk: { [identity: string]: string };
+		psk: { [identity: string]: string | Buffer };
 		/** Time after which a connection should successfully established */
 		timeout?: number;
 		// keyContext?: any; // TODO: DTLS-security options
