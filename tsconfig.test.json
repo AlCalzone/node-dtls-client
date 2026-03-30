@@ -1,8 +1,7 @@
 {
     "extends": "./tsconfig.json",
     "compilerOptions": {
-        "noUnusedLocals": false,
-        "types": ["node"]
+        "noUnusedLocals": false
     },
     "include": [
         "src/**/*.test.ts"

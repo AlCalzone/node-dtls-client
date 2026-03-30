@@ -2,15 +2,12 @@
     "extends": "@tsconfig/node22/tsconfig.json",
     "compilerOptions": {
         "declaration": true,
-        "esModuleInterop": true,
-        "module": "node16",
         "noEmitOnError": true,
-        "noImplicitAny": true,
         "noUnusedLocals": true,
         "outDir": "build/",
         "removeComments": false,
         "rootDir": "src",
-        "strict": false,
+        "strictNullChecks": false,
         "stripInternal": true,
         "types": ["node"]
     },
