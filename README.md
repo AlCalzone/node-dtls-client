@@ -92,6 +92,9 @@ The events are defined as follows:
     PLACEHOLDER for next version:
     ### __WORK IN PROGRESS__
 -->
+### __WORK IN PROGRESS__
+* Fix: replace deprecated `crypto.pseudoRandomBytes` with `crypto.randomBytes` (#467)
+
 ### 2.0.0 (2026-03-30)
 * Node.js 22+ is now required. Your mileage on older versions may vary.
 * This package is now pure ESM
