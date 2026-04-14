@@ -103,7 +103,7 @@ export function createCipher(
 
 		// find the right encryption params
 		const salt = (connEnd === "server") ? keyMaterial.server_write_IV : keyMaterial.client_write_IV;
-		const nonce_explicit = crypto.pseudoRandomBytes(cipherParams.recordIvLength);
+		const nonce_explicit = crypto.randomBytes(cipherParams.recordIvLength);
 		// alternatively:
 		// const nonce_explicit = Buffer.concat([
 		// 	BitConverter.numberToBuffer(packet.epoch, 16),

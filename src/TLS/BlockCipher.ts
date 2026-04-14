@@ -68,7 +68,7 @@ export function createCipher(
 		const padding = Buffer.alloc(padLength + 1, /*fill=*/padLength); // one byte is the actual length of the padding array
 
 		// find the right encryption params
-		const record_iv = crypto.pseudoRandomBytes(cipherParams.recordIvLength);
+		const record_iv = crypto.randomBytes(cipherParams.recordIvLength);
 		const cipher_key = (connEnd === "server") ? keyMaterial.server_write_key : keyMaterial.client_write_key;
 		const cipher = crypto.createCipheriv(algorithm, cipher_key, record_iv);
 		cipher.setAutoPadding(false);
