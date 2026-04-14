@@ -25,7 +25,7 @@
     "@alcalzone/release-script-plugin-license": "^5.1.1",
     "@tsconfig/node22": "^22.0.5",
     "@types/debug": "4.1.13",
-    "@types/node": "^22.19.15",
+    "@types/node": "^25.5.0",
     "@types/semver": "^7.7.1",
     "@types/yargs": "^17.0.20",
     "rimraf": "^6.1.3",
