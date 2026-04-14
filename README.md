@@ -92,7 +92,7 @@ The events are defined as follows:
     PLACEHOLDER for next version:
     ### __WORK IN PROGRESS__
 -->
-### 2.0.1 (2026-04-14)
+### 2.0.2 (2026-04-14)
 * Fix: replace deprecated `crypto.pseudoRandomBytes` with `crypto.randomBytes` (#467)
 
 ### 2.0.0 (2026-03-30)
