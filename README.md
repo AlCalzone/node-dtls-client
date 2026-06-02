@@ -92,8 +92,7 @@ The events are defined as follows:
     PLACEHOLDER for next version:
     ### __WORK IN PROGRESS__
 -->
-
-### __WORK IN PROGRESS__
+### 2.0.3 (2026-06-02)
 * Fix: Add missing `ServerKeyExchange` to `HandshakeMessages` (#469)
 
 ### 2.0.2 (2026-04-14)
