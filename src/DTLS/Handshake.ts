@@ -454,5 +454,6 @@ HandshakeMessages[HandshakeType.hello_request] = HelloRequest;
 HandshakeMessages[HandshakeType.client_hello] = ClientHello;
 HandshakeMessages[HandshakeType.server_hello] = ServerHello;
 HandshakeMessages[HandshakeType.hello_verify_request] = HelloVerifyRequest;
+HandshakeMessages[HandshakeType.server_key_exchange] = ServerKeyExchange;
 HandshakeMessages[HandshakeType.server_hello_done] = ServerHelloDone;
 HandshakeMessages[HandshakeType.finished] = Finished;
