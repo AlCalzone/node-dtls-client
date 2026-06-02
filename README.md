@@ -92,6 +92,10 @@ The events are defined as follows:
     PLACEHOLDER for next version:
     ### __WORK IN PROGRESS__
 -->
+
+### __WORK IN PROGRESS__
+* Fix: Add missing `ServerKeyExchange` to `HandshakeMessages` (#469)
+
 ### 2.0.2 (2026-04-14)
 * Fix: replace deprecated `crypto.pseudoRandomBytes` with `crypto.randomBytes` (#467)
 
